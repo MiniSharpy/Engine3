@@ -340,4 +340,70 @@ namespace Engine3
 		ASSERT_NEAR(perpendicular.Y(), -0.5f, 0.000001);
 		ASSERT_NEAR(perpendicular.Z(), -1, 0.000001);
 	}
+
+	TEST(VectorTest, CrossProductStaticAB)
+	{
+		Vector<3> a{0.f, -1.f, 0.f};
+		Vector<3> b{0.f, 0.f, 1.f};
+
+		Vector<3> actual = Vector<3>::CrossProduct(a, b);
+		Vector<3> expected{-1.f, 0.f, 0.f};
+
+		ASSERT_EQ(actual, expected);
+	}
+
+	TEST(VectorTest, CrossProductStaticBA)
+	{
+		Vector<3> a{0.f, -1.f, 0.f};
+		Vector<3> b{0.f, 0.f, 1.f};
+
+		Vector<3> actual = Vector<3>::CrossProduct(b, a);
+		Vector<3> expected{1.f, 0.f, 0.f};
+
+		ASSERT_EQ(actual, expected);
+	}
+
+	TEST(VectorTest, CrossProductMember)
+	{
+		Vector<3> a{-2.f, 4.f, 1.f};
+		Vector<3> b{1.f, -2.f, -1.f};
+
+		Vector<3> actual = a.CrossProduct(b);
+		Vector<3> expected{-2.f, -1.f, 0.f};
+
+		ASSERT_EQ(actual, expected);
+	}
+
+	TEST(VectorTest, CrossProductParallel)
+	{
+		Vector<3> a{-2.f, 4.f, 0.f};
+		Vector<3> b{2.f, -4.f, 0.f};
+
+		Vector<3> actual = a.CrossProduct(b);
+		Vector<3> expected = Vector<3>::Zero();
+
+		ASSERT_EQ(actual, expected);
+	}
+
+	TEST(VectorTest, CrossProductZeroVectorA)
+	{
+		Vector<3> a{Vector<3>::Zero()};
+		Vector<3> b{2.f, -4.f, 0.f};
+
+		Vector<3> actual = a.CrossProduct(b);
+		Vector<3> expected = Vector<3>::Zero();
+
+		ASSERT_EQ(actual, expected);
+	}
+
+	TEST(VectorTest, CrossProductZeroVectorB)
+	{
+		Vector<3> a{-2.f, 4.f, 0.f};
+		Vector<3> b{Vector<3>::Zero()};
+
+		Vector<3> actual = a.CrossProduct(b);
+		Vector<3> expected = Vector<3>::Zero();
+
+		ASSERT_EQ(actual, expected);
+	}
 }

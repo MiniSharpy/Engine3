@@ -12,6 +12,7 @@ namespace Engine3
 	class Vector
 	{
 	public:
+		/* Static Methods */
 		static constexpr Vector Zero() { return {}; }
 
 		static constexpr Vector Forward() requires (Dimensions == 3)
@@ -21,23 +22,75 @@ namespace Engine3
 
 		static constexpr Vector Back() requires (Dimensions == 3) { return {-Vector::Forward()}; }
 
-		static constexpr Vector Right() requires (Dimensions == 3)
-		{
-			return {static_cast<T>(1), static_cast<T>(0), static_cast<T>(0)};
-		}
-
 		static constexpr Vector Up() requires (Dimensions == 3)
 		{
 			return {static_cast<T>(0), static_cast<T>(1), static_cast<T>(0)};
 		}
 
-		static constexpr Vector Right() requires (Dimensions == 2) { return {static_cast<T>(1), static_cast<T>(0)}; }
+		static constexpr Vector Right() requires (Dimensions == 3)
+		{
+			return {static_cast<T>(1), static_cast<T>(0), static_cast<T>(0)};
+		}
 
 		static constexpr Vector Up() requires(Dimensions == 2) { return {static_cast<T>(0), static_cast<T>(1)}; }
+
+		static constexpr Vector Right() requires (Dimensions == 2) { return {static_cast<T>(1), static_cast<T>(0)}; }
 
 		static constexpr Vector Left() requires (Dimensions == 2 || Dimensions == 3) { return {-Vector::Right()}; }
 
 		static constexpr Vector Down() requires (Dimensions == 2 || Dimensions == 3) { return {-Vector::Up()}; }
+
+		/// A commutative function that sums the products of each component in \p a and \p b.
+		/// @return A negative scalar value when \p a points towards \p b. \n
+		/// A zero value when the vectors are perpendicular, or when one is a zero vector.
+		static constexpr T DotProduct(const Vector& a, const Vector& b)
+		{
+			// An integer squared is always an integer, no need to worry about precision loss when std::integral<T>,
+			// just need to not allow other typed vectors as a parameter.
+			T value = 0;
+			for (size_t i = 0; i < Dimensions; ++i) { value += a[i] * b[i]; }
+
+			return value;
+		}
+
+		/// An anti-commutative function, \p a x \p b, that can only be applied using 3D vectors, yielding a 3D vector perpendicular to the original two.
+		/// @return Zero vector if \p a or \p b are parallel, of if either are the zero vector. \n
+		/// Otherwise, a vector perpendicular to both vector. TODO: To determine the direction of \p a x \p b 
+		static constexpr Vector CrossProduct(const Vector& a, const Vector& b) requires (Dimensions == 3)
+		{
+			return {a.Y() * b.Z() - a.Z() * b.Y(), a.Z() * b.X() - a.X() * b.Z(), a.X() * b.Y() - a.Y() * b.X()};
+		}
+
+		/// Calculates the squared distance between two vectors.
+		/// @return The squared magnitude of the vector \p b - \p a.
+		static constexpr T DistanceSquared(const Vector& a, const Vector& b) { return (b - a).LengthSquared(); }
+
+		/// Calculates the distance between two vectors.
+		/// @return The magnitude of the vector \p b - \p a.
+		static constexpr auto Distance(const Vector& a, const Vector& b) { return (b - a).Length(); }
+
+		/// Projects a vector onto an infinitely long line. \n
+		///	Consider a right-angled triangle made up of vectors where the hypotenuse is \p b, the adjacent side \p Project(a, \p b), and the opposite side is \p ProjectPerpendicular(a, \p b).
+		/// @param a Unit vector that determines the direction of the line that \p b will be projected upon.
+		/// @param b Vector to project.
+		/// @return The projection of \p b onto an infinitely long line which is parallel to \p a. 
+		static constexpr Vector Project(const Vector& a, const Vector& b) requires std::floating_point<T>
+		{
+			// No member method to better emphasise the usage of the unit vector.
+			assert(a.IsUnit());
+			return DotProduct(a, b) * a;
+		}
+
+		/// Calculates the vector from \p Project(a, \p b) to \p b. \n
+		///	Consider a right-angled triangle made up of vectors where the hypotenuse is \p b, the adjacent side \p Project(a, \p b), and the opposite side is \p ProjectPerpendicular(a, \p b).
+		/// @param a Unit vector that determines the direction of the line that \p b will be projected upon.
+		/// @param b Vector to project.
+		/// @return The vector of \p b, which is parallel to \p a. 
+		static constexpr Vector ProjectPerpendicular(const Vector& a, const Vector& b) requires std::floating_point<T>
+		{
+			assert(a.IsUnit());
+			return b - (DotProduct(a, b) * a);
+		}
 
 	private:
 		std::array<T, Dimensions> Values_;
@@ -64,24 +117,20 @@ namespace Engine3
 
 		Vector& operator=(Vector&& other) noexcept = default;
 
-		/* Vector Methods */
-		/// A commutative function that sums the products of each component in \p a and \p b.
-		/// @return A negative scalar value when \p a points towards \p b. \n
-		/// A zero value when the vectors are perpendicular, or when one is a zero vector.
-		static constexpr T DotProduct(const Vector& a, const Vector& b)
-		{
-			// An integer squared is always an integer, no need to worry about precision loss when std::integral<T>,
-			// just need to allow other typed vectors as a parameter.
-			T value = 0;
-			for (size_t i = 0; i < Dimensions; ++i) { value += a[i] * b[i]; }
-
-			return value;
-		}
-
+		/* Methods */
 		/// A commutative function that sums the products of each component in two vectors.
 		/// @return A negative scalar value when the vector points towards the vector \p other. \n
 		/// A zero value when the vectors are perpendicular, or when one is a zero vector.
 		constexpr T DotProduct(const Vector& other) const { return DotProduct(*this, other); }
+
+		/// An anti-commutative function, \p a x \p b, that can only be applied to 3D vectors, yielding a 3D vector perpendicular to the original two.
+		///	@param other \p b in \p a x \p b.
+		/// @return Zero vector if \p a or \p b are parallel, of if either are the zero vector. \n
+		/// Otherwise, a vector perpendicular to both vectors.
+		constexpr Vector CrossProduct(const Vector& other) const requires (Dimensions == 3)
+		{
+			return CrossProduct(*this, other);
+		}
 
 		/// Calculates the squared length of the vector by applying the dot product to itself.\n
 		/// This is useful for when relative comparisons are necessary and avoids a costly square root.
@@ -111,45 +160,12 @@ namespace Engine3
 		}
 
 		/// Calculates the squared distance between two vectors.
-		/// @return The squared magnitude of the vector \p b - \p a.
-		static constexpr T DistanceSquared(const Vector& a, const Vector& b) { return (b - a).LengthSquared(); }
-
-		/// Calculates the distance between two vectors.
-		/// @return The magnitude of the vector \p b - \p a.
-		static constexpr auto Distance(const Vector& a, const Vector& b) { return (b - a).Length(); }
-
-		/// Calculates the squared distance between two vectors.
 		/// @return The squared magnitude of the vector \p other - \p this.
 		constexpr T DistanceSquared(const Vector& other) { return DistanceSquared(*this, other); }
 
 		/// Calculates the distance between two vectors.
 		/// @return The magnitude of the vector \p other - \p this.
 		constexpr auto Distance(const Vector& other) { return Distance(*this, other); }
-
-		// Strictly speaking only other needs to be a floating point, not this. Could
-		// template the type of other to require floating point instead, but then I'd
-		// need to deal with converting the result of DotProduct.
-		/// Projects a vector onto an infinitely long line. \n
-		///	Consider a right-angled triangle made up of vectors where the hypotenuse is \p b, the adjacent side \p Project(a, \p b), and the opposite side is \p ProjectPerpendicular(a, \p b).
-		/// @param a Unit vector that determines the direction of the line that \p b will be projected upon.
-		/// @param b Vector to project.
-		/// @return The projection of \p b onto an infinitely long line which is parallel to \p a. 
-		static constexpr Vector Project(const Vector& a, const Vector& b) requires std::floating_point<T>
-		{
-			assert(a.IsUnit());
-			return DotProduct(a, b) * a;
-		}
-
-		/// Calculates the vector from \p Project(a, \p b) to \p b. \n
-		///	Consider a right-angled triangle made up of vectors where the hypotenuse is \p b, the adjacent side \p Project(a, \p b), and the opposite side is \p ProjectPerpendicular(a, \p b).
-		/// @param a Unit vector that determines the direction of the line that \p b will be projected upon.
-		/// @param b Vector to project.
-		/// @return The vector of \p b, which is parallel to \p a. 
-		static constexpr Vector ProjectPerpendicular(const Vector& a, const Vector& b) requires std::floating_point<T>
-		{
-			assert(a.IsUnit());
-			return b - (DotProduct(a, b) * a);
-		}
 
 		/* Getters and Setters */
 		T X() requires (Dimensions <= 4) { return Values_[0]; }
