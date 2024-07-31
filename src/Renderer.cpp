@@ -6,7 +6,7 @@
 #include <print>
 #include <SDL.h>
 #include <string>
-#include <gl/glew.h>
+#include <GL/glew.h>
 
 GLenum Engine3::Renderer::LoadShader(GLenum shaderType, const std::string_view shaderFileName)
 {

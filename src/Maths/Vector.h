@@ -51,7 +51,7 @@ namespace Engine3
 		/// @param args Value of each element in the vector.
 		template <typename... Args>
 			requires(sizeof...(Args) == Dimensions) // Require all parameters specified.
-		constexpr Vector(Args&&... args) : Values_(std::forward<Args>(args)...) {}
+		constexpr Vector(Args&&... args) : Values_{std::forward<Args>(args)...} {}
 
 		Vector(const Vector& other) = default;
 

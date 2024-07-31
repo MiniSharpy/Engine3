@@ -1,9 +1,9 @@
 #pragma once
 #include "Window.h"
-#include "gl/glew.h"
 #include "Maths/Matrix.h"
 #include <array>
 #include <vector>
+#include <GL/glew.h>
 
 namespace Engine3
 {
