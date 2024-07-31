@@ -14,27 +14,30 @@ namespace Engine3
 	public:
 		static constexpr Vector Zero() { return {}; }
 
-		static constexpr Vector Forward() requires (Dimensions == 3) { return {0, 0, 1}; }
-
-		static constexpr Vector Back() requires (Dimensions == 3) { return {-Vector<Dimensions>::Forward()}; }
-
-		static constexpr Vector Right() requires (Dimensions == 3) { return {1, 0, 0}; }
-
-		static constexpr Vector Up() requires (Dimensions == 3) { return {0, 1, 0}; }
-
-		static constexpr Vector Right() requires (Dimensions == 2) { return {1, 0}; }
-
-		static constexpr Vector Up() requires(Dimensions == 2) { return {0, 1}; }
-
-		static constexpr Vector Left() requires (Dimensions == 2 || Dimensions == 3)
+		static constexpr Vector Forward() requires (Dimensions == 3)
 		{
-			return {-Vector<Dimensions>::Right()};
+			return {static_cast<T>(0), static_cast<T>(0), static_cast<T>(1)};
 		}
 
-		static constexpr Vector Down() requires (Dimensions == 2 || Dimensions == 3)
+		static constexpr Vector Back() requires (Dimensions == 3) { return {-Vector::Forward()}; }
+
+		static constexpr Vector Right() requires (Dimensions == 3)
 		{
-			return {-Vector<Dimensions>::Up()};
+			return {static_cast<T>(1), static_cast<T>(0), static_cast<T>(0)};
 		}
+
+		static constexpr Vector Up() requires (Dimensions == 3)
+		{
+			return {static_cast<T>(0), static_cast<T>(1), static_cast<T>(0)};
+		}
+
+		static constexpr Vector Right() requires (Dimensions == 2) { return {static_cast<T>(1), static_cast<T>(0)}; }
+
+		static constexpr Vector Up() requires(Dimensions == 2) { return {static_cast<T>(0), static_cast<T>(1)}; }
+
+		static constexpr Vector Left() requires (Dimensions == 2 || Dimensions == 3) { return {-Vector::Right()}; }
+
+		static constexpr Vector Down() requires (Dimensions == 2 || Dimensions == 3) { return {-Vector::Up()}; }
 
 	private:
 		std::array<T, Dimensions> Values_;

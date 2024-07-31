@@ -105,7 +105,7 @@ void Engine3::Renderer::InitialiseProgram(const int width, const int height)
 	float near = 0.1f;
 	float far = 3.0f;
 
-	std::ranges::fill(PerspectiveMatrix_, 0);
+	std::ranges::fill(PerspectiveMatrix_, 0.f);
 	PerspectiveMatrix_(0, 0) = FrustumScale_ / (width / static_cast<float>(height));
 	PerspectiveMatrix_(1, 1) = FrustumScale_;
 	PerspectiveMatrix_(2, 2) = (far + near) / (near - far);
@@ -209,10 +209,10 @@ void Engine3::Renderer::Render()
 
 	glBindVertexArray(VertexArrayHandle_);
 	glUniform3f(OffsetUniform_, 0.0f, 0.0f, -1.0f);
-	glDrawElements(GL_TRIANGLES, IndexData_.size(), GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, IndexData_.size(), GL_UNSIGNED_SHORT, nullptr);
 
 	glUniform3f(OffsetUniform_, 0.0f, 0.0f, -1.0f);
-	glDrawElementsBaseVertex(GL_TRIANGLES, IndexData_.size(), GL_UNSIGNED_SHORT, 0, numberOfVertices / 2);
+	glDrawElementsBaseVertex(GL_TRIANGLES, IndexData_.size(), GL_UNSIGNED_SHORT, nullptr, numberOfVertices / 2);
 
 	glBindVertexArray(0);
 	glUseProgram(0);
