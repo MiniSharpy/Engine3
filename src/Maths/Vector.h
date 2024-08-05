@@ -55,7 +55,7 @@ namespace Engine3
 
 		/// An anti-commutative function, \p a x \p b, that can only be applied using 3D vectors, yielding a 3D vector perpendicular to the original two.
 		/// @return Zero vector if \p a or \p b are parallel, of if either are the zero vector. \n
-		/// Otherwise, a vector perpendicular to both vector. TODO: To determine the direction of \p a x \p b 
+		/// Otherwise, a vector perpendicular to both vector.
 		static constexpr Vector CrossProduct(const Vector& a, const Vector& b) requires (Dimensions == 3)
 		{
 			return {a.Y() * b.Z() - a.Z() * b.Y(), a.Z() * b.X() - a.X() * b.Z(), a.X() * b.Y() - a.Y() * b.X()};
@@ -69,6 +69,7 @@ namespace Engine3
 		/// @return The magnitude of the vector \p b - \p a.
 		static constexpr auto Distance(const Vector& a, const Vector& b) { return (b - a).Length(); }
 
+		// Static to better emphasise the usage of the unit vector.
 		/// Projects a vector onto an infinitely long line. \n
 		///	Consider a right-angled triangle made up of vectors where the hypotenuse is \p b, the adjacent side \p Project(a, \p b), and the opposite side is \p ProjectPerpendicular(a, \p b).
 		/// @param a Unit vector that determines the direction of the line that \p b will be projected upon.
@@ -76,11 +77,11 @@ namespace Engine3
 		/// @return The projection of \p b onto an infinitely long line which is parallel to \p a. 
 		static constexpr Vector Project(const Vector& a, const Vector& b) requires std::floating_point<T>
 		{
-			// No member method to better emphasise the usage of the unit vector.
 			assert(a.IsUnit());
 			return DotProduct(a, b) * a;
 		}
 
+		// Static to better emphasise the usage of the unit vector.
 		/// Calculates the vector from \p Project(a, \p b) to \p b. \n
 		///	Consider a right-angled triangle made up of vectors where the hypotenuse is \p b, the adjacent side \p Project(a, \p b), and the opposite side is \p ProjectPerpendicular(a, \p b).
 		/// @param a Unit vector that determines the direction of the line that \p b will be projected upon.
@@ -150,7 +151,7 @@ namespace Engine3
 
 		/// Normalises a vector by dividing each of its components by the vector's magnitude.
 		/// @return A normalised copy of the vector.
-		[[nodiscard]] Vector Normalised() const requires std::floating_point<T>
+		[[nodiscard]] constexpr Vector Normalised() const requires std::floating_point<T>
 		// [[nodiscard]] to help emphasise this is not the same as Normalise().
 		{
 			Vector copy = *this;
@@ -216,30 +217,33 @@ namespace Engine3
 
 		constexpr friend Vector operator+(Vector left, const Vector& right) { return left += right; }
 
-		constexpr Vector& operator-=(const Vector& right)
+		/// Subtracts each component in the vector by the corresponding component in \p other.
+		constexpr Vector& operator-=(const Vector& other)
 		{
-			for (size_t i = 0; i < Dimensions; ++i) { Values_[i] -= right[i]; }
+			for (size_t i = 0; i < Dimensions; ++i) { Values_[i] -= other[i]; }
 			return *this;
 		}
 
-		constexpr friend Vector operator-(Vector left, const Vector& right) { return left -= right; }
+		/// Subtracts each component in \p a by the corrosponding component in \p b.
+		constexpr friend Vector operator-(Vector a, const Vector& b) { return a -= b; }
 
 		/// Multiplies each element in the vector by a scalar.
 		/// @tparam U Arithmetic type of the scalar.
-		/// @param right Scalar value.
+		/// @param other Scalar value.
 		/// @return A reference to the altered vector.
-		constexpr Vector& operator*=(T right)
+		constexpr Vector& operator*=(T other)
 		{
-			for (size_t i = 0; i < Dimensions; ++i) { Values_[i] *= right; }
+			for (size_t i = 0; i < Dimensions; ++i) { Values_[i] *= other; }
 			return *this;
 		}
 
 		/// Multiplies each element in a vector by a scalar.
-		/// @param left Vector that's elements will be multiplied.
-		/// @param right Scalar value by which to multiply each element.
+		/// @param a Vector that's elements will be multiplied.
+		/// @param b Scalar value by which to multiply each element.
 		/// @return A copy of the passed vector, multiplied by the scalar.
-		constexpr friend Vector operator*(Vector left, T right) { return left *= right; }
+		constexpr friend Vector operator*(Vector a, T b) { return a *= b; }
 
+		// Intentionally copied parameter to re-use already implemented operator.
 		/// Multiplies each element in a vector by a scalar.
 		/// @param left Scalar value by which to multiply each element.
 		/// @param right Vector that's elements will be multiplied.
@@ -255,6 +259,7 @@ namespace Engine3
 			return *this;
 		}
 
+		// Intentionally copied parameter to re-use already implemented operator.
 		/// Divides each element in a vector by a scalar.
 		/// @param left Vector that's elements will be divided.
 		/// @param right Scalar value by which to multiply each element.
