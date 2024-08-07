@@ -49,19 +49,19 @@ namespace Engine3
 
 	TEST(MatrixTest, IdentityMatrix3)
 	{
-		Matrix<3> actual =
+		Matrix<3> expected =
 		{
 			1, 0, 0,
 			0, 1, 0,
 			0, 0, 1
 		};
 
-		ASSERT_EQ(Matrix<3>::IdentityMatrix(), actual);
+		ASSERT_EQ(Matrix<3>::IdentityMatrix(), expected);
 	}
 
 	TEST(MatrixTest, IdentityMatrix4)
 	{
-		Matrix<4> actual =
+		Matrix<4> expected =
 		{
 			1, 0, 0, 0,
 			0, 1, 0, 0,
@@ -69,6 +69,140 @@ namespace Engine3
 			0, 0, 0, 1
 		};
 
-		ASSERT_EQ(Matrix<4>::IdentityMatrix(), actual);
+		ASSERT_EQ(Matrix<4>::IdentityMatrix(), expected);
+	}
+
+	TEST(MatrixTest, Transpose3)
+	{
+		Matrix<3> actual
+		{
+			1, 2, 3,
+			4, 5, 6,
+			7, 8, 9
+		};
+		actual.Transpose();
+
+		Matrix<3> expected
+		{
+			1, 4, 7,
+			2, 5, 8,
+			3, 6, 9
+		};
+
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(MatrixTest, Transpose4x3)
+	{
+		Matrix<3, 4> actual =
+			Matrix<4, 3>
+			{
+				1, 2, 3,
+				4, 5, 6,
+				7, 8, 9,
+				10, 11, 12
+			}.Transposed();
+
+		Matrix<3, 4> expected
+		{
+			1, 4, 7, 10,
+			2, 5, 8, 11,
+			3, 6, 9, 12
+		};
+
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(MatrixTest, ScalarMultiplicationAssignment)
+	{
+		Matrix<3> actual
+		{
+			1, 2, 3,
+			4, 5, 6,
+			7, 8, 9
+		};
+
+		actual *= 10;
+
+		Matrix<3> expected
+		{
+			10, 20, 30,
+			40, 50, 60,
+			70, 80, 90
+		};
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(MatrixTest, ScalarMultiplicationRight)
+	{
+		Matrix<3> actual = Matrix<3>
+		{
+			1, 2, 3,
+			4, 5, 6,
+			7, 8, 9
+		} * 10;
+
+		Matrix<3> expected
+		{
+			10, 20, 30,
+			40, 50, 60,
+			70, 80, 90
+		};
+		//ASSERT_EQ(expected, actual);
+	}
+
+	TEST(MatrixTest, ScalarMultiplicationLeft)
+	{
+		Matrix<3> actual = 10 * Matrix<3>
+		{
+			1, 2, 3,
+			4, 5, 6,
+			7, 8, 9
+		};
+
+		Matrix<3> expected
+		{
+			10, 20, 30,
+			40, 50, 60,
+			70, 80, 90
+		};
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(MatrixTest, ScalarDivisionAssignment)
+	{
+		Matrix<3> actual
+		{
+			10, 20, 30,
+			40, 50, 60,
+			70, 80, 90
+		};
+		actual /= 10;
+
+		Matrix<3> expected
+		{
+			1, 2, 3,
+			4, 5, 6,
+			7, 8, 9
+		};
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(MatrixTest, ScalarDivisionRight)
+	{
+		Matrix<3> actual = Matrix<3>
+		{
+			10, 20, 30,
+			40, 50, 60,
+			70, 80, 90
+		} / 10;
+
+		Matrix<3> expected
+		{
+			1, 2, 3,
+			4, 5, 6,
+			7, 8, 9
+		};
+		ASSERT_EQ(expected, actual);
 	}
 }

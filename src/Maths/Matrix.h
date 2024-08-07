@@ -18,20 +18,58 @@ namespace Engine3
 		static constexpr Matrix IdentityMatrix() requires (RowSize == ColumnSize)
 		{
 			Matrix identityMatrix{};
-			for (size_t i = 0; i < RowSize; ++i) { identityMatrix[(RowSize + 1) * i] = 1; }
+			for (std::size_t i = 0; i < RowSize; ++i) { identityMatrix[(RowSize + 1) * i] = 1; }
 
 			return identityMatrix;
 		}
 
+		/* Methods */
+		void Transpose() requires (RowSize == ColumnSize) { (*this) = this->Transposed(); }
+
+		Matrix<ColumnSize, RowSize, T> Transposed()
+		{
+			// Non-Square matrices when transposed will return a matrix that's aspect ratio is flipped.
+			Matrix<ColumnSize, RowSize, T> matrix;
+			for (std::size_t row = 0; row < RowSize; ++row)
+			{
+				for (std::size_t column = 0; column < ColumnSize; ++column)
+				{
+					matrix(column, row) = (*this)(row, column);
+				}
+			}
+
+			return matrix;
+		}
+
+		/* Operators */
 		T& operator()(size_t row, size_t column) { return (*this)[ColumnSize * row + column]; }
 
 		const T& operator()(size_t row, size_t column) const { return (*this)[ColumnSize * row + column]; }
+
+		constexpr Matrix& operator*=(T other)
+		{
+			for (size_t i = 0; i < this->size(); ++i) { (*this)[i] *= other; }
+			return *this;
+		}
+
+		constexpr friend Matrix operator*(Matrix a, T b) { return a *= b; }
+
+		friend Matrix operator*(T left, const Matrix& right) { return right * left; }
+
+		constexpr Matrix& operator/=(T right)
+		{
+			for (size_t i = 0; i < this->size(); ++i) { (*this)[i] /= right; }
+			return *this;
+		}
+
+		constexpr friend Matrix operator/(Matrix left, T right) { return left /= right; }
 
 		friend bool operator==(const Matrix& lhs, const Matrix& rhs) = default;
 
 		friend bool operator!=(const Matrix& lhs, const Matrix& rhs) = default;
 
-		// If these aren't deleted it makes it possible to comparisons like Matrix<4, 3>{} == Matrix<3, 4>{}.
+		// If these aren't deleted it makes it possible to perform comparisons like Matrix<4, 3>{} == Matrix<3, 4>{},
+		// as well as to arrays of the same type and size.
 		friend auto operator==(const std::array<T, RowSize * ColumnSize>& lhs,
 		                       const std::array<T, RowSize * ColumnSize>& rhs) = delete;
 
