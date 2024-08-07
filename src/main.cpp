@@ -2,6 +2,8 @@
 #include "Input.h"
 #include "Renderer.h"
 #include "Window.h"
+#include "Maths/Matrix.h"
+#include "Maths/Vector.h"
 
 int main(int argc, char* argv[])
 {
@@ -10,7 +12,7 @@ int main(int argc, char* argv[])
 	Engine engine;
 	if (!engine) { return -1; }
 
-	Window window{u8"Engine3", 1280, 720, Window::Flags::OpenGL | Window::Flags::Resizable};
+	Window window{u8"Engine3", 1280, 720, Window::OpenGL | Window::Resizable};
 	if (!window) { return -1; }
 
 	Renderer renderer(window);

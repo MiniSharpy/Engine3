@@ -4,23 +4,20 @@
 #include <cassert>
 #include <cmath>
 #include <concepts>
+#include <cstddef>
 
 namespace Engine3
 {
 	template <std::size_t Dimensions, typename T = float>
 		requires std::integral<T> || std::floating_point<T>
-	class Vector
+	struct Vector : std::array<T, Dimensions>
 	{
-	public:
 		/* Static Methods */
 		static constexpr Vector Zero() { return {}; }
 
-		static constexpr Vector Forward() requires (Dimensions == 3)
-		{
-			return {static_cast<T>(0), static_cast<T>(0), static_cast<T>(1)};
-		}
+		static constexpr Vector Up() requires(Dimensions == 2) { return {static_cast<T>(0), static_cast<T>(1)}; }
 
-		static constexpr Vector Back() requires (Dimensions == 3) { return {-Vector::Forward()}; }
+		static constexpr Vector Right() requires (Dimensions == 2) { return {static_cast<T>(1), static_cast<T>(0)}; }
 
 		static constexpr Vector Up() requires (Dimensions == 3)
 		{
@@ -32,9 +29,12 @@ namespace Engine3
 			return {static_cast<T>(1), static_cast<T>(0), static_cast<T>(0)};
 		}
 
-		static constexpr Vector Up() requires(Dimensions == 2) { return {static_cast<T>(0), static_cast<T>(1)}; }
+		static constexpr Vector Forward() requires (Dimensions == 3)
+		{
+			return {static_cast<T>(0), static_cast<T>(0), static_cast<T>(1)};
+		}
 
-		static constexpr Vector Right() requires (Dimensions == 2) { return {static_cast<T>(1), static_cast<T>(0)}; }
+		static constexpr Vector Back() requires (Dimensions == 3) { return {-Vector::Forward()}; }
 
 		static constexpr Vector Left() requires (Dimensions == 2 || Dimensions == 3) { return {-Vector::Right()}; }
 
@@ -93,31 +93,6 @@ namespace Engine3
 			return b - (DotProduct(a, b) * a);
 		}
 
-	private:
-		std::array<T, Dimensions> Values_;
-
-	public:
-		/* Constructors and Move/Copy Operations */
-		/// Constructs an uninitialized vector.
-		constexpr Vector() = default;
-
-		~Vector() = default;
-
-		/// Constructs each element in the vector to a value.
-		/// @tparam Args Type of each parameter, implicitly converted in aggregate initialization of the underlying std::array.
-		/// @param args Value of each element in the vector.
-		template <typename... Args>
-			requires(sizeof...(Args) == Dimensions) // Require all parameters specified.
-		constexpr Vector(Args&&... args) : Values_{std::forward<Args>(args)...} {}
-
-		Vector(const Vector& other) = default;
-
-		Vector(Vector&& other) noexcept = default;
-
-		Vector& operator=(const Vector& other) = default;
-
-		Vector& operator=(Vector&& other) noexcept = default;
-
 		/* Methods */
 		/// A commutative function that sums the products of each component in two vectors.
 		/// @return A negative scalar value when the vector points towards the vector \p other. \n
@@ -169,37 +144,33 @@ namespace Engine3
 		constexpr auto Distance(const Vector& other) { return Distance(*this, other); }
 
 		/* Getters and Setters */
-		T X() requires (Dimensions <= 4) { return Values_[0]; }
+		T X() requires (Dimensions <= 4) { return (*this)[0]; }
 
-		constexpr T X() const requires (Dimensions <= 4) { return Values_[0]; }
+		constexpr T X() const requires (Dimensions <= 4) { return (*this)[0]; }
 
-		void X(T value) requires (Dimensions <= 4) { Values_[0] = value; }
+		void X(T value) requires (Dimensions <= 4) { (*this)[0] = value; }
 
-		T Y() requires (Dimensions <= 4 && Dimensions > 1) { return Values_[1]; }
+		T Y() requires (Dimensions <= 4 && Dimensions > 1) { return (*this)[1]; }
 
-		constexpr T Y() const requires (Dimensions <= 4 && Dimensions > 1) { return Values_[1]; }
+		constexpr T Y() const requires (Dimensions <= 4 && Dimensions > 1) { return (*this)[1]; }
 
-		void Y(T value) requires (Dimensions <= 4 && Dimensions > 1) { Values_[1] = value; }
+		void Y(T value) requires (Dimensions <= 4 && Dimensions > 1) { (*this)[1] = value; }
 
-		T Z() requires (Dimensions <= 4 && Dimensions > 2) { return Values_[2]; }
+		T Z() requires (Dimensions <= 4 && Dimensions > 2) { return (*this)[2]; }
 
-		constexpr T Z() const requires (Dimensions <= 4 && Dimensions > 2) { return Values_[2]; }
+		constexpr T Z() const requires (Dimensions <= 4 && Dimensions > 2) { return (*this)[2]; }
 
-		void Z(T value) requires (Dimensions <= 4 && Dimensions > 2) { Values_[2] = value; }
+		void Z(T value) requires (Dimensions <= 4 && Dimensions > 2) { (*this)[2] = value; }
 
-		T W() requires (Dimensions <= 4 && Dimensions > 3) { return Values_[3]; }
+		T W() requires (Dimensions <= 4 && Dimensions > 3) { return (*this)[3]; }
 
-		constexpr T W() const requires (Dimensions <= 4 && Dimensions > 3) { return Values_[3]; }
+		constexpr T W() const requires (Dimensions <= 4 && Dimensions > 3) { return (*this)[3]; }
 
-		void W(T value) requires (Dimensions <= 4 && Dimensions > 3) { Values_[3] = value; }
+		void W(T value) requires (Dimensions <= 4 && Dimensions > 3) { (*this)[3] = value; }
 
 		constexpr bool IsUnit() const { return std::abs(1 - LengthSquared()) < std::numeric_limits<T>::epsilon(); }
 
 		/* Operator Overloading */
-		T& operator[](std::size_t index) { return Values_[index]; }
-
-		constexpr T operator[](std::size_t index) const { return Values_[index]; }
-
 		/// @return A negated copy of the vector.
 		Vector operator-() const
 		{
@@ -211,7 +182,7 @@ namespace Engine3
 
 		constexpr Vector& operator+=(const Vector& right)
 		{
-			for (size_t i = 0; i < Dimensions; ++i) { Values_[i] += right[i]; }
+			for (size_t i = 0; i < Dimensions; ++i) { (*this)[i] += right[i]; }
 			return *this;
 		}
 
@@ -220,11 +191,11 @@ namespace Engine3
 		/// Subtracts each component in the vector by the corresponding component in \p other.
 		constexpr Vector& operator-=(const Vector& other)
 		{
-			for (size_t i = 0; i < Dimensions; ++i) { Values_[i] -= other[i]; }
+			for (size_t i = 0; i < Dimensions; ++i) { (*this)[i] -= other[i]; }
 			return *this;
 		}
 
-		/// Subtracts each component in \p a by the corrosponding component in \p b.
+		/// Subtracts each component in \p a by the corresponding component in \p b.
 		constexpr friend Vector operator-(Vector a, const Vector& b) { return a -= b; }
 
 		/// Multiplies each element in the vector by a scalar.
@@ -233,7 +204,7 @@ namespace Engine3
 		/// @return A reference to the altered vector.
 		constexpr Vector& operator*=(T other)
 		{
-			for (size_t i = 0; i < Dimensions; ++i) { Values_[i] *= other; }
+			for (size_t i = 0; i < Dimensions; ++i) { (*this)[i] *= other; }
 			return *this;
 		}
 
@@ -255,7 +226,7 @@ namespace Engine3
 		/// @return A reference to the altered vector.
 		constexpr Vector& operator/=(T right)
 		{
-			for (size_t i = 0; i < Dimensions; ++i) { Values_[i] /= right; }
+			for (size_t i = 0; i < Dimensions; ++i) { (*this)[i] /= right; }
 			return *this;
 		}
 
@@ -266,19 +237,24 @@ namespace Engine3
 		/// @return A copy of the passed vector, divided by the scalar.
 		constexpr friend Vector operator/(Vector left, T right) { return left /= right; }
 
-		friend bool operator==(const Vector& lhs, const Vector& rhs) { return lhs.Values_ == rhs.Values_; }
-
-		friend bool operator!=(const Vector& lhs, const Vector& rhs) { return !(lhs == rhs); }
+		friend bool operator==(const Vector& lhs, const Vector& rhs) = default;
 
 		friend bool operator<(const Vector& lhs, const Vector& rhs)
 		{
 			return lhs.LengthSquared() < rhs.LengthSquared();
 		}
 
+		friend bool operator!=(const Vector& lhs, const Vector& rhs) { return !(lhs == rhs); }
+
 		friend bool operator<=(const Vector& lhs, const Vector& rhs) { return !(rhs < lhs); }
 
 		friend bool operator>(const Vector& lhs, const Vector& rhs) { return rhs < lhs; }
 
 		friend bool operator>=(const Vector& lhs, const Vector& rhs) { return !(lhs < rhs); }
+
+		// If these aren't deleted it makes it possible to compare to a plain array of the same type and size.
+		friend auto operator==(const std::array<T, Dimensions>& lhs, const std::array<T, Dimensions>& rhs) = delete;
+
+		friend auto operator<=>(const std::array<T, Dimensions>& lhs, const std::array<T, Dimensions>& rhs) = delete;
 	};
 }

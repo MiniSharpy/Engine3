@@ -52,6 +52,8 @@ namespace Engine3
 			Undefined
 		};
 
+		using enum Flags;
+
 	private:
 		std::unique_ptr<SDL_Window, void(*)(SDL_Window*)> Window_;
 
@@ -159,22 +161,22 @@ namespace Engine3
 	constexpr Window::Flags operator|(Window::Flags lhs, Window::Flags rhs)
 	{
 		return static_cast<Window::Flags>(
-			static_cast<std::underlying_type_t<Window::Flags>>(lhs) |
-			static_cast<std::underlying_type_t<Window::Flags>>(rhs)
+			std::to_underlying(lhs) |
+			std::to_underlying(rhs)
 		);
 	}
 
 	constexpr Window::Flags operator&(Window::Flags lhs, Window::Flags rhs)
 	{
 		return static_cast<Window::Flags>(
-			static_cast<std::underlying_type_t<Window::Flags>>(lhs) |
-			static_cast<std::underlying_type_t<Window::Flags>>(rhs)
+			std::to_underlying(lhs) |
+			std::to_underlying(rhs)
 		);
 	}
 
 	constexpr Window::Flags operator~(Window::Flags flag)
 	{
 		return static_cast<Window::Flags>(
-			~static_cast<std::underlying_type_t<Window::Flags>>(flag));
+			~std::to_underlying(flag));
 	}
 }
