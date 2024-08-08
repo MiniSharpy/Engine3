@@ -70,10 +70,14 @@ namespace Engine3
 
 		// If these aren't deleted it makes it possible to perform comparisons like Matrix<4, 3>{} == Matrix<3, 4>{},
 		// as well as to arrays of the same type and size.
-		friend auto operator==(const std::array<T, RowSize * ColumnSize>& lhs,
-		                       const std::array<T, RowSize * ColumnSize>& rhs) = delete;
+		// auto val = Matrix<4, 3>{} == Matrix<3, 4>{}; // Shouldn't compile
+		// auto val1 = Matrix<4, 3>{} == std::array<float, 12>{}; //  Shouldn't compile
+		// auto val2 = Vector<3>{} == std::array<float, 3>{}; // Shouldn't compile.
+		// auto val3 = std::array<float, 3>{} == std::array<float, 3>{}; // Should compule.
+		// auto val4 = std::array<float, 12>{} == Matrix<4, 3>{}; //  Shouldn't compile
 
-		friend auto operator<=>(const std::array<T, RowSize * ColumnSize>& lhs,
-		                        const std::array<T, RowSize * ColumnSize>& rhs) = delete;
+		auto operator==(const std::array<T, RowSize * ColumnSize>& rhs) = delete;
+
+		auto operator<=>(const std::array<T, RowSize * ColumnSize>& rhs) = delete;
 	};
 }
