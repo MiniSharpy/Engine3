@@ -205,4 +205,84 @@ namespace Engine3
 		};
 		ASSERT_EQ(expected, actual);
 	}
+
+	TEST(MatrixTest, GetRow)
+	{
+		Vector<3> actual = Matrix<3>
+		{
+			1, 2, 3,
+			4, 5, 6,
+			7, 8, 9
+		}.GetRow(1);
+
+		Vector<3> expected{4, 5, 6};
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(MatrixTest, GetColumn)
+	{
+		Vector<4> actual = Matrix<4>
+		{
+			1, 2, 3, 4,
+			5, 6, 7, 8,
+			9, 10, 11, 12,
+			13, 14, 15, 16
+		}.GetColumn(1);
+
+		Vector<4> expected{2, 6, 10, 14};
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(MatrixTest, MatrixMultiplication)
+	{
+		Matrix<3> a =
+		{
+			1, -5, 3,
+			0, -2, 6,
+			7, 2, -4
+		};
+
+		Matrix<3> b =
+		{
+			-8, 6, 1,
+			7, 0, -3,
+			2, 4, 5
+		};
+
+		Matrix<3> ab = a * b;
+
+		Matrix<3> expected =
+		{
+			-37, 18, 31,
+			-2, 24, 36,
+			-50, 26, -19
+		};
+		ASSERT_EQ(expected, ab);
+	}
+
+	TEST(MatrixTest, MatrixMultiplicationNonSquare)
+	{
+		Matrix<2, 4> a =
+		{
+			1, 2, 3, 4,
+			5, 6, 7, 8
+		};
+
+		Matrix<4, 3> b =
+		{
+			1, 2, 3,
+			4, 5, 6,
+			7, 8, 9,
+			10, 11, 12
+		};
+
+		Matrix<2, 3> ab = a * b;
+
+		Matrix<2, 3> expected =
+		{
+			70, 80, 90,
+			158, 184, 210
+		};
+		ASSERT_EQ(expected, ab);
+	}
 }

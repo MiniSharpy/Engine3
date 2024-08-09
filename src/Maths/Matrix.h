@@ -1,4 +1,5 @@
 #pragma once
+#include "Vector.h"
 #include <algorithm>
 #include <array>
 #include <concepts>
@@ -41,14 +42,29 @@ namespace Engine3
 			return matrix;
 		}
 
+		Vector<ColumnSize> GetRow(std::size_t row) const
+		{
+			Vector<ColumnSize, T> vector;
+			for (std::size_t column = 0; column < ColumnSize; ++column) { vector[column] = (*this)(row, column); }
+			return vector;
+		}
+
+		Vector<RowSize> GetColumn(std::size_t column) const
+		{
+			Vector<RowSize, T> vector;
+			for (std::size_t i = 0; i < RowSize; ++i) { vector[i] = (*this)(i, column); }
+			return vector;
+		}
+
 		/* Operators */
-		T& operator()(size_t row, size_t column) { return (*this)[ColumnSize * row + column]; }
+		T& operator()(std::size_t row, std::size_t column) { return (*this)[ColumnSize * row + column]; }
 
-		const T& operator()(size_t row, size_t column) const { return (*this)[ColumnSize * row + column]; }
+		const T& operator()(std::size_t row, std::size_t column) const { return (*this)[ColumnSize * row + column]; }
 
+		// Scalar multiplications.
 		constexpr Matrix& operator*=(T other)
 		{
-			for (size_t i = 0; i < this->size(); ++i) { (*this)[i] *= other; }
+			for (std::size_t i = 0; i < this->size(); ++i) { (*this)[i] *= other; }
 			return *this;
 		}
 
@@ -58,11 +74,41 @@ namespace Engine3
 
 		constexpr Matrix& operator/=(T right)
 		{
-			for (size_t i = 0; i < this->size(); ++i) { (*this)[i] /= right; }
+			for (std::size_t i = 0; i < this->size(); ++i) { (*this)[i] /= right; }
 			return *this;
 		}
 
 		constexpr friend Matrix operator/(Matrix left, T right) { return left /= right; }
+
+		// Matrix multiplications.
+		/// Takes the dot product of each row in \p lhs by each column in \p rhs to create a new matrix.
+		///
+		/// Subsequently, matrix multiplication can only occur when the columns in \p lhs
+		/// match the number of rows in \p rhs.
+		template <std::size_t OtherRowSize, std::size_t OtherColumnSize>
+			requires(ColumnSize == OtherRowSize)
+		friend constexpr Matrix<RowSize, OtherColumnSize, T> operator*(
+			Matrix lhs, Matrix<OtherRowSize, OtherColumnSize, T> rhs)
+		{
+			Matrix<RowSize, OtherColumnSize> result;
+			for (std::size_t row = 0; row < RowSize; ++row)
+			{
+				for (std::size_t column = 0; column < OtherColumnSize; ++column)
+				{
+					// TODO: Would a for loop be more performant with a single temporary value rather than constructing
+					// two vectors each time?
+					// ColumnSize and OtherRowSize are equivalent, so either would work for the dimensions of the vector.
+					// Additionally, dot product should work fine no matter T, as long as different typed matrices aren't
+					// mixed.
+					result(row, column) =
+						Vector<ColumnSize, T>::DotProduct(
+							lhs.GetRow(row), rhs.GetColumn(column)
+						);
+				}
+			}
+
+			return result;
+		}
 
 		friend bool operator==(const Matrix& lhs, const Matrix& rhs) = default;
 
