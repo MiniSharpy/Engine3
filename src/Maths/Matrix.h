@@ -109,7 +109,10 @@ namespace Engine3
 			return result;
 		}
 
-		// Row vector multiplication.
+		/// Multiplies a row vector by a matrix.
+		/// @param lhs A row vector with a number of columns equal to the number of rows in \p rhs.
+		/// @param rhs A matrix with a number of rows equal to the size of \p lhs.
+		/// @return A row vector with a size equal to the number of columns in \p rhs.
 		constexpr friend Vector<ColumnSize> operator*(const Vector<RowSize>& lhs, const Matrix& rhs)
 		{
 			Vector<ColumnSize> rowVector;
@@ -121,7 +124,10 @@ namespace Engine3
 			return rowVector;
 		}
 
-		// Column vector multiplication
+		/// Multiplies a column vector by a matrix.
+		/// @param lhs A matrix with a number of columns equal to the size of \p rhs.
+		/// @param rhs A column vector with a number of rows equal to the number of columns in \p lhs.
+		/// @return A column vector with a size equal to the number of rows in \p lhs.
 		constexpr friend Vector<RowSize> operator*(const Matrix& lhs, const Vector<ColumnSize>& rhs)
 		{
 			Vector<RowSize> columnVector;
