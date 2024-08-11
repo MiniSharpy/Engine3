@@ -17,6 +17,7 @@ namespace Engine3
 		requires std::integral<T> || std::floating_point<T>
 	struct Matrix : std::array<T, RowSize * ColumnSize>
 	{
+		/// @return A square matrix that's zeroed except for its diagonal elements, which are all one.
 		static constexpr Matrix IdentityMatrix() requires (RowSize == ColumnSize)
 		{
 			Matrix identityMatrix{};
@@ -26,9 +27,12 @@ namespace Engine3
 		}
 
 		/* Methods */
+		/// Flips a square matrix diagonally, in place. TODO: Should the function return a reference to this to allow chaining methods?
 		void Transpose() requires (RowSize == ColumnSize) { (*this) = this->Transposed(); }
 
-		Matrix<ColumnSize, RowSize, T> Transposed()
+		/// Flips a matrix diagonally.
+		[[nodiscard]] Matrix<ColumnSize, RowSize, T> Transposed()
+		// [[nodiscard]] to help emphasise this is not the same as Transpose().
 		{
 			// Non-Square matrices when transposed will return a matrix that's aspect ratio is flipped.
 			Matrix<ColumnSize, RowSize, T> matrix;
@@ -43,6 +47,8 @@ namespace Engine3
 			return matrix;
 		}
 
+		/// @param row The row to return, indexed from zero/
+		/// @return A row vector.
 		constexpr Vector<ColumnSize> GetRow(std::size_t row) const
 		{
 			Vector<ColumnSize, T> vector;
@@ -50,6 +56,8 @@ namespace Engine3
 			return vector;
 		}
 
+		/// @param column The column to return, indexed from zero.
+		/// @return A column vector.
 		constexpr Vector<RowSize> GetColumn(std::size_t column) const
 		{
 			Vector<RowSize, T> vector;
@@ -58,36 +66,52 @@ namespace Engine3
 		}
 
 		/* Operators */
+		// I would like to use [row, column] for zero indexing and operator() for 1 indexed to follow matrix conventions,
+		// but there's a lack of support for it in gcc and I prefer zero indexing.
+		/// @param row The row to retrieve the element, indexed from zero.
+		/// @param column The column to retrieve the element, indexed from zero.
+		/// @return The element at \p row and \p column.
 		T& operator()(std::size_t row, std::size_t column) { return (*this)[ColumnSize * row + column]; }
 
+		/// @param row The row to retrieve the element, indexed from zero.
+		/// @param column The column to retrieve the element, indexed from zero.
+		/// @return The element at \p row and \p column.
 		const T& operator()(std::size_t row, std::size_t column) const { return (*this)[ColumnSize * row + column]; }
 
 		// Scalar multiplications.
-		constexpr Matrix& operator*=(T other)
+		/// Multiplies each element in the matrix by the scalar value \p other.
+		/// @return A reference to the now altered matrix for further operations.
+		constexpr Matrix& operator*=(T rhs)
 		{
-			for (std::size_t i = 0; i < this->size(); ++i) { (*this)[i] *= other; }
+			for (std::size_t i = 0; i < this->size(); ++i) { (*this)[i] *= rhs; }
 			return *this;
 		}
 
-		constexpr friend Matrix operator*(Matrix a, T b) { return a *= b; } // Intentional Matrix copy.
+		/// Multiplies each element in the copied \p lhs by the scalar value \p rhs.
+		constexpr friend Matrix operator*(Matrix lhs, T rhs) { return lhs *= rhs; } // Intentional Matrix copy.
 
-		friend Matrix operator*(T left, const Matrix& right) { return right * left; }
+		/// Multiplies each element in \p right by the scalar value \p left.
+		constexpr friend Matrix operator*(T lhs, const Matrix& rhs) { return rhs * lhs; }
 
-		constexpr Matrix& operator/=(T right)
+		/// Divides each element in the matrix by \p rhs in place.
+		/// @return A reference to the now altered matrix for further operations.
+		constexpr Matrix& operator/=(T rhs)
 		{
-			for (std::size_t i = 0; i < this->size(); ++i) { (*this)[i] /= right; }
+			for (std::size_t i = 0; i < this->size(); ++i) { (*this)[i] /= rhs; }
 			return *this;
 		}
 
-		constexpr friend Matrix operator/(Matrix left, T right) { return left /= right; } // Intentional Matrix copy.
+		/// Divides each element in \p lhs by the scalar value \p rhs.
+		constexpr friend Matrix operator/(Matrix lhs, T rhs) { return lhs /= rhs; } // Intentional Matrix copy.
 
-		/// Matrix multiplication. \n
 		/// Takes the dot product of each row in \p lhs by each column in \p rhs to create a new matrix.
-		///
-		/// Subsequently, matrix multiplication can only occur when the columns in \p lhs
-		/// match the number of rows in \p rhs.
+		/// @param lhs A matrix with a number of columns equal to the number of rows in \p rhs.
+		/// @param rhs A matrix with a number of rows equal to the number of columns in \p lhs.
+		/// @return A matrix with the same number of rows as \p lhs and the same number of columns as \p rhs.
 		template <std::size_t OtherColumnSize>
-		constexpr Matrix<RowSize, OtherColumnSize, T> operator*(const Matrix<ColumnSize, OtherColumnSize, T>& rhs)
+		constexpr friend Matrix<RowSize, OtherColumnSize, T> operator*(const Matrix& lhs,
+		                                                               const Matrix<ColumnSize, OtherColumnSize, T>&
+		                                                               rhs)
 		{
 			Matrix<RowSize, OtherColumnSize> result;
 			for (std::size_t row = 0; row < RowSize; ++row)
@@ -101,7 +125,7 @@ namespace Engine3
 					// mixed.
 					result(row, column) =
 						Vector<ColumnSize, T>::DotProduct(
-							this->GetRow(row), rhs.GetColumn(column)
+							lhs.GetRow(row), rhs.GetColumn(column)
 						);
 				}
 			}
@@ -113,12 +137,12 @@ namespace Engine3
 		/// @param lhs A row vector with a number of columns equal to the number of rows in \p rhs.
 		/// @param rhs A matrix with a number of rows equal to the size of \p lhs.
 		/// @return A row vector with a size equal to the number of columns in \p rhs.
-		constexpr friend Vector<ColumnSize> operator*(const Vector<RowSize>& lhs, const Matrix& rhs)
+		constexpr friend Vector<ColumnSize, T> operator*(const Vector<RowSize, T>& lhs, const Matrix& rhs)
 		{
-			Vector<ColumnSize> rowVector;
+			Vector<ColumnSize, T> rowVector;
 			for (std::size_t column = 0; column < rowVector.size(); ++column)
 			{
-				rowVector[column] = Vector<RowSize>::DotProduct(lhs, rhs.GetColumn(column));
+				rowVector[column] = Vector<RowSize, T>::DotProduct(lhs, rhs.GetColumn(column));
 			}
 
 			return rowVector;
@@ -128,20 +152,22 @@ namespace Engine3
 		/// @param lhs A matrix with a number of columns equal to the size of \p rhs.
 		/// @param rhs A column vector with a number of rows equal to the number of columns in \p lhs.
 		/// @return A column vector with a size equal to the number of rows in \p lhs.
-		constexpr friend Vector<RowSize> operator*(const Matrix& lhs, const Vector<ColumnSize>& rhs)
+		constexpr friend Vector<RowSize, T> operator*(const Matrix& lhs, const Vector<ColumnSize, T>& rhs)
 		{
-			Vector<RowSize> columnVector;
+			Vector<RowSize, T> columnVector;
 
 			for (std::size_t row = 0; row < columnVector.size(); ++row)
 			{
-				columnVector[row] = Vector<ColumnSize>::DotProduct(lhs.GetRow(row), rhs);
+				columnVector[row] = Vector<ColumnSize, T>::DotProduct(lhs.GetRow(row), rhs);
 			}
 
 			return columnVector;
 		}
 
+		/// Checks whether each element in the two matrices are equal.
 		friend bool operator==(const Matrix& lhs, const Matrix& rhs) = default;
 
+		/// Checks whether any element in two matrices differ.
 		friend bool operator!=(const Matrix& lhs, const Matrix& rhs) = default;
 
 		// If these aren't deleted it makes it possible to perform comparisons like Matrix<4, 3>{} == Matrix<3, 4>{},
@@ -151,7 +177,6 @@ namespace Engine3
 		// auto val2 = Vector<3>{} == std::array<float, 3>{}; // Shouldn't compile.
 		// auto val3 = std::array<float, 3>{} == std::array<float, 3>{}; // Should compule.
 		// auto val4 = std::array<float, 12>{} == Matrix<4, 3>{}; //  Shouldn't compile
-
 		auto operator==(const std::array<T, RowSize * ColumnSize>& rhs) = delete;
 
 		auto operator<=>(const std::array<T, RowSize * ColumnSize>& rhs) = delete;

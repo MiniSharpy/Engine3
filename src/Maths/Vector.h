@@ -40,72 +40,81 @@ namespace Engine3
 
 		static constexpr Vector Down() requires (Dimensions == 2 || Dimensions == 3) { return {-Vector::Up()}; }
 
-		/// A commutative function that sums the products of each component in \p a and \p b.
-		/// @return A negative scalar value when \p a points towards \p b. \n
+		/// A commutative function that sums the products of each component in \p lhs and \p rhs.
+		/// @return A negative scalar value when \p lhs points towards \p rhs. \n
 		/// A zero value when the vectors are perpendicular, or when one is a zero vector.
-		static constexpr T DotProduct(const Vector& a, const Vector& b)
+		static constexpr T DotProduct(const Vector& lhs, const Vector& rhs)
 		{
 			// An integer squared is always an integer, no need to worry about precision loss when std::integral<T>,
-			// just need to not allow other typed vectors as a parameter.
+			// just need to not allow other typed vectors as lhs parameter.
 			T value = 0;
-			for (size_t i = 0; i < Dimensions; ++i) { value += a[i] * b[i]; }
+			for (size_t i = 0; i < Dimensions; ++i) { value += lhs[i] * rhs[i]; }
 
 			return value;
 		}
 
-		/// An anti-commutative function, \p a x \p b, that can only be applied using 3D vectors, yielding a 3D vector perpendicular to the original two.
-		/// @return Zero vector if \p a or \p b are parallel, of if either are the zero vector. \n
+		/// An anti-commutative function, \p lhs x \p rhs, that can only be applied using 3D vectors,
+		/// yielding a 3D vector perpendicular to the original two.
+		/// @return Zero vector if \p lhs or \p rhs are parallel, of if either are the zero vector. \n
 		/// Otherwise, a vector perpendicular to both vector.
-		static constexpr Vector CrossProduct(const Vector& a, const Vector& b) requires (Dimensions == 3)
+		static constexpr Vector CrossProduct(const Vector& lhs, const Vector& rhs) requires (Dimensions == 3)
 		{
-			return {a.Y() * b.Z() - a.Z() * b.Y(), a.Z() * b.X() - a.X() * b.Z(), a.X() * b.Y() - a.Y() * b.X()};
+			return {
+				lhs.Y() * rhs.Z() - lhs.Z() * rhs.Y(),
+				lhs.Z() * rhs.X() - lhs.X() * rhs.Z(),
+				lhs.X() * rhs.Y() - lhs.Y() * rhs.X()
+			};
 		}
 
 		/// Calculates the squared distance between two vectors.
-		/// @return The squared magnitude of the vector \p b - \p a.
-		static constexpr T DistanceSquared(const Vector& a, const Vector& b) { return (b - a).LengthSquared(); }
+		/// @return The squared magnitude of the vector \p rhs - \p lhs.
+		static constexpr T DistanceSquared(const Vector& lhs, const Vector& rhs) { return (rhs - lhs).LengthSquared(); }
 
 		/// Calculates the distance between two vectors.
-		/// @return The magnitude of the vector \p b - \p a.
-		static constexpr auto Distance(const Vector& a, const Vector& b) { return (b - a).Length(); }
+		/// @return The magnitude of the vector \p rhs - \p lhs.
+		static constexpr auto Distance(const Vector& lhs, const Vector& rhs) { return (rhs - lhs).Length(); }
 
 		// Static to better emphasise the usage of the unit vector.
 		/// Projects a vector onto an infinitely long line. \n
-		///	Consider a right-angled triangle made up of vectors where the hypotenuse is \p b, the adjacent side \p Project(a, \p b), and the opposite side is \p ProjectPerpendicular(a, \p b).
-		/// @param a Unit vector that determines the direction of the line that \p b will be projected upon.
-		/// @param b Vector to project.
-		/// @return The projection of \p b onto an infinitely long line which is parallel to \p a. 
-		static constexpr Vector Project(const Vector& a, const Vector& b) requires std::floating_point<T>
+		///	Consider a right-angled triangle made up of vectors where the hypotenuse is \p rhs,
+		///	the adjacent side \p Project(lhs, \p rhs), and the opposite side is \p ProjectPerpendicular(lhs, \p rhs).
+		/// @param lhs Unit vector that determines the direction of the line that \p rhs will be projected upon.
+		/// @param rhs Vector to project.
+		/// @return The projection of \p rhs onto an infinitely long line which is parallel to \p lhs. 
+		static constexpr Vector Project(const Vector& lhs, const Vector& rhs) requires std::floating_point<T>
 		{
-			assert(a.IsUnit());
-			return DotProduct(a, b) * a;
+			assert(lhs.IsUnit());
+			return DotProduct(lhs, rhs) * lhs;
 		}
 
 		// Static to better emphasise the usage of the unit vector.
-		/// Calculates the vector from \p Project(a, \p b) to \p b. \n
-		///	Consider a right-angled triangle made up of vectors where the hypotenuse is \p b, the adjacent side \p Project(a, \p b), and the opposite side is \p ProjectPerpendicular(a, \p b).
-		/// @param a Unit vector that determines the direction of the line that \p b will be projected upon.
-		/// @param b Vector to project.
-		/// @return The vector of \p b, which is parallel to \p a. 
-		static constexpr Vector ProjectPerpendicular(const Vector& a, const Vector& b) requires std::floating_point<T>
+		/// Calculates the vector from \p Project(lhs, \p b) to \p rhs. \n
+		///	Consider a right-angled triangle made up of vectors where the hypotenuse is \p rhs,
+		///	the adjacent side \p Project(lhs, \p rhs), and the opposite side is \p ProjectPerpendicular(lhs, \p rhs).
+		/// @param lhs Unit vector that determines the direction of the line that \p rhs will be projected upon.
+		/// @param rhs Vector to project.
+		/// @return The vector of \p rhs, which is parallel to \p lhs. 
+		static constexpr Vector ProjectPerpendicular(const Vector& lhs, const Vector& rhs) requires std::floating_point<
+			T>
 		{
-			assert(a.IsUnit());
-			return b - (DotProduct(a, b) * a);
+			assert(lhs.IsUnit());
+			return rhs - (DotProduct(lhs, rhs) * lhs);
 		}
 
 		/* Methods */
 		/// A commutative function that sums the products of each component in two vectors.
-		/// @return A negative scalar value when the vector points towards the vector \p other. \n
+		/// @return A negative scalar value when the vector points towards the vector \p rhs. \n
 		/// A zero value when the vectors are perpendicular, or when one is a zero vector.
-		constexpr T DotProduct(const Vector& other) const { return DotProduct(*this, other); }
+		constexpr T DotProduct(const Vector& rhs) const { return DotProduct(*this, rhs); }
 
-		/// An anti-commutative function, \p a x \p b, that can only be applied to 3D vectors, yielding a 3D vector perpendicular to the original two.
-		///	@param other \p b in \p a x \p b.
-		/// @return Zero vector if \p a or \p b are parallel, of if either are the zero vector. \n
+		/// An anti-commutative function, \p lhs x \p rhs, that can only be applied to 3D vectors,
+		/// yielding a 3D vector perpendicular to the original two.
+		///	@param rhs \p rhs in \p lhs x \p rhs.
+		/// @return Zero vector if \p lhs or \p rhs are parallel, of if either are the zero vector. \n
 		/// Otherwise, a vector perpendicular to both vectors.
-		constexpr Vector CrossProduct(const Vector& other) const requires (Dimensions == 3)
+		constexpr Vector CrossProduct(const Vector& rhs) const requires (Dimensions == 3)
 		{
-			return CrossProduct(*this, other);
+			return CrossProduct(*this, rhs);
 		}
 
 		/// Calculates the squared length of the vector by applying the dot product to itself.\n
@@ -136,12 +145,12 @@ namespace Engine3
 		}
 
 		/// Calculates the squared distance between two vectors.
-		/// @return The squared magnitude of the vector \p other - \p this.
-		constexpr T DistanceSquared(const Vector& other) { return DistanceSquared(*this, other); }
+		/// @return The squared magnitude of the vector \p rhs - \p (*this).
+		constexpr T DistanceSquared(const Vector& rhs) { return DistanceSquared(*this, rhs); }
 
 		/// Calculates the distance between two vectors.
-		/// @return The magnitude of the vector \p other - \p this.
-		constexpr auto Distance(const Vector& other) { return Distance(*this, other); }
+		/// @return The magnitude of the vector \p rhs - \p (*this).
+		constexpr auto Distance(const Vector& rhs) { return Distance(*this, rhs); }
 
 		/* Getters and Setters */
 		T X() requires (Dimensions <= 4) { return (*this)[0]; }
@@ -180,62 +189,64 @@ namespace Engine3
 			return negated;
 		}
 
-		constexpr Vector& operator+=(const Vector& right)
+		/// Adds each corresponding element in two vectors together.
+		constexpr Vector& operator+=(const Vector& rhs)
 		{
-			for (size_t i = 0; i < Dimensions; ++i) { (*this)[i] += right[i]; }
+			for (size_t i = 0; i < Dimensions; ++i) { (*this)[i] += rhs[i]; }
 			return *this;
 		}
 
-		constexpr friend Vector operator+(Vector left, const Vector& right) { return left += right; }
+		/// Adds each corresponding element in two vectors together.
+		constexpr friend Vector operator+(Vector lhs, const Vector& rhs) { return lhs += rhs; }
 
-		/// Subtracts each component in the vector by the corresponding component in \p other.
-		constexpr Vector& operator-=(const Vector& other)
+		/// Subtracts each component in the vector by the corresponding component in \p rhs.
+		constexpr Vector& operator-=(const Vector& rhs)
 		{
-			for (size_t i = 0; i < Dimensions; ++i) { (*this)[i] -= other[i]; }
+			for (size_t i = 0; i < Dimensions; ++i) { (*this)[i] -= rhs[i]; }
 			return *this;
 		}
 
-		/// Subtracts each component in \p a by the corresponding component in \p b.
-		constexpr friend Vector operator-(Vector a, const Vector& b) { return a -= b; }
+		/// Subtracts each component in \p lhs by the corresponding component in \p rhs.
+		constexpr friend Vector operator-(Vector lhs, const Vector& rhs) { return lhs -= rhs; }
 
 		/// Multiplies each element in the vector by a scalar.
 		/// @tparam U Arithmetic type of the scalar.
-		/// @param other Scalar value.
+		/// @param rhs Scalar value.
 		/// @return A reference to the altered vector.
-		constexpr Vector& operator*=(T other)
+		constexpr Vector& operator*=(T rhs)
 		{
-			for (size_t i = 0; i < Dimensions; ++i) { (*this)[i] *= other; }
+			for (size_t i = 0; i < Dimensions; ++i) { (*this)[i] *= rhs; }
 			return *this;
 		}
 
 		/// Multiplies each element in a vector by a scalar.
-		/// @param a Vector that's elements will be multiplied.
-		/// @param b Scalar value by which to multiply each element.
+		/// @param lhs Vector that's elements will be multiplied.
+		/// @param rhs Scalar value by which to multiply each element.
 		/// @return A copy of the passed vector, multiplied by the scalar.
-		constexpr friend Vector operator*(Vector a, T b) { return a *= b; }
+		constexpr friend Vector operator*(Vector lhs, T rhs) { return lhs *= rhs; }
 
 		// Intentionally copied parameter to re-use already implemented operator.
 		/// Multiplies each element in a vector by a scalar.
-		/// @param left Scalar value by which to multiply each element.
-		/// @param right Vector that's elements will be multiplied.
+		/// @param lhs Scalar value by which to multiply each element.
+		/// @param rhs Vector that's elements will be multiplied.
 		/// @return A copy of the passed vector, multiplied by the scalar.
-		friend Vector operator*(T left, const Vector& right) { return right * left; }
+		friend Vector operator*(T lhs, const Vector& rhs) { return rhs * lhs; }
 
 		/// Divides each element in the vector by a scalar.
-		/// @param right Scalar value.
+		/// @param rhs Scalar value.
 		/// @return A reference to the altered vector.
-		constexpr Vector& operator/=(T right)
+		constexpr Vector& operator/=(T rhs)
 		{
-			for (size_t i = 0; i < Dimensions; ++i) { (*this)[i] /= right; }
+			for (size_t i = 0; i < Dimensions; ++i) { (*this)[i] /= rhs; }
 			return *this;
 		}
 
 		// Intentionally copied parameter to re-use already implemented operator.
 		/// Divides each element in a vector by a scalar.
-		/// @param left Vector that's elements will be divided.
-		/// @param right Scalar value by which to multiply each element.
+		/// @param lhs Vector that's elements will be divided.
+		/// @param rhs Scalar value by which to multiply each element.
 		/// @return A copy of the passed vector, divided by the scalar.
-		constexpr friend Vector operator/(Vector left, T right) { return left /= right; }
+		constexpr friend Vector operator/(Vector lhs, T rhs) { return lhs /= rhs; }
 
 		friend bool operator==(const Vector& lhs, const Vector& rhs) = default;
 
