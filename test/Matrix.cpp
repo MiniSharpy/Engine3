@@ -233,7 +233,7 @@ namespace Engine3
 		ASSERT_EQ(expected, actual);
 	}
 
-	TEST(MatrixTest, MatrixMultiplication)
+	TEST(MatrixTest, MatrixMultiplication3x3)
 	{
 		Matrix<3> a =
 		{
@@ -260,7 +260,7 @@ namespace Engine3
 		ASSERT_EQ(expected, ab);
 	}
 
-	TEST(MatrixTest, MatrixMultiplicationNonSquare)
+	TEST(MatrixTest, MatrixMultiplicationNonSquare2x4by4x3)
 	{
 		Matrix<2, 4> a =
 		{
@@ -283,6 +283,76 @@ namespace Engine3
 			70, 80, 90,
 			158, 184, 210
 		};
+		ASSERT_EQ(expected, ab);
+	}
+
+	TEST(MatrixTest, MatrixMultiplication2x2)
+	{
+		Matrix<2> a
+		{
+			1, -2,
+			5, 0
+		};
+
+		Matrix<2> b
+		{
+			-3, 7,
+			4, 1.f / 3.f
+		};
+
+		Matrix<2> ab = a * b;
+
+		Matrix<2> expected =
+		{
+			-11, 6.f + 1.f / 3.f, -15, 35
+		};
+		ASSERT_EQ(expected, ab);
+	}
+
+	TEST(MatrixTest, MatrixMultiplicationVector3By3x3)
+	{
+		Vector<3> a
+		{
+			3, -1, 4
+		};
+
+		Matrix<3> b
+		{
+			-2, 6, 3,
+			5, 7, -6,
+			1, -4, 2
+		};
+
+		Vector<3> ab = a * b;
+
+		Vector<3> expected =
+		{
+			-7, -5, 23
+		};
+
+		ASSERT_EQ(expected, ab);
+	}
+
+	TEST(MatrixTest, MatrixMultiplicationVector2By2x2)
+	{
+		Vector<2> a
+		{
+			3, 3
+		};
+
+		Matrix<2> b
+		{
+			6, -7,
+			-4, 5
+		};
+
+		Vector<2> ab = a * b;
+
+		Vector<2> expected =
+		{
+			6, -6
+		};
+
 		ASSERT_EQ(expected, ab);
 	}
 
