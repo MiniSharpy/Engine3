@@ -4,6 +4,7 @@
 #include <array>
 #include <concepts>
 #include <cstddef>
+#include <numeric>
 
 namespace Engine3
 {
@@ -42,14 +43,14 @@ namespace Engine3
 			return matrix;
 		}
 
-		Vector<ColumnSize> GetRow(std::size_t row) const
+		constexpr Vector<ColumnSize> GetRow(std::size_t row) const
 		{
 			Vector<ColumnSize, T> vector;
 			for (std::size_t column = 0; column < ColumnSize; ++column) { vector[column] = (*this)(row, column); }
 			return vector;
 		}
 
-		Vector<RowSize> GetColumn(std::size_t column) const
+		constexpr Vector<RowSize> GetColumn(std::size_t column) const
 		{
 			Vector<RowSize, T> vector;
 			for (std::size_t i = 0; i < RowSize; ++i) { vector[i] = (*this)(i, column); }
@@ -68,7 +69,7 @@ namespace Engine3
 			return *this;
 		}
 
-		constexpr friend Matrix operator*(Matrix a, T b) { return a *= b; }
+		constexpr friend Matrix operator*(Matrix a, T b) { return a *= b; } // Intentional Matrix copy.
 
 		friend Matrix operator*(T left, const Matrix& right) { return right * left; }
 
@@ -78,17 +79,15 @@ namespace Engine3
 			return *this;
 		}
 
-		constexpr friend Matrix operator/(Matrix left, T right) { return left /= right; }
+		constexpr friend Matrix operator/(Matrix left, T right) { return left /= right; } // Intentional Matrix copy.
 
-		// Matrix multiplications.
+		/// Matrix multiplication. \n
 		/// Takes the dot product of each row in \p lhs by each column in \p rhs to create a new matrix.
 		///
 		/// Subsequently, matrix multiplication can only occur when the columns in \p lhs
 		/// match the number of rows in \p rhs.
-		template <std::size_t OtherRowSize, std::size_t OtherColumnSize>
-			requires(ColumnSize == OtherRowSize)
-		friend constexpr Matrix<RowSize, OtherColumnSize, T> operator*(
-			Matrix lhs, Matrix<OtherRowSize, OtherColumnSize, T> rhs)
+		template <std::size_t OtherColumnSize>
+		constexpr Matrix<RowSize, OtherColumnSize, T> operator*(const Matrix<ColumnSize, OtherColumnSize, T>& rhs)
 		{
 			Matrix<RowSize, OtherColumnSize> result;
 			for (std::size_t row = 0; row < RowSize; ++row)
@@ -102,12 +101,37 @@ namespace Engine3
 					// mixed.
 					result(row, column) =
 						Vector<ColumnSize, T>::DotProduct(
-							lhs.GetRow(row), rhs.GetColumn(column)
+							this->GetRow(row), rhs.GetColumn(column)
 						);
 				}
 			}
 
 			return result;
+		}
+
+		// Row vector multiplication.
+		constexpr friend Vector<ColumnSize> operator*(const Vector<RowSize>& lhs, const Matrix& rhs)
+		{
+			Vector<ColumnSize> rowVector;
+			for (std::size_t column = 0; column < rowVector.size(); ++column)
+			{
+				rowVector[column] = Vector<RowSize>::DotProduct(lhs, rhs.GetColumn(column));
+			}
+
+			return rowVector;
+		}
+
+		// Column vector multiplication
+		constexpr friend Vector<RowSize> operator*(const Matrix& lhs, const Vector<ColumnSize>& rhs)
+		{
+			Vector<RowSize> columnVector;
+
+			for (std::size_t row = 0; row < columnVector.size(); ++row)
+			{
+				columnVector[row] = Vector<ColumnSize>::DotProduct(lhs.GetRow(row), rhs);
+			}
+
+			return columnVector;
 		}
 
 		friend bool operator==(const Matrix& lhs, const Matrix& rhs) = default;

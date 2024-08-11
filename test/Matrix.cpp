@@ -285,4 +285,50 @@ namespace Engine3
 		};
 		ASSERT_EQ(expected, ab);
 	}
+
+	TEST(MatrixTest, RowVectorMultiplication)
+	{
+		Matrix<2, 3> matrix =
+		{
+			1, 2, 3,
+			4, 5, 6,
+		};
+
+		Vector<2> rowVector =
+		{
+			1, 2
+		};
+
+		Vector<3> actual = rowVector * matrix;
+
+		Vector<3> expected =
+		{
+			9, 12, 15
+		};
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(MatrixTest, ColumnVectorMultiplication)
+	{
+		Matrix<4, 3> matrix =
+		{
+			1, 2, 3,
+			4, 5, 6,
+			7, 8, 9,
+			10, 11, 12
+		};
+
+		Vector<3> rowVector =
+		{
+			1, 2, 3
+		};
+
+		Vector<4> actual = matrix * rowVector;
+
+		Vector<4> expected =
+		{
+			14, 32, 50, 68
+		};
+		ASSERT_EQ(expected, actual);
+	}
 }
