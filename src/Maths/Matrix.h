@@ -8,6 +8,12 @@
 
 namespace Engine3
 {
+	template <std::size_t a, std::size_t b>
+	concept IsSquare = (a == b);
+
+	template <std::size_t Size, std::size_t ... ValidSizes>
+	concept IsValidDimensions = ((Size == ValidSizes) || ...);
+
 	// Row first, then column to follow normal matrix conventions.
 	/// Matrix with its elements stored in row-major order.
 	/// @tparam RowSize The vertical size of the matrix.
@@ -18,12 +24,73 @@ namespace Engine3
 	struct Matrix : std::array<T, RowSize * ColumnSize>
 	{
 		/// @return A square matrix that's zeroed except for its diagonal elements, which are all one.
-		static constexpr Matrix IdentityMatrix() requires (RowSize == ColumnSize)
+		static constexpr Matrix IdentityMatrix() requires (IsSquare<RowSize, ColumnSize>)
 		{
 			Matrix identityMatrix{};
 			for (std::size_t i = 0; i < RowSize; ++i) { identityMatrix[(RowSize + 1) * i] = 1; }
 
 			return identityMatrix;
+		}
+
+		static constexpr Matrix RotationX(T radians) requires
+			IsSquare<RowSize, ColumnSize> && IsValidDimensions<RowSize, 3> && std::floating_point<T>
+		{
+			Matrix matrix{IdentityMatrix()};
+			matrix(1, 1) = std::cos(radians);
+			matrix(1, 2) = std::sin(radians);
+			matrix(2, 1) = -std::sin(radians);
+			matrix(2, 2) = std::cos(radians);
+
+			return matrix;
+		}
+
+		static constexpr Matrix RotationY(T radians) requires
+			IsSquare<RowSize, ColumnSize> && IsValidDimensions<RowSize, 3> && std::floating_point<T>
+		{
+			Matrix matrix{IdentityMatrix()};
+			matrix(0, 0) = std::cos(radians);
+			matrix(0, 2) = -std::sin(radians);
+			matrix(2, 0) = std::sin(radians);
+			matrix(2, 2) = std::cos(radians);
+
+			return matrix;
+		}
+
+		static constexpr Matrix RotationZ(T radians) requires // TODO: 2D rotations are on the Z axis.
+			IsSquare<RowSize, ColumnSize> && IsValidDimensions<RowSize, 3> && std::floating_point<T>
+		{
+			Matrix matrix{IdentityMatrix()};
+			matrix(0, 0) = std::cos(radians);
+			matrix(0, 1) = std::sin(radians);
+			matrix(1, 0) = -std::sin(radians);
+			matrix(1, 1) = std::cos(radians);
+
+			return matrix;
+		}
+
+		/// @param axis The axis to rotate about.
+		/// @param radians The number of degrees in radians to rotate about \p axis.
+		static constexpr Matrix Rotation(Vector<3, T> axis, T radians) requires
+			IsSquare<RowSize, ColumnSize> && IsValidDimensions<RowSize, 3> && std::floating_point<T>
+		{
+			// Some convenience
+			using namespace std;
+			const T x = axis.X();
+			const T y = axis.Y();
+			const T z = axis.Z();
+
+			Matrix matrix{IdentityMatrix()};
+			matrix(0, 0) = x * x * (1 - cos(radians)) + cos(radians);
+			matrix(0, 1) = x * y * (1 - cos(radians)) + z * sin(radians);
+			matrix(0, 2) = x * z * (1 - cos(radians)) - y * sin(radians);
+			matrix(1, 0) = x * y * (1 - cos(radians)) - z * sin(radians);
+			matrix(1, 1) = y * y * (1 - cos(radians)) + cos(radians);
+			matrix(1, 2) = y * z * (1 - cos(radians)) + x * sin(radians);
+			matrix(2, 0) = x * z * (1 - cos(radians)) + y * sin(radians);
+			matrix(2, 1) = y * z * (1 - cos(radians)) - x * sin(radians);
+			matrix(2, 2) = z * z * (1 - cos(radians)) + cos(radians);
+
+			return matrix;
 		}
 
 		/* Methods */

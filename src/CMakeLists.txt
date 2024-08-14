@@ -14,9 +14,9 @@ add_library(${PROJECT_NAME}_static STATIC ${ALL_FILES}
 	"Engine.h" "Engine.cpp"
 	"Input.h" "Input.cpp" 
 	"Renderer.h" "Renderer.cpp" 
-	  
 	"Maths/Vector.h" 
-	"Maths/Matrix.h")
+	"Maths/Matrix.h" 
+	"Maths/Maths.h")
 set_target_properties(${PROJECT_NAME}_static PROPERTIES LINKER_LANGUAGE CXX) # Not strictly speaking neccesary. CMake will infer off the types.
 
 # Linking against static library.

@@ -1,4 +1,5 @@
 #include "../src/Maths/Matrix.h"
+#include "../src/Maths/Maths.h"
 #include <gtest/gtest.h>
 
 namespace Engine3
@@ -400,5 +401,64 @@ namespace Engine3
 			14, 32, 50, 68
 		};
 		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, RotationX)
+	{
+		Matrix actual{Matrix<3>::RotationX(DegreesToRadians(-22.f))};
+		Matrix<3> expected
+		{
+			1.f, 0.f, 0.f,
+			0.f, 0.9271838546f, -0.3746065934f,
+			0.f, 0.3746065934f, 0.9271838546f
+		};
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, RotationY)
+	{
+		Matrix actual{Matrix<3>::RotationY(DegreesToRadians(30.f))};
+		Matrix<3> expected
+		{
+			0.8660254038f, 0, -0.5f,
+			0, 1, 0,
+			0.5, 0, 0.8660254038f
+		};
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, RotationZ)
+	{
+		Matrix actual{Matrix<3>::RotationZ(DegreesToRadians(45.f))};
+		Matrix<3> expected
+		{
+			0.707106782f, 0.7071067812f, 0,
+			-0.7071067812f, 0.7071067812f, 0,
+			0, 0, 1
+		};
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, RotationArbitraryAxis)
+	{
+		Vector<3> axis{0.267f, -0.535f, 0.802f};
+		Matrix<3> actual{Matrix<3>::Rotation(axis, DegreesToRadians(-15.f))};
+
+		Matrix<3> expected
+		{
+			0.968f, -0.212f, -0.131f,
+			0.203f, 0.976f, -0.084f,
+			0.146f, 0.054f, 0.988f
+		};
+
+		EXPECT_NEAR(actual[0], expected[0], 0.001);
+		EXPECT_NEAR(actual[1], expected[1], 0.001);
+		EXPECT_NEAR(actual[2], expected[2], 0.001);
+		EXPECT_NEAR(actual[3], expected[3], 0.001);
+		EXPECT_NEAR(actual[4], expected[4], 0.001);
+		EXPECT_NEAR(actual[5], expected[5], 0.001);
+		EXPECT_NEAR(actual[6], expected[6], 0.001);
+		EXPECT_NEAR(actual[7], expected[7], 0.001);
+		EXPECT_NEAR(actual[8], expected[8], 0.001);
 	}
 }
