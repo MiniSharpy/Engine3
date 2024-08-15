@@ -4,10 +4,34 @@
 #include <array>
 #include <concepts>
 #include <cstddef>
-#include <numeric>
+#include <print>
+#include <tuple>
+#include <utility>
 
 namespace Engine3
 {
+	/// Calls the passed function, passing the current index as a parameter.
+	///	Indexing starts from 0, and counts up to \p Count - 1.
+	/// @tparam T The type of the indices.
+	/// @tparam Count The number of indices.
+	/// @param function The function to be called, passing the current index.
+	template <std::integral T, T Count, class Function>
+	constexpr void UnrollLoop(Function&& function)
+	{
+		// https://stackoverflow.com/a/46873787
+		auto unrollIntegerSequence = []
+			<T... Indices>
+		(std::integer_sequence<T, Indices...>, Function&& function)
+		{
+			(function(std::integral_constant<T, Indices>{}), ...);
+		};
+
+		unrollIntegerSequence(std::make_integer_sequence<T, Count>{}, std::forward<Function>(function));
+	}
+
+	template <class T>
+	concept Number = std::is_floating_point_v<T> || std::is_integral_v<T>;
+
 	template <std::size_t a, std::size_t b>
 	concept IsSquare = (a == b);
 
@@ -89,6 +113,26 @@ namespace Engine3
 			matrix(2, 0) = x * z * (1 - cos(radians)) + y * sin(radians);
 			matrix(2, 1) = y * z * (1 - cos(radians)) - x * sin(radians);
 			matrix(2, 2) = z * z * (1 - cos(radians)) + cos(radians);
+
+			return matrix;
+		}
+
+		/// Constructs a matrix that can be used to scale an object of the same dimension.
+		///	@tparam Args A number type that may implicitly be converted to \p T.
+		/// @param scale Scaling along the corresponding axis.
+		template <Number ...Args>
+		static constexpr Matrix Scaling(Args... scale) requires
+			IsSquare<RowSize, ColumnSize> && (sizeof...(Args) == RowSize)
+		{
+			// It probably would've been simpler to just specialise for 2x2, 3x3, and 4x4...
+			Matrix matrix{};
+
+			// std::get needs a constant value for the templated index.
+			UnrollLoop<std::size_t, RowSize>([&matrix, ... args = std::forward<Args>(scale)](auto i)
+			{
+				// Pack indexing would be nicer if it was well supported.
+				matrix[(RowSize + 1) * i] = std::get<i>(std::forward_as_tuple(args...));
+			});
 
 			return matrix;
 		}

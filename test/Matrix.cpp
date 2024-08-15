@@ -461,4 +461,43 @@ namespace Engine3
 		EXPECT_NEAR(actual[7], expected[7], 0.001);
 		EXPECT_NEAR(actual[8], expected[8], 0.001);
 	}
+
+	TEST(Matrix2x2FloatTest, Scaling)
+	{
+		Matrix<2> actual = Matrix<2>::Scaling(2, 2);
+		Matrix<2> expected
+		{
+			2, 0,
+			0, 2
+		};
+
+		ASSERT_EQ(actual, expected);
+	}
+
+	TEST(Matrix3x3FloatTest, Scaling)
+	{
+		Matrix<3> actual = Matrix<3>::Scaling(2, 2, 2);
+		Matrix<3> expected
+		{
+			2, 0, 0,
+			0, 2, 0,
+			0, 0, 2
+		};
+
+		ASSERT_EQ(actual, expected);
+	}
+
+	TEST(Matrix4x4FloatTest, Scaling)
+	{
+		Matrix<4> actual = Matrix<4>::Scaling(2, 2, 2, 2);
+		Matrix<4> expected
+		{
+			2, 0, 0, 0,
+			0, 2, 0, 0,
+			0, 0, 2, 0,
+			0, 0, 0, 2
+		};
+
+		ASSERT_EQ(actual, expected);
+	}
 }
