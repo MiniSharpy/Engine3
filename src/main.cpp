@@ -9,8 +9,6 @@ int main(int argc, char* argv[])
 {
 	using namespace Engine3;
 
-	Matrix<3>::Scaling(1, 1, 1);
-
 	Engine engine;
 	if (!engine) { return -1; }
 

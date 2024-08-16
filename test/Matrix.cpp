@@ -405,7 +405,7 @@ namespace Engine3
 
 	TEST(Matrix3x3FloatTest, RotationX)
 	{
-		Matrix actual{Matrix<3>::RotationX(DegreesToRadians(-22.f))};
+		Matrix actual{Matrix<3>::RotationAboutX(DegreesToRadians(-22.f))};
 		Matrix<3> expected
 		{
 			1.f, 0.f, 0.f,
@@ -417,7 +417,7 @@ namespace Engine3
 
 	TEST(Matrix3x3FloatTest, RotationY)
 	{
-		Matrix actual{Matrix<3>::RotationY(DegreesToRadians(30.f))};
+		Matrix actual{Matrix<3>::RotationAboutY(DegreesToRadians(30.f))};
 		Matrix<3> expected
 		{
 			0.8660254038f, 0, -0.5f,
@@ -429,7 +429,7 @@ namespace Engine3
 
 	TEST(Matrix3x3FloatTest, RotationZ)
 	{
-		Matrix actual{Matrix<3>::RotationZ(DegreesToRadians(45.f))};
+		Matrix actual{Matrix<3>::RotationAboutZ(DegreesToRadians(45.f))};
 		Matrix<3> expected
 		{
 			0.707106782f, 0.7071067812f, 0,
@@ -439,10 +439,21 @@ namespace Engine3
 		ASSERT_EQ(expected, actual);
 	}
 
+	TEST(Matrix2x2FloatTest, RotationZ)
+	{
+		Matrix actual{Matrix<2>::RotationAboutZ(DegreesToRadians(45.f))};
+		Matrix<2> expected
+		{
+			0.707106782f, 0.7071067812f,
+			-0.7071067812f, 0.7071067812f
+		};
+		ASSERT_EQ(expected, actual);
+	}
+
 	TEST(Matrix3x3FloatTest, RotationArbitraryAxis)
 	{
 		Vector<3> axis{0.267f, -0.535f, 0.802f};
-		Matrix<3> actual{Matrix<3>::Rotation(axis, DegreesToRadians(-15.f))};
+		Matrix<3> actual{Matrix<3>::RotationAboutAxis(axis, DegreesToRadians(-15.f))};
 
 		Matrix<3> expected
 		{
@@ -462,9 +473,9 @@ namespace Engine3
 		EXPECT_NEAR(actual[8], expected[8], 0.001);
 	}
 
-	TEST(Matrix2x2FloatTest, Scaling)
+	TEST(Matrix2x2FloatTest, ScalingCardinal)
 	{
-		Matrix<2> actual = Matrix<2>::Scaling(2, 2);
+		Matrix<2> actual = Matrix<2>::ScalingAlongCardinalAxes(2, 2);
 		Matrix<2> expected
 		{
 			2, 0,
@@ -474,9 +485,9 @@ namespace Engine3
 		ASSERT_EQ(actual, expected);
 	}
 
-	TEST(Matrix3x3FloatTest, Scaling)
+	TEST(Matrix3x3FloatTest, ScalingCardinal)
 	{
-		Matrix<3> actual = Matrix<3>::Scaling(2, 2, 2);
+		Matrix<3> actual = Matrix<3>::ScalingAlongCardinalAxes(2, 2, 2);
 		Matrix<3> expected
 		{
 			2, 0, 0,
@@ -487,9 +498,9 @@ namespace Engine3
 		ASSERT_EQ(actual, expected);
 	}
 
-	TEST(Matrix4x4FloatTest, Scaling)
+	TEST(Matrix4x4FloatTest, ScalingCardinal)
 	{
-		Matrix<4> actual = Matrix<4>::Scaling(2, 2, 2, 2);
+		Matrix<4> actual = Matrix<4>::ScalingAlongCardinalAxes(2, 2, 2, 2);
 		Matrix<4> expected
 		{
 			2, 0, 0, 0,
@@ -499,5 +510,37 @@ namespace Engine3
 		};
 
 		ASSERT_EQ(actual, expected);
+	}
+
+	TEST(Matrix2x2FloatTest, ScalingAxis)
+	{
+		Vector<2> axis = Vector<2>::Up();
+		Vector<2> actual = Vector<2>{0, 1} * Matrix<2>::ScalingAlongAxis(axis, 2);
+		Vector<2> expected{0, 2};
+
+		ASSERT_EQ(actual, expected);
+	}
+
+	TEST(Matrix3x3FloatTest, ScalingAxis)
+	{
+		Vector<3> axis{0.267f, -0.535f, 0.802f};
+		axis.Normalise();
+		Matrix<3> actual = Matrix<3>::ScalingAlongAxis(axis, 5);
+		Matrix<3> expected
+		{
+			1.285f, -0.571f, 0.857f,
+			-0.571f, 2.145f, -1.716f,
+			0.857f, -1.716f, 3.573f
+		};
+
+		EXPECT_NEAR(actual[0], expected[0], 0.01);
+		EXPECT_NEAR(actual[1], expected[1], 0.01);
+		EXPECT_NEAR(actual[2], expected[2], 0.01);
+		EXPECT_NEAR(actual[3], expected[3], 0.01);
+		EXPECT_NEAR(actual[4], expected[4], 0.01);
+		EXPECT_NEAR(actual[5], expected[5], 0.01);
+		EXPECT_NEAR(actual[6], expected[6], 0.01);
+		EXPECT_NEAR(actual[7], expected[7], 0.01);
+		EXPECT_NEAR(actual[8], expected[8], 0.01);
 	}
 }

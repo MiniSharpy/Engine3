@@ -43,8 +43,7 @@ namespace Engine3
 	/// @tparam RowSize The vertical size of the matrix.
 	/// @tparam ColumnSize The horizontal size of the matrix.
 	/// @tparam T The type of each element stored in the matrix.
-	template <std::size_t RowSize, std::size_t ColumnSize = RowSize, typename T = float>
-		requires std::integral<T> || std::floating_point<T>
+	template <std::size_t RowSize, std::size_t ColumnSize = RowSize, Number T = float>
 	struct Matrix : std::array<T, RowSize * ColumnSize>
 	{
 		/// @return A square matrix that's zeroed except for its diagonal elements, which are all one.
@@ -56,7 +55,7 @@ namespace Engine3
 			return identityMatrix;
 		}
 
-		static constexpr Matrix RotationX(T radians) requires
+		static constexpr Matrix RotationAboutX(T radians) requires
 			IsSquare<RowSize, ColumnSize> && IsValidDimensions<RowSize, 3> && std::floating_point<T>
 		{
 			Matrix matrix{IdentityMatrix()};
@@ -68,7 +67,7 @@ namespace Engine3
 			return matrix;
 		}
 
-		static constexpr Matrix RotationY(T radians) requires
+		static constexpr Matrix RotationAboutY(T radians) requires
 			IsSquare<RowSize, ColumnSize> && IsValidDimensions<RowSize, 3> && std::floating_point<T>
 		{
 			Matrix matrix{IdentityMatrix()};
@@ -80,8 +79,8 @@ namespace Engine3
 			return matrix;
 		}
 
-		static constexpr Matrix RotationZ(T radians) requires // TODO: 2D rotations are on the Z axis.
-			IsSquare<RowSize, ColumnSize> && IsValidDimensions<RowSize, 3> && std::floating_point<T>
+		static constexpr Matrix RotationAboutZ(T radians) requires
+			IsSquare<RowSize, ColumnSize> && IsValidDimensions<RowSize, 2, 3> && std::floating_point<T>
 		{
 			Matrix matrix{IdentityMatrix()};
 			matrix(0, 0) = std::cos(radians);
@@ -94,7 +93,7 @@ namespace Engine3
 
 		/// @param axis The axis to rotate about.
 		/// @param radians The number of degrees in radians to rotate about \p axis.
-		static constexpr Matrix Rotation(Vector<3, T> axis, T radians) requires
+		static constexpr Matrix RotationAboutAxis(Vector<3, T> axis, T radians) requires
 			IsSquare<RowSize, ColumnSize> && IsValidDimensions<RowSize, 3> && std::floating_point<T>
 		{
 			// Some convenience
@@ -117,11 +116,11 @@ namespace Engine3
 			return matrix;
 		}
 
-		/// Constructs a matrix that can be used to scale an object of the same dimension.
+		/// Constructs a matrix that can be used to scale an object in the same dimension.
 		///	@tparam Args A number type that may implicitly be converted to \p T.
 		/// @param scale Scaling along the corresponding axis.
 		template <Number ...Args>
-		static constexpr Matrix Scaling(Args... scale) requires
+		static constexpr Matrix ScalingAlongCardinalAxes(Args... scale) requires
 			IsSquare<RowSize, ColumnSize> && (sizeof...(Args) == RowSize)
 		{
 			// It probably would've been simpler to just specialise for 2x2, 3x3, and 4x4...
@@ -130,9 +129,54 @@ namespace Engine3
 			// std::get needs a constant value for the templated index.
 			UnrollLoop<std::size_t, RowSize>([&matrix, ... args = std::forward<Args>(scale)](auto i)
 			{
-				// Pack indexing would be nicer if it was well supported.
+				// Pack indexing would be nicer if it was supported.
 				matrix[(RowSize + 1) * i] = std::get<i>(std::forward_as_tuple(args...));
 			});
+
+			return matrix;
+		}
+
+		static constexpr Matrix ScalingAlongAxis(const Vector<RowSize>& axis, T k) requires
+			IsSquare<RowSize, ColumnSize> && IsValidDimensions<RowSize, 2, 3>
+		{
+			assert(axis.IsUnit());
+
+			// Some convenience
+			using namespace std;
+			const T x = axis.X();
+			const T y = axis.Y();
+
+			Matrix matrix; // TODO: Use identity matrix for a 4x4.
+
+			// Handle shared.
+			matrix(0, 0) = 1 + (k - 1) * x * x;
+			matrix(0, 1) = (k - 1) * x * y;
+			matrix(1, 0) = (k - 1) * x * y;
+			matrix(1, 1) = 1 + (k - 1) * y * y;
+
+			// Handle 3x3 matrix.
+			if constexpr (RowSize > 2)
+			{
+				const T z = axis.Z();
+				matrix(0, 2) = (k - 1) * x * z;
+				matrix(1, 2) = (k - 1) * y * z;
+				matrix(2, 0) = (k - 1) * x * z;
+				matrix(2, 1) = (k - 1) * y * z;
+				matrix(2, 2) = 1 + (k - 1) * z * z;
+			}
+
+			// Mostly did this just because I could. Really, the other method is better for a 4x4 matrix
+			// because we're only using the extra dimension for translation and would want it left untouched.
+			// Though I could just set matrix to identity and do a constexpr if to return out early.
+			//UnrollLoop<std::size_t, matrix.size()>([&matrix, &axis, k](auto i)
+			//{
+			//	constexpr std::size_t row = i / ColumnSize;
+			//	constexpr std::size_t column = i % ColumnSize;
+			//	constexpr bool isDiagonal = i == (RowSize + 1) * row;
+			//	const T current = (k - 1) * std::get<column>(axis) * std::get<row>(axis);
+			//	if constexpr (isDiagonal) { matrix[i] = 1 + current; }
+			//	else { matrix[i] = current; }
+			//});
 
 			return matrix;
 		}
