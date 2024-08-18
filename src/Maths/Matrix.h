@@ -181,6 +181,39 @@ namespace Engine3
 			return matrix;
 		}
 
+		static constexpr Matrix ProjectionOntoAxis(const Vector<RowSize>& axis) requires
+			IsSquare<RowSize, ColumnSize> && IsValidDimensions<RowSize, 2, 3>
+		{
+			// akin to ScalingAlongAxis(axis, 0)
+			assert(axis.IsUnit());
+
+			// Some convenience
+			using namespace std;
+			const T x = axis.X();
+			const T y = axis.Y();
+
+			Matrix matrix; // TODO: Use identity matrix for a 4x4.
+
+			// Handle shared.
+			matrix(0, 0) = 1 - x * x;
+			matrix(0, 1) = -x * y;
+			matrix(1, 0) = -x * y;
+			matrix(1, 1) = 1 - y * y;
+
+			// Handle 3x3 matrix.
+			if constexpr (RowSize > 2)
+			{
+				const T z = axis.Z();
+				matrix(0, 2) = -x * z;
+				matrix(1, 2) = -y * z;
+				matrix(2, 0) = -x * z;
+				matrix(2, 1) = -y * z;
+				matrix(2, 2) = 1 - z * z;
+			}
+
+			return matrix;
+		}
+
 		/* Methods */
 		/// Flips a square matrix diagonally, in place. TODO: Should the function return a reference to this to allow chaining methods?
 		void Transpose() requires (RowSize == ColumnSize) { (*this) = this->Transposed(); }
