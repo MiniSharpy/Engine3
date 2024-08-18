@@ -544,7 +544,20 @@ namespace Engine3
 		EXPECT_NEAR(actual[8], expected[8], 0.01);
 	}
 
-	TEST(Matrix3x3FloatTest, ProjectAxis)
+	TEST(Matrix2x2FloatTest, OrthographicProjectAxis)
+	{
+		Vector<2> axis{0.267f, -0.535f};
+		axis.Normalise();
+		Matrix<2> actual = Matrix<2>::ProjectionOntoAxis(axis);
+		Matrix<2> expected = Matrix<2>::ScalingAlongAxis(axis, 0);
+
+		EXPECT_NEAR(actual[0], expected[0], 0.01);
+		EXPECT_NEAR(actual[1], expected[1], 0.01);
+		EXPECT_NEAR(actual[2], expected[2], 0.01);
+		EXPECT_NEAR(actual[3], expected[3], 0.01);
+	}
+
+	TEST(Matrix3x3FloatTest, OrthographicProjectAxis)
 	{
 		Vector<3> axis{0.267f, -0.535f, 0.802f};
 		axis.Normalise();

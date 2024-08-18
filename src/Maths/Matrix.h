@@ -181,6 +181,7 @@ namespace Engine3
 			return matrix;
 		}
 
+		/// @return A matrix that when multiplied by results in an orthographic projection onto \p axis.
 		static constexpr Matrix ProjectionOntoAxis(const Vector<RowSize>& axis) requires
 			IsSquare<RowSize, ColumnSize> && IsValidDimensions<RowSize, 2, 3>
 		{
