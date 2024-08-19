@@ -98,7 +98,7 @@ namespace Engine3
 
 			/// @param row The row to return, indexed from zero/
 			/// @return A row vector.
-			constexpr Vector<ColumnSize> GetRow(std::size_t row) const
+			constexpr Vector<ColumnSize, T> GetRow(std::size_t row) const
 			{
 				Vector<ColumnSize, T> vector;
 				for (std::size_t column = 0; column < ColumnSize; ++column)
@@ -110,7 +110,7 @@ namespace Engine3
 
 			/// @param column The column to return, indexed from zero.
 			/// @return A column vector.
-			constexpr Vector<RowSize> GetColumn(std::size_t column) const
+			constexpr Vector<RowSize, T> GetColumn(std::size_t column) const
 			{
 				Vector<RowSize, T> vector;
 				for (std::size_t row = 0; row < RowSize; ++row)
@@ -283,7 +283,7 @@ namespace Engine3
 			return matrix;
 		}
 
-		static constexpr Matrix ScalingAlongAxis(const Vector<2>& axis, T k)
+		static constexpr Matrix ScalingAlongAxis(const Vector<2, T>& axis, T k)
 		{
 			assert(axis.IsUnit());
 
@@ -320,7 +320,7 @@ namespace Engine3
 		}
 
 		/// @return A matrix that when multiplied by results in an orthographic projection onto \p axis.
-		static constexpr Matrix ProjectionOntoAxis(const Vector<2>& axis)
+		static constexpr Matrix ProjectionOntoAxis(const Vector<2, T>& axis)
 		{
 			// akin to ScalingAlongAxis(axis, 0)
 			assert(axis.IsUnit());
@@ -384,10 +384,12 @@ namespace Engine3
 			return matrix;
 		}
 
-		/// @param axis The axis to rotate about.
+		/// @param axis The axis to rotate about as a unit vector.
 		/// @param radians The number of degrees in radians to rotate about \p axis.
 		static constexpr Matrix RotationAboutAxis(Vector<3, T> axis, T radians) requires std::floating_point<T>
 		{
+			assert(axis.IsUnit());
+
 			// Some convenience
 			using namespace std;
 			const T x = axis.X();
@@ -408,7 +410,11 @@ namespace Engine3
 			return matrix;
 		}
 
-		static constexpr Matrix ScalingAlongAxis(const Vector<3>& axis, T k)
+		/// 
+		/// @param axis A unit vector.
+		/// @param k A scale factor.
+		/// @return A matrix that when multiplied by resulting in a scaling of \p k along \p axis.
+		static constexpr Matrix ScalingAlongAxis(const Vector<3, T>& axis, T k)
 		{
 			assert(axis.IsUnit());
 
@@ -459,8 +465,9 @@ namespace Engine3
 			};
 		}
 
+		/// @param axis A unit vector
 		/// @return A matrix that when multiplied by results in an orthographic projection onto \p axis.
-		static constexpr Matrix ProjectionOntoPlane(const Vector<3>& axis)
+		static constexpr Matrix ProjectionOntoPlane(const Vector<3, T>& axis)
 		{
 			// akin to ScalingAlongAxis(axis, 0)
 			assert(axis.IsUnit());
