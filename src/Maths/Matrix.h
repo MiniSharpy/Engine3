@@ -301,8 +301,26 @@ namespace Engine3
 			return matrix;
 		}
 
+		static constexpr Matrix ProjectionOntoAxisX()
+		{
+			return
+			{
+				1, 0,
+				0, 0
+			};
+		}
+
+		static constexpr Matrix ProjectionOntoAxisY()
+		{
+			return
+			{
+				0, 0,
+				0, 1
+			};
+		}
+
 		/// @return A matrix that when multiplied by results in an orthographic projection onto \p axis.
-		static constexpr Matrix ProjectionOntoLine(const Vector<2>& axis)
+		static constexpr Matrix ProjectionOntoAxis(const Vector<2>& axis)
 		{
 			// akin to ScalingAlongAxis(axis, 0)
 			assert(axis.IsUnit());
@@ -412,6 +430,33 @@ namespace Engine3
 			matrix(2, 2) = 1 + (k - 1) * z * z;
 
 			return matrix;
+		}
+
+		static constexpr Matrix ProjectionOntoPlaneXY()
+		{
+			return {
+				1, 0, 0,
+				0, 1, 0,
+				0, 0, 0
+			};
+		}
+
+		static constexpr Matrix ProjectionOntoPlaneXZ()
+		{
+			return {
+				1, 0, 0,
+				0, 0, 0,
+				0, 0, 1
+			};
+		}
+
+		static constexpr Matrix ProjectionOntoPlaneYZ()
+		{
+			return {
+				0, 0, 0,
+				0, 1, 0,
+				0, 0, 1
+			};
 		}
 
 		/// @return A matrix that when multiplied by results in an orthographic projection onto \p axis.
