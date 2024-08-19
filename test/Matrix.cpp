@@ -441,7 +441,7 @@ namespace Engine3
 
 	TEST(Matrix2x2FloatTest, RotationZ)
 	{
-		Matrix actual{Matrix<2>::RotationAboutZ(DegreesToRadians(45.f))};
+		Matrix actual{Matrix<2>::Rotation(DegreesToRadians(45.f))};
 		Matrix<2> expected
 		{
 			0.707106782f, 0.7071067812f,
@@ -548,7 +548,7 @@ namespace Engine3
 	{
 		Vector<2> axis{0.267f, -0.535f};
 		axis.Normalise();
-		Matrix<2> actual = Matrix<2>::ProjectionOntoAxis(axis);
+		Matrix<2> actual = Matrix<2>::ProjectionOntoLine(axis);
 		Matrix<2> expected = Matrix<2>::ScalingAlongAxis(axis, 0);
 
 		EXPECT_NEAR(actual[0], expected[0], 0.01);
@@ -561,7 +561,7 @@ namespace Engine3
 	{
 		Vector<3> axis{0.267f, -0.535f, 0.802f};
 		axis.Normalise();
-		Matrix<3> actual = Matrix<3>::ProjectionOntoAxis(axis);
+		Matrix<3> actual = Matrix<3>::ProjectionOntoPlane(axis);
 		Matrix<3> expected = Matrix<3>::ScalingAlongAxis(axis, 0);
 
 		EXPECT_NEAR(actual[0], expected[0], 0.01);
