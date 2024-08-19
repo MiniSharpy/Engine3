@@ -547,7 +547,7 @@ namespace Engine3
 	TEST(Matrix2x2FloatTest, OrthographicProjectAxisX)
 	{
 		Matrix<2> actual = Matrix<2>::ProjectionOntoAxisX();
-		Matrix<2> expected = {1, 0, 0, 0};
+		Matrix<2> expected{1, 0, 0, 0};
 
 		ASSERT_EQ(actual, expected);
 	}
@@ -555,17 +555,17 @@ namespace Engine3
 	TEST(Matrix2x2FloatTest, OrthographicProjectAxisY)
 	{
 		Matrix<2> actual = Matrix<2>::ProjectionOntoAxisY();
-		Matrix<2> expected = {0, 0, 0, 1};
+		Matrix<2> expected{0, 0, 0, 1};
 
 		ASSERT_EQ(actual, expected);
 	}
 
 	TEST(Matrix2x2FloatTest, OrthographicProjectAxis)
 	{
-		Vector<2> axis{0.267f, -0.535f};
+		Vector<2> axis{0.7f, -0.7f};
 		axis.Normalise();
 		Matrix<2> actual = Matrix<2>::ProjectionOntoAxis(axis);
-		Matrix<2> expected = Matrix<2>::ScalingAlongAxis(axis, 0);
+		Matrix<2> expected{0.5f, 0.5f, 0.5f, 0.5f};
 
 		EXPECT_NEAR(actual[0], expected[0], 0.01);
 		EXPECT_NEAR(actual[1], expected[1], 0.01);
@@ -617,7 +617,13 @@ namespace Engine3
 		Vector<3> axis{0.267f, -0.535f, 0.802f};
 		axis.Normalise();
 		Matrix<3> actual = Matrix<3>::ProjectionOntoPlane(axis);
-		Matrix<3> expected = Matrix<3>::ScalingAlongAxis(axis, 0);
+		Matrix<3> expected =
+		{
+			0.928711f, 0.142845f, -0.214134f,
+			0.142845f, 0.713775f, 0.42907f,
+			-0.214134f, 0.42907f, 0.356796f
+
+		};
 
 		EXPECT_NEAR(actual[0], expected[0], 0.01);
 		EXPECT_NEAR(actual[1], expected[1], 0.01);
