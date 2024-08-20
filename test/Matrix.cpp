@@ -453,6 +453,7 @@ namespace Engine3
 	TEST(Matrix3x3FloatTest, RotationArbitraryAxis)
 	{
 		Vector<3> axis{0.267f, -0.535f, 0.802f};
+		axis.Normalise();
 		Matrix<3> actual{Matrix<3>::RotationAboutAxis(axis, DegreesToRadians(-15.f))};
 
 		Matrix<3> expected

@@ -44,7 +44,7 @@ namespace Engine3
 	namespace Detail
 	{
 		template <std::size_t RowSize, std::size_t ColumnSize, Number T, class Derived>
-		struct MatrixBase
+		struct MatrixBase : std::array<T, RowSize * ColumnSize>
 		{
 			/// @return A square matrix that's zeroed except for its diagonal elements, which are all one.
 			static constexpr Derived IdentityMatrix() requires (IsSquare<RowSize, ColumnSize>)
@@ -260,8 +260,7 @@ namespace Engine3
 	/// @tparam ColumnSize The horizontal size of the matrix.
 	/// @tparam T The type of each element stored in the matrix.
 	template <std::size_t RowSize, std::size_t ColumnSize = RowSize, Number T = float>
-	struct Matrix final : std::array<T, RowSize * ColumnSize>,
-	                      Detail::MatrixBase<RowSize, ColumnSize, T, Matrix<RowSize, ColumnSize, T>> {};
+	struct Matrix final : Detail::MatrixBase<RowSize, ColumnSize, T, Matrix<RowSize, ColumnSize, T>> {};
 
 	// Row first, then column to follow normal matrix conventions.
 	/// Matrix with its elements stored in row-major order.
@@ -269,8 +268,7 @@ namespace Engine3
 	/// @tparam ColumnSize The horizontal size of the matrix.
 	/// @tparam T The type of each element stored in the matrix.
 	template <Number T>
-	struct Matrix<2, 2, T> final : std::array<T, 4>,
-	                               Detail::MatrixBase<2, 2, T, Matrix<2, 2, T>>
+	struct Matrix<2, 2, T> final : Detail::MatrixBase<2, 2, T, Matrix<2, 2, T>>
 	{
 		static constexpr Matrix Rotation(T radians) requires std::floating_point<T>
 		{
@@ -348,8 +346,7 @@ namespace Engine3
 	/// @tparam ColumnSize The horizontal size of the matrix.
 	/// @tparam T The type of each element stored in the matrix.
 	template <Number T>
-	struct Matrix<3, 3, T> final : std::array<T, 9>,
-	                               Detail::MatrixBase<3, 3, T, Matrix<3, 3, T>>
+	struct Matrix<3, 3, T> final : Detail::MatrixBase<3, 3, T, Matrix<3, 3, T>>
 	{
 		static constexpr Matrix RotationAboutX(T radians) requires std::floating_point<T>
 		{
