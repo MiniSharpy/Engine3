@@ -55,26 +55,6 @@ namespace Engine3
 				return identityMatrix;
 			}
 
-			/// Constructs a matrix that can be used to scale an object in the same dimension.
-			///	@tparam Args A number type that may implicitly be converted to \p T.
-			/// @param scale Scaling along the corresponding axis.
-			template <Number ...Args>
-			static constexpr Derived ScalingAlongCardinalAxes(Args... scale) requires
-				IsSquare<RowSize, ColumnSize> && (sizeof...(Args) == RowSize)
-			{
-				// It probably would've been simpler to just specialise for 2x2, 3x3, and 4x4...
-				Derived matrix{};
-
-				// std::get needs a constant value for the templated index.
-				UnrollLoop<std::size_t, RowSize>([&matrix, ... args = std::forward<Args>(scale)](auto i)
-				{
-					// Pack indexing would be nicer if it was supported.
-					matrix[(RowSize + 1) * i] = std::get<i>(std::forward_as_tuple(args...));
-				});
-
-				return matrix;
-			}
-
 			/* Methods */
 			/// Flips a square matrix diagonally, in place. TODO: Should the function return a reference to this to allow chaining methods?
 			void Transpose() requires (RowSize == ColumnSize) { static_cast<Derived&>(*this) = this->Transposed(); }
@@ -281,6 +261,14 @@ namespace Engine3
 			return matrix;
 		}
 
+		static constexpr Matrix ScalingAlongCardinalAxes(T x, T y)
+		{
+			return {
+				x, 0,
+				0, y
+			};
+		}
+
 		static constexpr Matrix ScalingAlongAxis(const Vector<2, T>& axis, T k)
 		{
 			assert(axis.IsUnit());
@@ -407,6 +395,15 @@ namespace Engine3
 			return matrix;
 		}
 
+		static constexpr Matrix ScalingAlongCardinalAxes(T x, T y, T z)
+		{
+			return {
+				x, 0, 0,
+				0, y, 0,
+				0, 0, z
+			};
+		}
+
 		/// 
 		/// @param axis A unit vector.
 		/// @param k A scale factor.
@@ -487,6 +484,25 @@ namespace Engine3
 			matrix(2, 2) = 1 - z * z;
 
 			return matrix;
+		}
+	};
+
+	// Row first, then column to follow normal matrix conventions.
+	/// Matrix with its elements stored in row-major order.
+	/// @tparam RowSize The vertical size of the matrix.
+	/// @tparam ColumnSize The horizontal size of the matrix.
+	/// @tparam T The type of each element stored in the matrix.
+	template <Number T>
+	struct Matrix<4, 4, T> final : Detail::MatrixBase<4, 4, T, Matrix<4, 4, T>>
+	{
+		static constexpr Matrix ScalingAlongCardinalAxes(T x, T y, T z, T w)
+		{
+			return {
+				x, 0, 0, 0,
+				0, y, 0, 0,
+				0, 0, z, 0,
+				0, 0, 0, w
+			};
 		}
 	};
 }
