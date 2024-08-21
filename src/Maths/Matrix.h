@@ -35,9 +35,6 @@ namespace Engine3
 	template <std::size_t a, std::size_t b>
 	concept IsSquare = (a == b);
 
-	template <std::size_t Size, std::size_t ... ValidSizes>
-	concept IsValidDimensions = ((Size == ValidSizes) || ...);
-
 	template <std::size_t RowSize, std::size_t ColumnSize, Number T>
 	struct Matrix;
 
@@ -80,11 +77,9 @@ namespace Engine3
 			/// @return A row vector.
 			constexpr Vector<ColumnSize, T> GetRow(std::size_t row) const
 			{
+				assert(row < RowSize);
 				Vector<ColumnSize, T> vector;
-				for (std::size_t column = 0; column < ColumnSize; ++column)
-				{
-					vector[column] = static_cast<const Derived&>(*this)(row, column);
-				}
+				for (std::size_t column = 0; column < ColumnSize; ++column) { vector[column] = (*this)(row, column); }
 				return vector;
 			}
 
@@ -92,11 +87,9 @@ namespace Engine3
 			/// @return A column vector.
 			constexpr Vector<RowSize, T> GetColumn(std::size_t column) const
 			{
+				assert(column < ColumnSize);
 				Vector<RowSize, T> vector;
-				for (std::size_t row = 0; row < RowSize; ++row)
-				{
-					vector[row] = static_cast<const Derived&>(*this)(row, column);
-				}
+				for (std::size_t row = 0; row < RowSize; ++row) { vector[row] = (*this)(row, column); }
 				return vector;
 			}
 
@@ -108,7 +101,9 @@ namespace Engine3
 			/// @return The element at \p row and \p column.
 			T& operator()(std::size_t row, std::size_t column)
 			{
-				return static_cast<Derived&>(*this)[ColumnSize * row + column];
+				assert(row < RowSize);
+				assert(column < ColumnSize);
+				return (*this)[ColumnSize * row + column];
 			}
 
 			/// @param row The row to retrieve the element, indexed from zero.
@@ -116,7 +111,9 @@ namespace Engine3
 			/// @return The element at \p row and \p column.
 			const T& operator()(std::size_t row, std::size_t column) const
 			{
-				return static_cast<const Derived&>(*this)[ColumnSize * row + column];
+				assert(row < RowSize);
+				assert(column < ColumnSize);
+				return (*this)[ColumnSize * row + column];
 			}
 
 			// Scalar multiplications.
@@ -124,10 +121,7 @@ namespace Engine3
 			/// @return A reference to the now altered matrix for further operations.
 			constexpr Derived& operator*=(T rhs)
 			{
-				for (std::size_t i = 0; i < static_cast<Derived&>(*this).size(); ++i)
-				{
-					static_cast<Derived&>(*this)[i] *= rhs;
-				}
+				for (std::size_t i = 0; i < this->size(); ++i) { (*this)[i] *= rhs; }
 				return *static_cast<Derived*>(this);
 			}
 
@@ -141,10 +135,7 @@ namespace Engine3
 			/// @return A reference to the now altered matrix for further operations.
 			constexpr Derived& operator/=(T rhs)
 			{
-				for (std::size_t i = 0; i < static_cast<Derived&>(*this).size(); ++i)
-				{
-					static_cast<Derived&>(*this)[i] /= rhs;
-				}
+				for (std::size_t i = 0; i < this->size(); ++i) { (*this)[i] /= rhs; }
 				return static_cast<Derived&>(*this);
 			}
 
@@ -250,6 +241,7 @@ namespace Engine3
 	template <Number T>
 	struct Matrix<2, 2, T> final : Detail::MatrixBase<2, 2, T, Matrix<2, 2, T>>
 	{
+		/// Rotation matrix around the Z-Axis.
 		static constexpr Matrix Rotation(T radians) requires std::floating_point<T>
 		{
 			Matrix matrix{Matrix::IdentityMatrix()};
@@ -274,7 +266,6 @@ namespace Engine3
 			assert(axis.IsUnit());
 
 			// Some convenience
-			using namespace std;
 			const T x = axis.X();
 			const T y = axis.Y();
 
@@ -312,7 +303,6 @@ namespace Engine3
 			assert(axis.IsUnit());
 
 			// Some convenience
-			using namespace std;
 			const T x = axis.X();
 			const T y = axis.Y();
 
@@ -325,6 +315,22 @@ namespace Engine3
 			matrix(1, 1) = 1 - y * y;
 
 			return matrix;
+		}
+
+		static constexpr Matrix Reflection(const Vector<2, T>& axis)
+		{
+			// akin to ScalingAlongAxis(axis, -1)
+			assert(axis.IsUnit());
+
+			// Some convenience
+			const T x = axis.X();
+			const T y = axis.Y();
+
+			return
+			{
+				1 - 2 * x * x, -2 * x * y,
+				-2 * x * y, 1 - 2 * y * y
+			};
 		}
 	};
 
@@ -371,7 +377,7 @@ namespace Engine3
 
 		/// @param axis The axis to rotate about as a unit vector.
 		/// @param radians The number of degrees in radians to rotate about \p axis.
-		static constexpr Matrix RotationAboutAxis(Vector<3, T> axis, T radians) requires std::floating_point<T>
+		static constexpr Matrix RotationAboutAxis(const Vector<3, T>& axis, T radians) requires std::floating_point<T>
 		{
 			assert(axis.IsUnit());
 
@@ -484,6 +490,24 @@ namespace Engine3
 			matrix(2, 2) = 1 - z * z;
 
 			return matrix;
+		}
+
+		static constexpr Matrix Reflection(const Vector<3, T>& axis)
+		{
+			// akin to ScalingAlongAxis(axis, -1)
+			assert(axis.IsUnit());
+
+			// Some convenience
+			const T x = axis.X();
+			const T y = axis.Y();
+			const T z = axis.Z();
+
+			return
+			{
+				1 - 2 * x * x, -2 * x * y, -2 * x * z,
+				-2 * x * y, 1 - 2 * y * y, -2 * y * z,
+				-2 * x * z, -2 * y * z, 1 - 2 * z * z
+			};
 		}
 	};
 

@@ -5,7 +5,7 @@
 namespace Engine3
 {
 	/// Primarily a test to validate row-major order is kept.
-	TEST(MatrixTest, FunctionCallOperatorSquare)
+	TEST(MatrixSquareTest, FunctionCallOperator)
 	{
 		Matrix<3> actual{};
 		actual(2, 1) = 5;
@@ -19,7 +19,7 @@ namespace Engine3
 		ASSERT_EQ(expected, actual);
 	}
 
-	TEST(MatrixTest, FunctionCallOperatorNonSquare)
+	TEST(MatrixNonSquareTest, FunctionCallOperator)
 	{
 		Matrix<3, 4> actual{};
 		actual(2, 1) = 5;
@@ -33,7 +33,7 @@ namespace Engine3
 		ASSERT_EQ(expected, actual);
 	}
 
-	TEST(MatrixTest, FunctionCallOperatorNonSquareOtherAspectRatiio)
+	TEST(MatrixNonSquareTest, FunctionCallOperatorOtherAspectRatiio)
 	{
 		Matrix<4, 3> actual{};
 		actual(2, 1) = 5;
@@ -48,7 +48,7 @@ namespace Engine3
 		ASSERT_EQ(expected, actual);
 	}
 
-	TEST(MatrixTest, IdentityMatrix3)
+	TEST(Matrix3x3Test, IdentityMatrix)
 	{
 		Matrix<3> expected =
 		{
@@ -60,7 +60,7 @@ namespace Engine3
 		ASSERT_EQ(Matrix<3>::IdentityMatrix(), expected);
 	}
 
-	TEST(MatrixTest, IdentityMatrix4)
+	TEST(Matrix4x4Test, IdentityMatrix)
 	{
 		Matrix<4> expected =
 		{
@@ -73,7 +73,7 @@ namespace Engine3
 		ASSERT_EQ(Matrix<4>::IdentityMatrix(), expected);
 	}
 
-	TEST(MatrixTest, Transpose3)
+	TEST(Matrix3x3Test, Transposed)
 	{
 		Matrix<3> actual
 		{
@@ -93,7 +93,7 @@ namespace Engine3
 		ASSERT_EQ(expected, actual);
 	}
 
-	TEST(MatrixTest, Transpose4x3)
+	TEST(Matrix4x3Test, Transposed)
 	{
 		Matrix<3, 4> actual =
 			Matrix<4, 3>
@@ -114,7 +114,7 @@ namespace Engine3
 		ASSERT_EQ(expected, actual);
 	}
 
-	TEST(MatrixTest, ScalarMultiplicationAssignment)
+	TEST(Matrix3x3Test, ScalarMultiplicationAssignment)
 	{
 		Matrix<3> actual
 		{
@@ -134,7 +134,7 @@ namespace Engine3
 		ASSERT_EQ(expected, actual);
 	}
 
-	TEST(MatrixTest, ScalarMultiplicationRight)
+	TEST(Matrix3x3Test, ScalarMultiplicationRight)
 	{
 		Matrix<3> actual = Matrix<3>
 		{
@@ -152,7 +152,7 @@ namespace Engine3
 		//ASSERT_EQ(expected, actual);
 	}
 
-	TEST(MatrixTest, ScalarMultiplicationLeft)
+	TEST(Matrix3x3Test, ScalarMultiplicationLeft)
 	{
 		Matrix<3> actual = 10 * Matrix<3>
 		{
@@ -170,7 +170,7 @@ namespace Engine3
 		ASSERT_EQ(expected, actual);
 	}
 
-	TEST(MatrixTest, ScalarDivisionAssignment)
+	TEST(Matrix3x3Test, ScalarDivisionAssignment)
 	{
 		Matrix<3> actual
 		{
@@ -189,7 +189,7 @@ namespace Engine3
 		ASSERT_EQ(expected, actual);
 	}
 
-	TEST(MatrixTest, ScalarDivisionRight)
+	TEST(Matrix3x3Test, ScalarDivisionRight)
 	{
 		Matrix<3> actual = Matrix<3>
 		{
@@ -207,7 +207,7 @@ namespace Engine3
 		ASSERT_EQ(expected, actual);
 	}
 
-	TEST(MatrixTest, GetRow)
+	TEST(MatrixSquareTest, GetRow)
 	{
 		Vector<3> actual = Matrix<3>
 		{
@@ -220,7 +220,7 @@ namespace Engine3
 		ASSERT_EQ(expected, actual);
 	}
 
-	TEST(MatrixTest, GetColumn)
+	TEST(MatrixSquareTest, GetColumn)
 	{
 		Vector<4> actual = Matrix<4>
 		{
@@ -234,7 +234,7 @@ namespace Engine3
 		ASSERT_EQ(expected, actual);
 	}
 
-	TEST(MatrixTest, MatrixMultiplication3x3)
+	TEST(Matrix3x3Test, MatrixMultiplication)
 	{
 		Matrix<3> a =
 		{
@@ -261,7 +261,7 @@ namespace Engine3
 		ASSERT_EQ(expected, ab);
 	}
 
-	TEST(MatrixTest, MatrixMultiplicationNonSquare2x4by4x3)
+	TEST(MatrixNonSquareTest, MatrixMultiplication2x4By4x3)
 	{
 		Matrix<2, 4> a =
 		{
@@ -287,7 +287,7 @@ namespace Engine3
 		ASSERT_EQ(expected, ab);
 	}
 
-	TEST(MatrixTest, MatrixMultiplication2x2)
+	TEST(Matrix2x2Test, MatrixMultiplication)
 	{
 		Matrix<2> a
 		{
@@ -310,7 +310,7 @@ namespace Engine3
 		ASSERT_EQ(expected, ab);
 	}
 
-	TEST(MatrixTest, MatrixMultiplicationVector3By3x3)
+	TEST(Matrix3x3Test, MatrixMultiplicationBy3x3)
 	{
 		Vector<3> a
 		{
@@ -334,7 +334,7 @@ namespace Engine3
 		ASSERT_EQ(expected, ab);
 	}
 
-	TEST(MatrixTest, MatrixMultiplicationVector2By2x2)
+	TEST(Matrix2x2Test, MatrixMultiplicationBy2x2)
 	{
 		Vector<2> a
 		{
@@ -357,7 +357,7 @@ namespace Engine3
 		ASSERT_EQ(expected, ab);
 	}
 
-	TEST(MatrixTest, RowVectorMultiplication)
+	TEST(MatrixNonSquareTest, RowVectorMultiplication)
 	{
 		Matrix<2, 3> matrix =
 		{
@@ -379,7 +379,7 @@ namespace Engine3
 		ASSERT_EQ(expected, actual);
 	}
 
-	TEST(MatrixTest, ColumnVectorMultiplication)
+	TEST(MatrixNonSquareTest, ColumnVectorMultiplication)
 	{
 		Matrix<4, 3> matrix =
 		{
@@ -415,7 +415,7 @@ namespace Engine3
 		ASSERT_EQ(expected, actual);
 	}
 
-	TEST(Matrix3x3FloatTest, RotationY)
+	TEST(Matrix3x3FloatTest, RotationY)\
 	{
 		Matrix actual{Matrix<3>::RotationAboutY(DegreesToRadians(30.f))};
 		Matrix<3> expected
@@ -623,7 +623,46 @@ namespace Engine3
 			0.928711f, 0.142845f, -0.214134f,
 			0.142845f, 0.713775f, 0.42907f,
 			-0.214134f, 0.42907f, 0.356796f
+		};
 
+		EXPECT_NEAR(actual[0], expected[0], 0.01);
+		EXPECT_NEAR(actual[1], expected[1], 0.01);
+		EXPECT_NEAR(actual[2], expected[2], 0.01);
+		EXPECT_NEAR(actual[3], expected[3], 0.01);
+		EXPECT_NEAR(actual[4], expected[4], 0.01);
+		EXPECT_NEAR(actual[5], expected[5], 0.01);
+		EXPECT_NEAR(actual[6], expected[6], 0.01);
+		EXPECT_NEAR(actual[7], expected[7], 0.01);
+		EXPECT_NEAR(actual[8], expected[8], 0.01);
+	}
+
+	TEST(Matrix2x2FloatTest, Reflection)
+	{
+		Vector<2> axis{0.7f, 0.7f};
+		axis.Normalise();
+		Matrix<2> actual = Matrix<2>::Reflection(axis);
+		Matrix<2> expected =
+		{
+			0.000302f, -0.999698f,
+			-0.999698f, 0.000302f
+		};
+
+		EXPECT_NEAR(actual[0], expected[0], 0.01);
+		EXPECT_NEAR(actual[1], expected[1], 0.01);
+		EXPECT_NEAR(actual[2], expected[2], 0.01);
+		EXPECT_NEAR(actual[3], expected[3], 0.01);
+	}
+
+	TEST(Matrix3x3FloatTest, Reflection)
+	{
+		Vector<3> axis{0.267f, -0.535f, 0.802f};
+		axis.Normalise();
+		Matrix<3> actual = Matrix<3>::Reflection(axis);
+		Matrix<3> expected =
+		{
+			0.857422f, 0.28569f, -0.428278f,
+			0.28569f, 0.42755f, 0.85814f,
+			-0.428268f, 0.85814f, -0.286408f
 		};
 
 		EXPECT_NEAR(actual[0], expected[0], 0.01);
