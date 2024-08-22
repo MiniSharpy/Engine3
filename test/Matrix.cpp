@@ -675,4 +675,75 @@ namespace Engine3
 		EXPECT_NEAR(actual[7], expected[7], 0.01);
 		EXPECT_NEAR(actual[8], expected[8], 0.01);
 	}
+
+	TEST(Matrix2x2FloatTest, Shearing)
+	{
+		Vector<2> axis{0.7f, 0.7f};
+		axis.Normalise();
+		Matrix<2> actual = Matrix<2>::Reflection(axis);
+		Matrix<2> expected =
+		{
+			0.000302f, -0.999698f,
+			-0.999698f, 0.000302f
+		};
+
+		EXPECT_NEAR(actual[0], expected[0], 0.01);
+		EXPECT_NEAR(actual[1], expected[1], 0.01);
+		EXPECT_NEAR(actual[2], expected[2], 0.01);
+		EXPECT_NEAR(actual[3], expected[3], 0.01);
+	}
+
+	TEST(Matrix3x3FloatTest, ShearXInProportionToY)
+	{
+		Matrix<3> transform = Matrix<3>::Shearing(1, 0, 0, 0, 0, 0);
+		Vector<3> point{2, 3, 4};
+
+		Vector<3> actual{5, 3, 4};
+		ASSERT_EQ(transform * point, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, ShearXInProportionToZ)
+	{
+		Matrix<3> transform = Matrix<3>::Shearing(0, 1, 0, 0, 0, 0);
+		Vector<3> point{2, 3, 4};
+
+		Vector<3> actual{6, 3, 4};
+		ASSERT_EQ(transform * point, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, ShearYInProportionToX)
+	{
+		Matrix<3> transform = Matrix<3>::Shearing(0, 0, 1, 0, 0, 0);
+		Vector<3> point{2, 3, 4};
+
+		Vector<3> actual{2, 5, 4};
+		ASSERT_EQ(transform * point, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, ShearYInProportionToZ)
+	{
+		Matrix<3> transform = Matrix<3>::Shearing(0, 0, 0, 1, 0, 0);
+		Vector<3> point{2, 3, 4};
+
+		Vector<3> actual{2, 7, 4};
+		ASSERT_EQ(transform * point, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, ShearZInProportionToX)
+	{
+		Matrix<3> transform = Matrix<3>::Shearing(0, 0, 0, 0, 1, 0);
+		Vector<3> point{2, 3, 4};
+
+		Vector<3> actual{2, 3, 6};
+		ASSERT_EQ(transform * point, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, ShearZInProportionToY)
+	{
+		Matrix<3> transform = Matrix<3>::Shearing(0, 0, 0, 0, 0, 1);
+		Vector<3> point{2, 3, 4};
+
+		Vector<3> actual{2, 3, 7};
+		ASSERT_EQ(transform * point, actual);
+	}
 }

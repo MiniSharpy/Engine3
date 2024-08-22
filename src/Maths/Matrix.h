@@ -332,6 +332,15 @@ namespace Engine3
 				-2 * x * y, 1 - 2 * y * y
 			};
 		}
+
+		static constexpr Matrix Shearing(T xy, T yx)
+		{
+			return
+			{
+				1, yx,
+				xy, 1
+			};
+		}
 	};
 
 	// Row first, then column to follow normal matrix conventions.
@@ -508,6 +517,19 @@ namespace Engine3
 				-2 * x * y, 1 - 2 * y * y, -2 * y * z,
 				-2 * x * z, -2 * y * z, 1 - 2 * z * z
 			};
+		}
+
+		constexpr static Matrix Shearing(float xy, float xz, float yx, float yz, float zx, float zy)
+		{
+			Matrix shear = Matrix::IdentityMatrix();
+			shear(0, 1) = xy;
+			shear(0, 2) = xz;
+			shear(1, 0) = yx;
+			shear(1, 2) = yz;
+			shear(2, 0) = zx;
+			shear(2, 1) = zy;
+
+			return shear;
 		}
 	};
 
