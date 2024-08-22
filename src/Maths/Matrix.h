@@ -128,9 +128,8 @@ namespace Engine3
 			}
 
 			/// Multiplies each element in the copied \p lhs by the scalar value \p rhs.
-			constexpr friend auto operator*(Matrix<RowSize, ColumnSize, T> lhs, T rhs) { return lhs *= rhs; }
-
 			// Intentional Matrix copy.
+			constexpr friend auto operator*(Matrix<RowSize, ColumnSize, T> lhs, T rhs) { return lhs *= rhs; }
 
 			/// Multiplies each element in \p right by the scalar value \p left.
 			constexpr friend auto operator*(T lhs, const Matrix<RowSize, ColumnSize, T>& rhs) { return rhs * lhs; }
@@ -145,9 +144,8 @@ namespace Engine3
 			}
 
 			/// Divides each element in \p lhs by the scalar value \p rhs.
-			constexpr friend auto operator/(Matrix<RowSize, ColumnSize, T> lhs, T rhs) { return lhs /= rhs; }
-
 			// Intentional Matrix copy.
+			constexpr friend auto operator/(Matrix<RowSize, ColumnSize, T> lhs, T rhs) { return lhs /= rhs; }
 
 			/// Takes the dot product of each row in \p lhs by each column in \p rhs to create a new matrix.
 			/// @param lhs A matrix with a number of columns equal to the number of rows in \p rhs.
@@ -222,7 +220,7 @@ namespace Engine3
 			friend bool operator!=(const Matrix<RowSize, ColumnSize, T>& lhs, const Matrix<RowSize, ColumnSize, T>& rhs)
 			{
 				return !(lhs == rhs);
-			};
+			}
 
 			// If these aren't deleted it makes it possible to perform comparisons like Matrix<4, 3>{} == Matrix<3, 4>{},
 			// as well as to arrays of the same type and size.
