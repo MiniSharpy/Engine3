@@ -123,7 +123,7 @@ namespace Engine3
 			template <typename Self>
 			constexpr Self& operator*=(this Self& self, T rhs)
 			{
-				for (std::size_t i = 0; i < self.size(); ++i) { self[i] *= rhs; }
+				for (T& element : self) { element *= rhs; }
 				return self;
 			}
 
@@ -139,7 +139,7 @@ namespace Engine3
 			template <typename Self>
 			constexpr Self& operator/=(this Self& self, T rhs)
 			{
-				for (std::size_t i = 0; i < self.size(); ++i) { self[i] /= rhs; }
+				for (T& element : self) { element /= rhs; }
 				return self;
 			}
 
