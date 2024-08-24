@@ -746,4 +746,127 @@ namespace Engine3
 		Vector<3> actual{2, 3, 7};
 		ASSERT_EQ(transform * point, actual);
 	}
+
+	TEST(Matrix2x2FloatTest, Determinant)
+	{
+		Matrix<2> matrix{3, -2, 1, 4};
+		float actual = matrix.Determinant();
+
+		float expected = 14;
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, Determinant)
+	{
+		Matrix<3> matrix
+		{
+			3, -2, 0,
+			1, 4, 0,
+			0, 0, 2
+		};
+		float actual = matrix.Determinant();
+
+		float expected = 28;
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, Submatrix)
+	{
+		Matrix<3> matrix
+		{
+			3, -2, 0,
+			1, 4, 0,
+			0, 0, 2
+		};
+		Matrix<2> actual = matrix.Submatrix(1, 1);
+
+		Matrix<2> expected
+		{
+			3, 0,
+			0, 2
+		};
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix4x4FloatTest, Submatrix)
+	{
+		Matrix<4> matrix
+		{
+			3, -2, 0, 1,
+			1, 4, 0, 1,
+			0, 0, 2, 1,
+			1, 1, 1, 1
+		};
+		Matrix<3> actual = matrix.Submatrix(1, 1);
+
+		Matrix<3> expected
+		{
+			3, 0, 1,
+			0, 2, 1,
+			1, 1, 1
+		};
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix4x4FloatTest, Minor)
+	{
+		Matrix<4> matrix
+		{
+			3, -2, 0, 1,
+			1, 4, 0, 1,
+			0, 0, 2, 1,
+			1, 1, 1, 1
+		};
+
+		float actual = matrix.Minor(1, 1);
+
+		float expected = 1;
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix4x4FloatTest, Cofactor)
+	{
+		Matrix<4> matrix
+		{
+			3, -2, 0, 1,
+			1, 4, 0, 1,
+			0, 0, 2, 1,
+			1, 1, 1, 1
+		};
+
+		Matrix<4> actual;
+
+		for (int row = 0; row < 4; ++row)
+		{
+			for (int column = 0; column < 4; ++column) // Resharper, quit putting this as one line!
+			{
+				actual(row, column) = matrix.Cofactor(row, column);
+			}
+		}
+
+		Matrix<4> expected
+		{
+			2, 1, 3, -6,
+			4, 1, 5, -10,
+			6, 2, 6, -14,
+			-12, -4, -14, 28
+		};
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix4x4FloatTest, Determinant)
+	{
+		Matrix<4> matrix
+		{
+			3, -2, 0, 1,
+			1, 4, 0, 1,
+			0, 0, 2, 1,
+			1, 1, 1, 1
+		};
+
+		float actual = matrix.Determinant();
+
+		float expected = -2;
+		ASSERT_EQ(expected, actual);
+	}
 }

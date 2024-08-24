@@ -53,12 +53,59 @@ namespace Engine3
 			}
 
 			/* Methods */
+			/// @param row The row to remove. Indexed from 0.
+			/// @param column The column to remove. Indexed from 0.
+			/// @return The submatrix with \p row and \p column removed.
+			constexpr Matrix<RowSize - 1, ColumnSize - 1, T> Submatrix(const std::size_t row,
+			                                                           const std::size_t column) const
+			{
+				Matrix<RowSize - 1, ColumnSize - 1, T> submatrix;
+
+				for (std::size_t currentRow = 0; currentRow < RowSize - 1; ++currentRow)
+				{
+					for (std::size_t currentColumn = 0; currentColumn < ColumnSize - 1; ++currentColumn)
+					{
+						const size_t rowOffset = currentRow >= row ? 1 : 0;
+						const size_t columnOffset = currentColumn >= column ? 1 : 0;
+						submatrix(currentRow, currentColumn) = (*this)(currentRow + rowOffset,
+						                                               currentColumn + columnOffset);
+					}
+				}
+
+				return submatrix;
+			}
+
+			constexpr T Minor(const std::size_t row, const std::size_t column) const
+				requires IsSquare<RowSize, ColumnSize> { return Submatrix(row, column).Determinant(); }
+
+			constexpr T Cofactor(const std::size_t row, const std::size_t column) const
+				requires IsSquare<RowSize, ColumnSize>
+			{
+				// This could also be implemented by raising -1 to the power of (row + column)
+				// and multiplying by the minor.
+				T minor = Minor(row, column);
+				bool isNegated = (row + column) & 1;
+				return isNegated ? -minor : minor;
+			}
+
+			constexpr T Determinant() const requires IsSquare<RowSize, ColumnSize>
+			{
+				// Doesn't matter whether column or row is iterated over.
+				T determinant = 0;
+				for (int column = 0; column < ColumnSize; ++column)
+				{
+					determinant += (*this)(0, column) * Cofactor(0, column);
+				}
+
+				return determinant;
+			}
+
 			/// Flips a square matrix diagonally, in place. TODO: Should the function return a reference to this to allow chaining methods?
 			template <typename Self>
 			void Transpose(this Self& self) requires (RowSize == ColumnSize) { self = self.Transposed(); }
 
 			/// Flips a matrix diagonally.
-			[[nodiscard]] Matrix<ColumnSize, RowSize, T> Transposed()
+			[[nodiscard]] constexpr Matrix<ColumnSize, RowSize, T> Transposed()
 			// [[nodiscard]] to help emphasise this is not the same as Transpose().
 			{
 				// Non-Square matrices when transposed will return a matrix that's aspect ratio is flipped.
@@ -351,6 +398,13 @@ namespace Engine3
 				xy, 1
 			};
 		}
+
+		/* Methods */
+		constexpr T Determinant()
+		{
+			const Matrix& m = *this;
+			return {m(0, 0) * m(1, 1) - m(0, 1) * m(1, 0)};
+		}
 	};
 
 	// Row first, then column to follow normal matrix conventions.
@@ -540,6 +594,18 @@ namespace Engine3
 			shear(2, 1) = zy;
 
 			return shear;
+		}
+
+		/* Methods */
+		constexpr T Determinant()
+		{
+			const Matrix& m = *this;
+			return
+			{
+				m(0, 0) * (m(1, 1) * m(2, 2) - m(1, 2) * m(2, 1)) +
+				m(0, 1) * (m(1, 2) * m(2, 0) - m(1, 0) * m(2, 2)) +
+				m(0, 2) * (m(1, 0) * m(2, 1) - m(1, 1) * m(2, 0))
+			};
 		}
 	};
 
