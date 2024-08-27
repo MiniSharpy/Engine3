@@ -88,11 +88,25 @@ namespace Engine3
 				return isNegated ? -minor : minor;
 			}
 
+			constexpr Matrix<RowSize, ColumnSize, T> CofactorMatrix() const requires IsSquare<RowSize, ColumnSize>
+			{
+				Matrix<RowSize, ColumnSize, T> cofactorMatrix;
+				for (std::size_t row = 0; row < RowSize; ++row)
+				{
+					for (int column = 0; column < ColumnSize; ++column)
+					{
+						cofactorMatrix(row, column) = Cofactor(row, column);
+					}
+				}
+
+				return cofactorMatrix;
+			}
+
 			constexpr T Determinant() const requires IsSquare<RowSize, ColumnSize>
 			{
 				// Doesn't matter whether column or row is iterated over.
 				T determinant = 0;
-				for (int column = 0; column < ColumnSize; ++column)
+				for (std::size_t column = 0; column < ColumnSize; ++column)
 				{
 					determinant += (*this)(0, column) * Cofactor(0, column);
 				}
@@ -100,9 +114,16 @@ namespace Engine3
 				return determinant;
 			}
 
-			/// Flips a square matrix diagonally, in place. TODO: Should the function return a reference to this to allow chaining methods?
-			template <typename Self>
-			void Transpose(this Self& self) requires (RowSize == ColumnSize) { self = self.Transposed(); }
+			/// Flips a square matrix diagonally in place.
+			Matrix<RowSize, ColumnSize, T>& Transpose() requires (RowSize == ColumnSize)
+			{
+				// Effectively swapping rows with columns.
+				// Could do in place, not sure if there's much benefit.
+				// https://en.wikipedia.org/wiki/In-place_matrix_transposition#Square_matrices
+				*this = Transposed();
+
+				return static_cast<Matrix<RowSize, ColumnSize, T>&>(*this);
+			}
 
 			/// Flips a matrix diagonally.
 			[[nodiscard]] constexpr Matrix<ColumnSize, RowSize, T> Transposed()
@@ -120,6 +141,33 @@ namespace Engine3
 
 				return matrix;
 			}
+
+			constexpr Matrix<RowSize, ColumnSize, T> Adjoint()
+			{
+				Matrix<RowSize, ColumnSize, T> adjoint = CofactorMatrix();
+				adjoint.Transpose();
+
+				return adjoint;
+			}
+
+			constexpr Matrix<RowSize, ColumnSize, T> Inverted()
+			{
+				assert(IsInvertible());
+				Matrix<RowSize, ColumnSize, T> inverted = Adjoint();
+				inverted /= Determinant();
+
+				return inverted;
+			}
+
+			constexpr Matrix<RowSize, ColumnSize, T>& Invert()
+			{
+				assert(IsInvertible());
+				*this = Inverted();
+
+				return static_cast<Matrix<RowSize, ColumnSize, T>&>(*this);
+			}
+
+			bool IsInvertible() const { return Determinant() != 0; } // TODO: Rough equality due to float comparisons.
 
 			/// @param row The row to return, indexed from zero/
 			/// @return A row vector.
@@ -167,11 +215,10 @@ namespace Engine3
 			// Scalar multiplications.
 			/// Multiplies each element in the matrix by the scalar value \p other.
 			/// @return A reference to the now altered matrix for further operations.
-			template <typename Self>
-			constexpr Self& operator*=(this Self& self, T rhs)
+			constexpr Matrix<RowSize, ColumnSize, T>& operator*=(T rhs)
 			{
-				for (T& element : self) { element *= rhs; }
-				return self;
+				for (T& element : *this) { element *= rhs; }
+				return static_cast<Matrix<RowSize, ColumnSize, T>&>(*this);
 			}
 
 			/// Multiplies each element in the copied \p lhs by the scalar value \p rhs.
@@ -183,11 +230,10 @@ namespace Engine3
 
 			/// Divides each element in the matrix by \p rhs in place.
 			/// @return A reference to the now altered matrix for further operations.
-			template <typename Self>
-			constexpr Self& operator/=(this Self& self, T rhs)
+			constexpr Matrix<RowSize, ColumnSize, T>& operator/=(T rhs)
 			{
-				for (T& element : self) { element /= rhs; }
-				return self;
+				for (T& element : *this) { element /= rhs; }
+				return static_cast<Matrix<RowSize, ColumnSize, T>&>(*this);
 			}
 
 			/// Divides each element in \p lhs by the scalar value \p rhs.

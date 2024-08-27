@@ -73,7 +73,7 @@ namespace Engine3
 		ASSERT_EQ(Matrix<4>::IdentityMatrix(), expected);
 	}
 
-	TEST(Matrix3x3Test, Transposed)
+	TEST(Matrix3x3Test, Transpose)
 	{
 		Matrix<3> actual
 		{
@@ -149,7 +149,7 @@ namespace Engine3
 			40, 50, 60,
 			70, 80, 90
 		};
-		//ASSERT_EQ(expected, actual);
+		ASSERT_EQ(expected, actual);
 	}
 
 	TEST(Matrix3x3Test, ScalarMultiplicationLeft)
@@ -867,6 +867,87 @@ namespace Engine3
 		float actual = matrix.Determinant();
 
 		float expected = -2;
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, CofactorMatrix)
+	{
+		Matrix<3> actual =
+			Matrix<3>
+			{
+				3, -2, 0,
+				1, 4, 0,
+				0, 0, 2
+			}.CofactorMatrix();
+
+		Matrix<3> expected
+		{
+			8, -2, 0,
+			4, 6, 0,
+			0, 0, 14
+		};
+
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, Adjoint)
+	{
+		Matrix<3> actual =
+			Matrix<3>
+			{
+				3, -2, 0,
+				1, 4, 0,
+				0, 0, 2
+			}.Adjoint();
+
+		Matrix<3> expected
+		{
+			8, 4, 0,
+			-2, 6, 0,
+			0, 0, 14
+		};
+
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, Inverted)
+	{
+		Matrix<3> actual =
+			Matrix<3>
+			{
+				3, -2, 0,
+				1, 4, 0,
+				0, 0, 2
+			}.Inverted();
+
+		Matrix<3> expected
+		{
+			8 / 28.f, 4 / 28.f, 0,
+			-2 / 28.f, 6 / 28.f, 0,
+			0, 0, 14 / 28.f
+		};
+
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, Inverse)
+	{
+		Matrix<3> actual =
+			Matrix<3>
+			{
+				3, -2, 0,
+				1, 4, 0,
+				0, 0, 2
+			};
+		actual.Invert();
+
+		Matrix<3> expected
+		{
+			8 / 28.f, 4 / 28.f, 0,
+			-2 / 28.f, 6 / 28.f, 0,
+			0, 0, 14 / 28.f
+		};
+
 		ASSERT_EQ(expected, actual);
 	}
 }
