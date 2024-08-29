@@ -164,8 +164,8 @@ namespace Engine3
 		actual.Normalise();
 
 		Vector<2> expected{12 / 13.f, 5 / 13.f};
-		ASSERT_FLOAT_EQ(actual.X(), expected.X());
-		ASSERT_FLOAT_EQ(actual.Y(), expected.Y());
+		EXPECT_FLOAT_EQ(actual.X(), expected.X());
+		EXPECT_FLOAT_EQ(actual.Y(), expected.Y());
 	}
 
 	TEST(VectorTest, NormalisedCopy)
@@ -174,12 +174,12 @@ namespace Engine3
 		Vector<2> actual = original.Normalised();
 
 		Vector<2> expected{0.f, 1.f};
-		ASSERT_FLOAT_EQ(actual.X(), expected.X());
-		ASSERT_FLOAT_EQ(actual.Y(), expected.Y());
+		EXPECT_FLOAT_EQ(actual.X(), expected.X());
+		EXPECT_FLOAT_EQ(actual.Y(), expected.Y());
 
 		// Ensure original has not changed.
-		ASSERT_FLOAT_EQ(original.X(), 0.f);
-		ASSERT_FLOAT_EQ(original.Y(), 743.632f);
+		EXPECT_FLOAT_EQ(original.X(), 0.f);
+		EXPECT_FLOAT_EQ(original.Y(), 743.632f);
 	}
 
 	TEST(VectorTest, Normalise3)
@@ -192,9 +192,9 @@ namespace Engine3
 			-0.35052374270219159924545294800879f,
 			0.05842062378369859987424215800146f
 		};
-		ASSERT_FLOAT_EQ(actual.X(), expected.X());
-		ASSERT_FLOAT_EQ(actual.Y(), expected.Y());
-		ASSERT_FLOAT_EQ(actual.Z(), expected.Z());
+		EXPECT_FLOAT_EQ(actual.X(), expected.X());
+		EXPECT_FLOAT_EQ(actual.Y(), expected.Y());
+		EXPECT_FLOAT_EQ(actual.Z(), expected.Z());
 	}
 
 	TEST(VectorTest, Normalise3Negatives)
@@ -207,9 +207,9 @@ namespace Engine3
 			3 / 13.f,
 			-4 / 13.f
 		};
-		ASSERT_FLOAT_EQ(actual.X(), expected.X());
-		ASSERT_FLOAT_EQ(actual.Y(), expected.Y());
-		ASSERT_FLOAT_EQ(actual.Z(), expected.Z());
+		EXPECT_FLOAT_EQ(actual.X(), expected.X());
+		EXPECT_FLOAT_EQ(actual.Y(), expected.Y());
+		EXPECT_FLOAT_EQ(actual.Z(), expected.Z());
 	}
 
 	TEST(VectorTest, NormaliseAllOnes)
@@ -223,10 +223,10 @@ namespace Engine3
 			1 / 2.f,
 			1 / 2.f
 		};
-		ASSERT_FLOAT_EQ(actual.X(), expected.X());
-		ASSERT_FLOAT_EQ(actual.Y(), expected.Y());
-		ASSERT_FLOAT_EQ(actual.Z(), expected.Z());
-		ASSERT_FLOAT_EQ(actual.W(), expected.W());
+		EXPECT_FLOAT_EQ(actual.X(), expected.X());
+		EXPECT_FLOAT_EQ(actual.Y(), expected.Y());
+		EXPECT_FLOAT_EQ(actual.Z(), expected.Z());
+		EXPECT_FLOAT_EQ(actual.W(), expected.W());
 	}
 
 	TEST(VectorTest, AdditionAssignment)
@@ -332,13 +332,13 @@ namespace Engine3
 		auto parallel = Vector<3>::Project(unit, vector);
 		auto perpendicular = Vector<3>::ProjectPerpendicular(unit, vector);
 
-		ASSERT_FLOAT_EQ(parallel.X(), 3.5f);
-		ASSERT_FLOAT_EQ(parallel.Y(), 3.5f);
-		ASSERT_FLOAT_EQ(parallel.Z(), 0.f);
+		EXPECT_FLOAT_EQ(parallel.X(), 3.5f);
+		EXPECT_FLOAT_EQ(parallel.Y(), 3.5f);
+		EXPECT_FLOAT_EQ(parallel.Z(), 0.f);
 
-		ASSERT_NEAR(perpendicular.X(), 0.5f, 0.000001);
-		ASSERT_NEAR(perpendicular.Y(), -0.5f, 0.000001);
-		ASSERT_NEAR(perpendicular.Z(), -1, 0.000001);
+		EXPECT_NEAR(perpendicular.X(), 0.5f, 0.000001);
+		EXPECT_NEAR(perpendicular.Y(), -0.5f, 0.000001);
+		EXPECT_NEAR(perpendicular.Z(), -1, 0.000001);
 	}
 
 	TEST(VectorTest, CrossProductStaticAB)
@@ -405,5 +405,43 @@ namespace Engine3
 		Vector<3> expected = Vector<3>::Zero();
 
 		ASSERT_EQ(actual, expected);
+	}
+
+	TEST(VectorTest, IsPerpendicular)
+	{
+		Vector<3> up = Vector<3>::Up();
+		Vector<3> right = Vector<3>::Right();
+		Vector<3> forward = Vector<3>::Forward();
+		Vector<3> down = Vector<3>::Down();
+		Vector<3> left = Vector<3>::Left();
+		Vector<3> back = Vector<3>::Back();
+
+		EXPECT_TRUE(Vector<3>::IsPerpendicular(up, right));
+		EXPECT_TRUE(Vector<3>::IsPerpendicular(up, forward));
+		EXPECT_TRUE(Vector<3>::IsPerpendicular(forward, right));
+
+		EXPECT_FALSE(Vector<3>::IsPerpendicular(up, up));
+		EXPECT_FALSE(Vector<3>::IsPerpendicular(up, down));
+		EXPECT_FALSE(Vector<3>::IsPerpendicular(left, right));
+		EXPECT_FALSE(Vector<3>::IsPerpendicular(back, forward));
+	}
+
+	TEST(VectorTest, IsParallel)
+	{
+		Vector<3> up = Vector<3>::Up();
+		Vector<3> right = Vector<3>::Right();
+		Vector<3> forward = Vector<3>::Forward();
+		Vector<3> down = Vector<3>::Down();
+		Vector<3> left = Vector<3>::Left();
+		Vector<3> back = Vector<3>::Back();
+
+		EXPECT_TRUE(Vector<3>::IsParallel(up, up));
+		EXPECT_TRUE(Vector<3>::IsParallel(up, down));
+		EXPECT_TRUE(Vector<3>::IsParallel(left, right));
+		EXPECT_TRUE(Vector<3>::IsParallel(back, forward));
+
+		EXPECT_FALSE(Vector<3>::IsParallel(up, right));
+		EXPECT_FALSE(Vector<3>::IsParallel(up, forward));
+		EXPECT_FALSE(Vector<3>::IsParallel(forward, right));
 	}
 }

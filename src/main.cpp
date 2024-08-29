@@ -9,9 +9,6 @@ int main(int argc, char* argv[])
 {
 	using namespace Engine3;
 
-	std::array<int, 2> test = {5, 1};
-	std::swap(test[0], test[1]);
-
 	Engine engine;
 	if (!engine) { return -1; }
 

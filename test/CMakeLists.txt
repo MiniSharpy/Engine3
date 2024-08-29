@@ -4,7 +4,8 @@ find_package(GTest CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME}Test
 "Vector.cpp" 
-"Matrix.cpp")
+"Matrix.cpp" 
+"Matrix3x3.cpp")
 
 set_target_properties(${PROJECT_NAME}Test PROPERTIES LINKER_LANGUAGE CXX) # CMake will try to infer off file names making this unnecesary oftentimes.
 set_target_properties(${PROJECT_NAME}Test PROPERTIES CXX_STANDARD 23)

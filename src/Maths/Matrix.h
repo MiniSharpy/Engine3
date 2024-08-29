@@ -1,11 +1,11 @@
 #pragma once
+#include "Maths.h"
 #include "Vector.h"
 #include <algorithm>
 #include <array>
 #include <concepts>
 #include <cstddef>
 #include <print>
-#include <tuple>
 #include <utility>
 
 namespace Engine3
@@ -28,12 +28,6 @@ namespace Engine3
 
 		unrollIntegerSequence(std::make_integer_sequence<T, Count>{}, std::forward<Function>(function));
 	}
-
-	template <class T>
-	concept Number = std::is_floating_point_v<T> || std::is_integral_v<T>;
-
-	template <std::size_t a, std::size_t b>
-	concept IsSquare = (a == b);
 
 	template <std::size_t RowSize, std::size_t ColumnSize, Number T>
 	struct Matrix;
@@ -142,7 +136,7 @@ namespace Engine3
 				return matrix;
 			}
 
-			constexpr Matrix<RowSize, ColumnSize, T> Adjoint()
+			constexpr Matrix<RowSize, ColumnSize, T> Adjoint() requires (IsSquare<RowSize, ColumnSize>)
 			{
 				Matrix<RowSize, ColumnSize, T> adjoint = CofactorMatrix();
 				adjoint.Transpose();
@@ -150,7 +144,7 @@ namespace Engine3
 				return adjoint;
 			}
 
-			constexpr Matrix<RowSize, ColumnSize, T> Inverted()
+			constexpr Matrix<RowSize, ColumnSize, T> Inverted() requires (IsSquare<RowSize, ColumnSize>)
 			{
 				assert(IsInvertible());
 				Matrix<RowSize, ColumnSize, T> inverted = Adjoint();
@@ -159,7 +153,7 @@ namespace Engine3
 				return inverted;
 			}
 
-			constexpr Matrix<RowSize, ColumnSize, T>& Invert()
+			constexpr Matrix<RowSize, ColumnSize, T>& Invert() requires (IsSquare<RowSize, ColumnSize>)
 			{
 				assert(IsInvertible());
 				*this = Inverted();
@@ -167,7 +161,38 @@ namespace Engine3
 				return static_cast<Matrix<RowSize, ColumnSize, T>&>(*this);
 			}
 
-			bool IsInvertible() const { return Determinant() != 0; } // TODO: Rough equality due to float comparisons.
+			bool IsInvertible() const requires (IsSquare<RowSize, ColumnSize>)
+			{
+				return !AlmostEquals<T>(0, Determinant());
+			}
+
+			bool IsOrthogonal() const requires (IsSquare<RowSize, ColumnSize>)
+			{
+				// If there's only one row/column we can guarantee it's not orthogonal.
+				// constexpr if should mean the machine code is simplified without needing to
+				// specialise.
+				if constexpr (RowSize == 1) { return false; }
+
+				// Performing "bitwise and" on an already true value will reduce the need for branching.
+				bool isOrthogonal = true;
+
+				// Need the first/previous row so it can be compared inside the loop.
+				std::size_t row = 0;
+				Vector<RowSize, T> previousRow = GetRow(row);
+				isOrthogonal &= previousRow.IsUnit();
+
+				// Check each row is unit, and compare to the previous to determine perpendicularly.
+				// Could potentially exit early, but not sure if it's worth the branching in small matrices.
+				for (row = 1; row < RowSize; ++row)
+				{
+					Vector<RowSize, T> currentRow = GetRow(row);
+					isOrthogonal &= currentRow.IsUnit();
+					isOrthogonal &= currentRow.IsPerpendicular(previousRow, currentRow);
+					previousRow = currentRow;
+				}
+
+				return isOrthogonal;
+			}
 
 			/// @param row The row to return, indexed from zero/
 			/// @return A row vector.

@@ -1,4 +1,5 @@
 #pragma once
+#include "Maths.h"
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -8,8 +9,7 @@
 
 namespace Engine3
 {
-	template <std::size_t Dimensions, typename T = float>
-		requires std::integral<T> || std::floating_point<T>
+	template <std::size_t Dimensions, Number T = float>
 	struct Vector : std::array<T, Dimensions>
 	{
 		/* Static Methods */
@@ -101,7 +101,22 @@ namespace Engine3
 			return rhs - (DotProduct(lhs, rhs) * lhs);
 		}
 
+		static constexpr bool IsPerpendicular(const Vector& lhs, const Vector& rhs)
+		{
+			return AlmostEquals<T>(0, Vector::DotProduct(lhs, rhs));
+		}
+
+		static constexpr bool IsParallel(const Vector& lhs, const Vector& rhs)
+		{
+			return Vector::CrossProduct(lhs, rhs).IsZeroVector();
+		}
+
 		/* Methods */
+		constexpr bool IsZeroVector()
+		{
+			return std::all_of(this->begin(), this->end(), [](T value) { return AlmostEquals<T>(0, value); });
+		}
+
 		/// A commutative function that sums the products of each component in two vectors.
 		/// @return A negative scalar value when the vector points towards the vector \p rhs. \n
 		/// A zero value when the vectors are perpendicular, or when one is a zero vector.
@@ -153,31 +168,27 @@ namespace Engine3
 		constexpr auto Distance(const Vector& rhs) { return Distance(*this, rhs); }
 
 		/* Getters and Setters */
-		T X() requires (Dimensions <= 4) { return (*this)[0]; }
-
 		constexpr T X() const requires (Dimensions <= 4) { return (*this)[0]; }
 
 		void X(T value) requires (Dimensions <= 4) { (*this)[0] = value; }
-
-		T Y() requires (Dimensions <= 4 && Dimensions > 1) { return (*this)[1]; }
 
 		constexpr T Y() const requires (Dimensions <= 4 && Dimensions > 1) { return (*this)[1]; }
 
 		void Y(T value) requires (Dimensions <= 4 && Dimensions > 1) { (*this)[1] = value; }
 
-		T Z() requires (Dimensions <= 4 && Dimensions > 2) { return (*this)[2]; }
-
 		constexpr T Z() const requires (Dimensions <= 4 && Dimensions > 2) { return (*this)[2]; }
 
 		void Z(T value) requires (Dimensions <= 4 && Dimensions > 2) { (*this)[2] = value; }
-
-		T W() requires (Dimensions <= 4 && Dimensions > 3) { return (*this)[3]; }
 
 		constexpr T W() const requires (Dimensions <= 4 && Dimensions > 3) { return (*this)[3]; }
 
 		void W(T value) requires (Dimensions <= 4 && Dimensions > 3) { (*this)[3] = value; }
 
-		constexpr bool IsUnit() const { return std::abs(1 - LengthSquared()) < std::numeric_limits<T>::epsilon(); }
+		constexpr bool IsUnit() const
+		{
+			// It is not necessary to check Length(), because if it is a unit vector then LengthSquared() is the same value.
+			return AlmostEquals<T>(1, LengthSquared());
+		}
 
 		/* Operator Overloading */
 		/// @return A negated copy of the vector.
