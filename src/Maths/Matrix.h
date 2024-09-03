@@ -54,7 +54,6 @@ namespace Engine3
 			                                                           const std::size_t column) const
 			{
 				Matrix<RowSize - 1, ColumnSize - 1, T> submatrix;
-
 				for (std::size_t currentRow = 0; currentRow < RowSize - 1; ++currentRow)
 				{
 					for (std::size_t currentColumn = 0; currentColumn < ColumnSize - 1; ++currentColumn)
@@ -109,7 +108,7 @@ namespace Engine3
 			}
 
 			/// Flips a square matrix diagonally in place.
-			Matrix<RowSize, ColumnSize, T>& Transpose() requires (RowSize == ColumnSize)
+			constexpr Matrix<RowSize, ColumnSize, T>& Transpose() requires (RowSize == ColumnSize)
 			{
 				// Effectively swapping rows with columns.
 				// Could do in place, not sure if there's much benefit.
@@ -161,7 +160,7 @@ namespace Engine3
 				return static_cast<Matrix<RowSize, ColumnSize, T>&>(*this);
 			}
 
-			bool IsInvertible() const requires (IsSquare<RowSize, ColumnSize>)
+			constexpr bool IsInvertible() const requires (IsSquare<RowSize, ColumnSize>)
 			{
 				return !AlmostEquals<T>(0, Determinant());
 			}
@@ -194,6 +193,44 @@ namespace Engine3
 				return isOrthogonal;
 			}
 
+			Matrix<RowSize, ColumnSize, T> Orthonormalised() requires
+				(IsSquare<RowSize, ColumnSize> && RowSize > 1)
+			{
+				using Vector = Vector<RowSize, T>;
+
+				// "...subtract off the portion of that vector that is parallel to the proceeding basis vectors."
+				// - 3D Math Primer for Graphics and Game Development
+				auto lambda = [](const Vector& currentRow, const Vector& previousRow)
+				{
+					// This is similar to Vector::ProjectPerpendicular except we're normalising.
+					T currentDotPreviousNormalised =
+						Vector::DotProduct(currentRow, previousRow) /
+						Vector::DotProduct(previousRow, previousRow);
+
+					return currentDotPreviousNormalised * previousRow;
+				};
+
+				Matrix<RowSize, ColumnSize, T> orthonormalised;
+
+				const Vector rowZero = GetRow(0);
+				orthonormalised.SetRow(0, rowZero);
+
+				for (int i = 1; i < RowSize; ++i)
+				{
+					const Vector currentRow = GetRow(i);
+					// For each previous row, subtract the normalised projection.
+					for (int j = 0; j < i; ++j)
+					{
+						const Vector previousRow = GetRow(j);
+						currentRow - lambda(currentRow, previousRow);
+					}
+
+					orthonormalised.SetRow(i, currentRow);
+				}
+
+				return orthonormalised;
+			}
+
 			/// @param row The row to return, indexed from zero/
 			/// @return A row vector.
 			constexpr Vector<ColumnSize, T> GetRow(std::size_t row) const
@@ -202,6 +239,12 @@ namespace Engine3
 				Vector<ColumnSize, T> vector;
 				for (std::size_t column = 0; column < ColumnSize; ++column) { vector[column] = (*this)(row, column); }
 				return vector;
+			}
+
+			constexpr void SetRow(std::size_t row, const Vector<RowSize, T>& values)
+			{
+				assert(row < RowSize);
+				for (std::size_t column = 0; column < ColumnSize; ++column) { (*this)(row, column) = values[column]; }
 			}
 
 			/// @param column The column to return, indexed from zero.
@@ -214,13 +257,19 @@ namespace Engine3
 				return vector;
 			}
 
+			constexpr void SetColumn(std::size_t column, const Vector<ColumnSize, T>& values)
+			{
+				assert(column < ColumnSize);
+				for (std::size_t row = 0; row < ColumnSize; ++row) { (*this)(column, row) = values[row]; }
+			}
+
 			/* Operators */
 			// I would like to use [row, column] for zero indexing and operator() for 1 indexed to follow matrix conventions,
 			// but there's a lack of support for it in gcc and I prefer zero indexing.
 			/// @param row The row to retrieve the element, indexed from zero.
 			/// @param column The column to retrieve the element, indexed from zero.
 			/// @return The element at \p row and \p column.
-			T& operator()(std::size_t row, std::size_t column)
+			constexpr T& operator()(std::size_t row, std::size_t column)
 			{
 				assert(row < RowSize);
 				assert(column < ColumnSize);
@@ -230,7 +279,7 @@ namespace Engine3
 			/// @param row The row to retrieve the element, indexed from zero.
 			/// @param column The column to retrieve the element, indexed from zero.
 			/// @return The element at \p row and \p column.
-			const T& operator()(std::size_t row, std::size_t column) const
+			constexpr const T& operator()(std::size_t row, std::size_t column) const
 			{
 				assert(row < RowSize);
 				assert(column < ColumnSize);
@@ -328,17 +377,16 @@ namespace Engine3
 			}
 
 			/// Checks whether each element in the two matrices are equal.
-			friend bool operator==(const Matrix<RowSize, ColumnSize, T>& lhs, const Matrix<RowSize, ColumnSize, T>& rhs)
+			constexpr friend bool operator==(const Matrix<RowSize, ColumnSize, T>& lhs,
+			                                 const Matrix<RowSize, ColumnSize, T>& rhs)
 			{
 				for (std::size_t i = 0; i < lhs.size(); ++i) { if (lhs[i] != rhs[i]) { return false; } }
 				return true;
 			}
 
 			/// Checks whether any element in two matrices differ.
-			friend bool operator!=(const Matrix<RowSize, ColumnSize, T>& lhs, const Matrix<RowSize, ColumnSize, T>& rhs)
-			{
-				return !(lhs == rhs);
-			}
+			constexpr friend bool operator!=(const Matrix<RowSize, ColumnSize, T>& lhs,
+			                                 const Matrix<RowSize, ColumnSize, T>& rhs) { return !(lhs == rhs); }
 
 			// If these aren't deleted it makes it possible to perform comparisons like Matrix<4, 3>{} == Matrix<3, 4>{},
 			// as well as to arrays of the same type and size.
@@ -554,7 +602,6 @@ namespace Engine3
 			};
 		}
 
-		/// 
 		/// @param axis A unit vector.
 		/// @param k A scale factor.
 		/// @return A matrix that when multiplied by resulting in a scaling of \p k along \p axis.
@@ -677,6 +724,32 @@ namespace Engine3
 				m(0, 1) * (m(1, 2) * m(2, 0) - m(1, 0) * m(2, 2)) +
 				m(0, 2) * (m(1, 0) * m(2, 1) - m(1, 1) * m(2, 0))
 			};
+		}
+
+		// TODO: Would methods within MatrixBase calling Orthonormalised call this one of the base implemetnation?
+		Matrix Orthonormalised()
+		{
+			Matrix orthonormalised;
+
+			// Row one is left as is.
+			const Vector<3, T> rowOne = this->GetRow(0);
+
+			// Calculating row two.
+			const Vector<3, T> unalteredRowTwo = this->GetRow(1);
+			const T twoDotOneNormalised =
+				Vector<3, T>::DotProduct(unalteredRowTwo, rowOne) /
+				Vector<3, T>::DotProduct(rowOne, rowOne);
+
+			const Vector<3, T> rowTwo = unalteredRowTwo - (twoDotOneNormalised * rowOne);
+
+			// Row three is the cross of one and two.
+			const Vector<3, T> rowThree = Vector<3, T>::CrossProduct(rowOne, rowTwo);
+
+			orthonormalised.SetRow(0, rowOne);
+			orthonormalised.SetRow(1, rowTwo);
+			orthonormalised.SetRow(2, rowThree);
+
+			return orthonormalised;
 		}
 	};
 

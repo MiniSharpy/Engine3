@@ -82,19 +82,19 @@ namespace Engine3
 
 	TEST(VectorTest, Negation)
 	{
-		Vector<2> vector{3.f, 7.f};
-		Vector<2> actual = -vector;
+		constexpr Vector<2> vector{3.f, 7.f};
+		constexpr Vector<2> actual = -vector;
 
-		Vector<2> expected{-3.f, -7.f};
+		constexpr Vector<2> expected{-3.f, -7.f};
 		ASSERT_EQ(expected, actual);
 	}
 
 	TEST(VectorTest, NegationZero)
 	{
-		Vector<2> vector{0.f, 5.f};
-		Vector<2> actual = -vector;
+		constexpr Vector<2> vector{0.f, 5.f};
+		constexpr Vector<2> actual = -vector;
 
-		Vector<2> expected{0.f, -5.f};
+		constexpr Vector<2> expected{0.f, -5.f};
 		ASSERT_EQ(expected, actual);
 	}
 
@@ -170,10 +170,10 @@ namespace Engine3
 
 	TEST(VectorTest, NormalisedCopy)
 	{
-		Vector<2> original = Vector<2>{0.f, 743.632f};
-		Vector<2> actual = original.Normalised();
+		constexpr Vector<2> original = Vector<2>{0.f, 743.632f};
+		constexpr Vector<2> actual = original.Normalised();
 
-		Vector<2> expected{0.f, 1.f};
+		constexpr Vector<2> expected{0.f, 1.f};
 		EXPECT_FLOAT_EQ(actual.X(), expected.X());
 		EXPECT_FLOAT_EQ(actual.Y(), expected.Y());
 
@@ -182,11 +182,10 @@ namespace Engine3
 		EXPECT_FLOAT_EQ(original.Y(), 743.632f);
 	}
 
-	TEST(VectorTest, Normalise3)
+	TEST(VectorTest, Normalised3)
 	{
-		Vector<3> actual = Vector<3>{8.f, -3.f, 0.5f}.Normalised();
-
-		Vector<3> expected
+		constexpr Vector<3> actual = Vector<3>{8.f, -3.f, 0.5f}.Normalised();
+		constexpr Vector<3> expected
 		{
 			0.93472998053917759798787452802344f,
 			-0.35052374270219159924545294800879f,
@@ -197,11 +196,10 @@ namespace Engine3
 		EXPECT_FLOAT_EQ(actual.Z(), expected.Z());
 	}
 
-	TEST(VectorTest, Normalise3Negatives)
+	TEST(VectorTest, Normalised3Negatives)
 	{
-		Vector<3> actual = Vector<3>{-12.f, 3.f, -4.f}.Normalised();
-
-		Vector<3> expected
+		constexpr Vector<3> actual = Vector<3>{-12.f, 3.f, -4.f}.Normalised();
+		constexpr Vector<3> expected
 		{
 			-12 / 13.f,
 			3 / 13.f,
@@ -214,9 +212,8 @@ namespace Engine3
 
 	TEST(VectorTest, NormaliseAllOnes)
 	{
-		Vector<4> actual = Vector<4>{1.f, 1.f, 1.f, 1.f}.Normalised();
-
-		Vector<4> expected
+		constexpr Vector<4> actual = Vector<4>{1.f, 1.f, 1.f, 1.f}.Normalised();
+		constexpr Vector<4> expected
 		{
 			1 / 2.f,
 			1 / 2.f,
@@ -239,8 +236,8 @@ namespace Engine3
 
 	TEST(VectorTest, Addition)
 	{
-		Vector<3> actual = Vector<3>{2.f, 9.f, -1.f} + Vector<3>{-2.f, -9.f, 1.f};
-		Vector<3> expected{0.f, 0.f, 0.f};
+		constexpr Vector<3> actual = Vector<3>{2.f, 9.f, -1.f} + Vector<3>{-2.f, -9.f, 1.f};
+		constexpr Vector<3> expected{0.f, 0.f, 0.f};
 		ASSERT_EQ(actual, expected);
 	}
 
@@ -254,83 +251,83 @@ namespace Engine3
 
 	TEST(VectorTest, Subtraction)
 	{
-		Vector<3> actual = Vector<3>{4.f, 5.f, -11.f} - Vector<3>{-4.f, -5.f, 11.f};
-		Vector<3> expected{8.f, 10.f, -22.f};
+		constexpr Vector<3> actual = Vector<3>{4.f, 5.f, -11.f} - Vector<3>{-4.f, -5.f, 11.f};
+		constexpr Vector<3> expected{8.f, 10.f, -22.f};
 		ASSERT_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, DistanceStatic)
 	{
-		float actual = Vector<2>::Distance({10.f, 6.f}, {-14.f, 30.f});
-		float expected = 33.9411255f;
+		constexpr float actual = Vector<2>::Distance({10.f, 6.f}, {-14.f, 30.f});
+		constexpr float expected = 33.9411255f;
 		ASSERT_FLOAT_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, DistanceMethod)
 	{
-		float actual = Vector<2>{0.f, 0.f}.Distance({-12.f, 5.f});
-		float expected = 13.f;
+		constexpr float actual = Vector<2>{0.f, 0.f}.Distance({-12.f, 5.f});
+		constexpr float expected = 13.f;
 		ASSERT_FLOAT_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, Distance3Int)
 	{
-		double actual = Vector<3, int>::Distance({3, 10, 7}, {8, -7, 4});
+		constexpr double actual = Vector<3, int>::Distance({3, 10, 7}, {8, -7, 4});
 		double expected = std::sqrt(323);
 		ASSERT_DOUBLE_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, Distance3)
 	{
-		float actual = Vector<3>::Distance({-2.f, -4.f, 9.f}, {6.f, -7.f, 9.5f});
-		float expected = 8.558621384f;
+		constexpr float actual = Vector<3>::Distance({-2.f, -4.f, 9.f}, {6.f, -7.f, 9.5f});
+		constexpr float expected = 8.558621384f;
 		ASSERT_FLOAT_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, Distance4)
 	{
-		float actual = Vector<4>::Distance({4.f, -4.f, -4.f, 4.f}, {-6.f, 6.f, 6.f, -6.f});
-		float expected = 20;
+		constexpr float actual = Vector<4>::Distance({4.f, -4.f, -4.f, 4.f}, {-6.f, 6.f, 6.f, -6.f});
+		constexpr float expected = 20;
 		ASSERT_FLOAT_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, DotProductStatic)
 	{
-		float actual = Vector<2>::DotProduct({2.f, 6.f}, {-3.f, 8.f});
-		float expected = 42;
+		constexpr float actual = Vector<2>::DotProduct({2.f, 6.f}, {-3.f, 8.f});
+		constexpr float expected = 42;
 		ASSERT_FLOAT_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, DotProductMember)
 	{
-		float actual = -7 * Vector<2>{1.f, 2.f}.DotProduct({11.f, -4.f});
-		float expected = -21.f;
+		constexpr float actual = -7 * Vector<2>{1.f, 2.f}.DotProduct({11.f, -4.f});
+		constexpr float expected = -21.f;
 		ASSERT_FLOAT_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, DotProduct3)
 	{
-		float actual = 10 + Vector<3>{-5.f, 1.f, 3.f}.DotProduct({4.f, -13.f, 9.f});
-		float expected = 4;
+		constexpr float actual = 10 + Vector<3>{-5.f, 1.f, 3.f}.DotProduct({4.f, -13.f, 9.f});
+		constexpr float expected = 4;
 		ASSERT_FLOAT_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, DotProduct3Again)
 	{
-		float actual = 3 * Vector<3>{-2.f, 0.f, 4.f}.DotProduct(Vector<3>{8.f, -2.f, 3.f / 2.f} + Vector<3>{
+		constexpr float actual = 3 * Vector<3>{-2.f, 0.f, 4.f}.DotProduct(Vector<3>{8.f, -2.f, 3.f / 2.f} + Vector<3>{
 			0.f, 9.f, 7.f
 		});
-		float expected = 54;
+		constexpr float expected = 54;
 		ASSERT_FLOAT_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, ParallelAndPerpendicular)
 	{
-		Vector<3> vector{4.f, 3.f, -1.f};
-		Vector<3> unit{std::sqrtf(2) / 2.f, std::sqrtf(2) / 2.f, 0.f};
+		constexpr Vector<3> vector{4.f, 3.f, -1.f};
+		constexpr Vector<3> unit{0.7071067812f, 0.7071067812f, 0.f};
 
-		auto parallel = Vector<3>::Project(unit, vector);
-		auto perpendicular = Vector<3>::ProjectPerpendicular(unit, vector);
+		constexpr auto parallel = Vector<3>::Project(unit, vector);
+		constexpr auto perpendicular = Vector<3>::ProjectPerpendicular(unit, vector);
 
 		EXPECT_FLOAT_EQ(parallel.X(), 3.5f);
 		EXPECT_FLOAT_EQ(parallel.Y(), 3.5f);
@@ -343,79 +340,74 @@ namespace Engine3
 
 	TEST(VectorTest, CrossProductStaticAB)
 	{
-		Vector<3> a{0.f, -1.f, 0.f};
-		Vector<3> b{0.f, 0.f, 1.f};
+		constexpr Vector<3> a{0.f, -1.f, 0.f};
+		constexpr Vector<3> b{0.f, 0.f, 1.f};
+		constexpr Vector<3> actual = Vector<3>::CrossProduct(a, b);
 
-		Vector<3> actual = Vector<3>::CrossProduct(a, b);
-		Vector<3> expected{-1.f, 0.f, 0.f};
-
+		constexpr Vector<3> expected{-1.f, 0.f, 0.f};
 		ASSERT_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, CrossProductStaticBA)
 	{
-		Vector<3> a{0.f, -1.f, 0.f};
-		Vector<3> b{0.f, 0.f, 1.f};
+		constexpr Vector<3> a{0.f, -1.f, 0.f};
+		constexpr Vector<3> b{0.f, 0.f, 1.f};
+		constexpr Vector<3> actual = Vector<3>::CrossProduct(b, a);
 
-		Vector<3> actual = Vector<3>::CrossProduct(b, a);
-		Vector<3> expected{1.f, 0.f, 0.f};
-
+		constexpr Vector<3> expected{1.f, 0.f, 0.f};
 		ASSERT_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, CrossProductMember)
 	{
-		Vector<3> a{-2.f, 4.f, 1.f};
-		Vector<3> b{1.f, -2.f, -1.f};
+		constexpr Vector<3> a{-2.f, 4.f, 1.f};
+		constexpr Vector<3> b{1.f, -2.f, -1.f};
+		constexpr Vector<3> actual = a.CrossProduct(b);
 
-		Vector<3> actual = a.CrossProduct(b);
-		Vector<3> expected{-2.f, -1.f, 0.f};
-
+		constexpr Vector<3> expected{-2.f, -1.f, 0.f};
 		ASSERT_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, CrossProductParallel)
 	{
-		Vector<3> a{-2.f, 4.f, 0.f};
-		Vector<3> b{2.f, -4.f, 0.f};
+		constexpr Vector<3> a{-2.f, 4.f, 0.f};
+		constexpr Vector<3> b{2.f, -4.f, 0.f};
+		constexpr Vector<3> actual = a.CrossProduct(b);
 
-		Vector<3> actual = a.CrossProduct(b);
-		Vector<3> expected = Vector<3>::Zero();
-
+		constexpr Vector<3> expected = Vector<3>::Zero();
 		ASSERT_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, CrossProductZeroVectorA)
 	{
-		Vector<3> a{Vector<3>::Zero()};
-		Vector<3> b{2.f, -4.f, 0.f};
+		constexpr Vector<3> a{Vector<3>::Zero()};
+		constexpr Vector<3> b{2.f, -4.f, 0.f};
+		constexpr Vector<3> actual = a.CrossProduct(b);
 
-		Vector<3> actual = a.CrossProduct(b);
-		Vector<3> expected = Vector<3>::Zero();
-
+		constexpr Vector<3> expected = Vector<3>::Zero();
 		ASSERT_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, CrossProductZeroVectorB)
 	{
-		Vector<3> a{-2.f, 4.f, 0.f};
-		Vector<3> b{Vector<3>::Zero()};
+		constexpr Vector<3> a{-2.f, 4.f, 0.f};
+		constexpr Vector<3> b{Vector<3>::Zero()};
+		constexpr Vector<3> actual = a.CrossProduct(b);
 
-		Vector<3> actual = a.CrossProduct(b);
-		Vector<3> expected = Vector<3>::Zero();
-
+		constexpr Vector<3> expected = Vector<3>::Zero();
 		ASSERT_EQ(actual, expected);
 	}
 
 	TEST(VectorTest, IsPerpendicular)
 	{
-		Vector<3> up = Vector<3>::Up();
-		Vector<3> right = Vector<3>::Right();
+		constexpr Vector<3> up = Vector<3>::Up();
+		constexpr Vector<3> right = Vector<3>::Right();
 		Vector<3> forward = Vector<3>::Forward();
 		Vector<3> down = Vector<3>::Down();
 		Vector<3> left = Vector<3>::Left();
 		Vector<3> back = Vector<3>::Back();
 
+		static_assert(Vector<3>::IsPerpendicular(up, right) == true);
 		EXPECT_TRUE(Vector<3>::IsPerpendicular(up, right));
 		EXPECT_TRUE(Vector<3>::IsPerpendicular(up, forward));
 		EXPECT_TRUE(Vector<3>::IsPerpendicular(forward, right));
@@ -428,13 +420,14 @@ namespace Engine3
 
 	TEST(VectorTest, IsParallel)
 	{
-		Vector<3> up = Vector<3>::Up();
-		Vector<3> right = Vector<3>::Right();
+		constexpr Vector<3> up = Vector<3>::Up();
+		constexpr Vector<3> right = Vector<3>::Right();
 		Vector<3> forward = Vector<3>::Forward();
 		Vector<3> down = Vector<3>::Down();
 		Vector<3> left = Vector<3>::Left();
 		Vector<3> back = Vector<3>::Back();
 
+		static_assert(Vector<3>::IsParallel(up, up) == true);
 		EXPECT_TRUE(Vector<3>::IsParallel(up, up));
 		EXPECT_TRUE(Vector<3>::IsParallel(up, down));
 		EXPECT_TRUE(Vector<3>::IsParallel(left, right));
@@ -443,5 +436,23 @@ namespace Engine3
 		EXPECT_FALSE(Vector<3>::IsParallel(up, right));
 		EXPECT_FALSE(Vector<3>::IsParallel(up, forward));
 		EXPECT_FALSE(Vector<3>::IsParallel(forward, right));
+	}
+
+	TEST(VectorTest, IsZeroVector)
+	{
+		constexpr Vector<3> zero{};
+		static_assert(zero.IsZero() == true);
+
+		constexpr Vector<3> nonZero{5, 1, 0};
+		EXPECT_FALSE(nonZero.IsZero());
+	}
+
+	TEST(VectorTest, IsUnit)
+	{
+		constexpr Vector<3> unit{0, 1, 0};
+		constexpr Vector<3> non_unit{0, 0, 0};
+
+		static_assert(unit.IsUnit() == true);
+		static_assert(non_unit.IsUnit() == false);
 	}
 }

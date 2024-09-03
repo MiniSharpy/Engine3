@@ -63,7 +63,7 @@ namespace Engine3
 
 	TEST(Matrix4x3Test, Transposed)
 	{
-		Matrix<3, 4> actual =
+		constexpr Matrix<3, 4> actual =
 			Matrix<4, 3>
 			{
 				1, 2, 3,
@@ -72,7 +72,7 @@ namespace Engine3
 				10, 11, 12
 			}.Transposed();
 
-		Matrix<3, 4> expected
+		constexpr Matrix<3, 4> expected
 		{
 			1, 4, 7, 10,
 			2, 5, 8, 11,
@@ -84,20 +84,20 @@ namespace Engine3
 
 	TEST(MatrixSquareTest, GetRow)
 	{
-		Vector<3> actual = Matrix<3>
+		constexpr Vector<3> actual = Matrix<3>
 		{
 			1, 2, 3,
 			4, 5, 6,
 			7, 8, 9
 		}.GetRow(1);
 
-		Vector<3> expected{4, 5, 6};
+		constexpr Vector<3> expected{4, 5, 6};
 		ASSERT_EQ(expected, actual);
 	}
 
 	TEST(MatrixSquareTest, GetColumn)
 	{
-		Vector<4> actual = Matrix<4>
+		constexpr Vector<4> actual = Matrix<4>
 		{
 			1, 2, 3, 4,
 			5, 6, 7, 8,
@@ -105,19 +105,19 @@ namespace Engine3
 			13, 14, 15, 16
 		}.GetColumn(1);
 
-		Vector<4> expected{2, 6, 10, 14};
+		constexpr Vector<4> expected{2, 6, 10, 14};
 		ASSERT_EQ(expected, actual);
 	}
 
 	TEST(MatrixNonSquareTest, MatrixMultiplication2x4By4x3)
 	{
-		Matrix<2, 4> a =
+		constexpr Matrix<2, 4> a =
 		{
 			1, 2, 3, 4,
 			5, 6, 7, 8
 		};
 
-		Matrix<4, 3> b =
+		constexpr Matrix<4, 3> b =
 		{
 			1, 2, 3,
 			4, 5, 6,
@@ -125,9 +125,9 @@ namespace Engine3
 			10, 11, 12
 		};
 
-		Matrix<2, 3> ab = a * b;
+		constexpr Matrix<2, 3> ab = a * b;
 
-		Matrix<2, 3> expected =
+		constexpr Matrix<2, 3> expected =
 		{
 			70, 80, 90,
 			158, 184, 210
@@ -137,21 +137,21 @@ namespace Engine3
 
 	TEST(Matrix2x2Test, MatrixMultiplication)
 	{
-		Matrix<2> a
+		constexpr Matrix<2> a
 		{
 			1, -2,
 			5, 0
 		};
 
-		Matrix<2> b
+		constexpr Matrix<2> b
 		{
 			-3, 7,
 			4, 1.f / 3.f
 		};
 
-		Matrix<2> ab = a * b;
+		constexpr Matrix<2> ab = a * b;
 
-		Matrix<2> expected =
+		constexpr Matrix<2> expected =
 		{
 			-11, 6.f + 1.f / 3.f, -15, 35
 		};
@@ -160,20 +160,20 @@ namespace Engine3
 
 	TEST(Matrix2x2Test, VectorMultiplication)
 	{
-		Vector<2> a
+		constexpr Vector<2> a
 		{
 			3, 3
 		};
 
-		Matrix<2> b
+		constexpr Matrix<2> b
 		{
 			6, -7,
 			-4, 5
 		};
 
-		Vector<2> ab = a * b;
+		constexpr Vector<2> ab = a * b;
 
-		Vector<2> expected =
+		constexpr Vector<2> expected =
 		{
 			6, -6
 		};
@@ -183,20 +183,20 @@ namespace Engine3
 
 	TEST(MatrixNonSquareTest, RowVectorMultiplication)
 	{
-		Matrix<2, 3> matrix =
+		constexpr Matrix<2, 3> matrix =
 		{
 			1, 2, 3,
 			4, 5, 6,
 		};
 
-		Vector<2> rowVector =
+		constexpr Vector<2> rowVector =
 		{
 			1, 2
 		};
 
-		Vector<3> actual = rowVector * matrix;
+		constexpr Vector<3> actual = rowVector * matrix;
 
-		Vector<3> expected =
+		constexpr Vector<3> expected =
 		{
 			9, 12, 15
 		};
@@ -205,7 +205,7 @@ namespace Engine3
 
 	TEST(MatrixNonSquareTest, ColumnVectorMultiplication)
 	{
-		Matrix<4, 3> matrix =
+		constexpr Matrix<4, 3> matrix =
 		{
 			1, 2, 3,
 			4, 5, 6,
@@ -213,14 +213,14 @@ namespace Engine3
 			10, 11, 12
 		};
 
-		Vector<3> rowVector =
+		constexpr Vector<3> rowVector =
 		{
 			1, 2, 3
 		};
 
-		Vector<4> actual = matrix * rowVector;
+		constexpr Vector<4> actual = matrix * rowVector;
 
-		Vector<4> expected =
+		constexpr Vector<4> expected =
 		{
 			14, 32, 50, 68
 		};
@@ -347,16 +347,16 @@ namespace Engine3
 
 	TEST(Matrix4x4FloatTest, Submatrix)
 	{
-		Matrix<4> matrix
+		constexpr Matrix<4> matrix
 		{
 			3, -2, 0, 1,
 			1, 4, 0, 1,
 			0, 0, 2, 1,
 			1, 1, 1, 1
 		};
-		Matrix<3> actual = matrix.Submatrix(1, 1);
+		constexpr Matrix<3> actual = matrix.Submatrix(1, 1);
 
-		Matrix<3> expected
+		constexpr Matrix<3> expected
 		{
 			3, 0, 1,
 			0, 2, 1,
@@ -367,7 +367,7 @@ namespace Engine3
 
 	TEST(Matrix4x4FloatTest, Minor)
 	{
-		Matrix<4> matrix
+		constexpr Matrix<4> matrix
 		{
 			3, -2, 0, 1,
 			1, 4, 0, 1,
@@ -375,15 +375,15 @@ namespace Engine3
 			1, 1, 1, 1
 		};
 
-		float actual = matrix.Minor(1, 1);
+		constexpr float actual = matrix.Minor(1, 1);
 
-		float expected = 1;
+		constexpr float expected = 1;
 		ASSERT_EQ(expected, actual);
 	}
 
 	TEST(Matrix4x4FloatTest, Cofactor)
 	{
-		Matrix<4> matrix
+		constexpr Matrix<4> matrix
 		{
 			3, -2, 0, 1,
 			1, 4, 0, 1,
@@ -391,17 +391,9 @@ namespace Engine3
 			1, 1, 1, 1
 		};
 
-		Matrix<4> actual;
+		constexpr Matrix<4> actual = matrix.CofactorMatrix();
 
-		for (int row = 0; row < 4; ++row)
-		{
-			for (int column = 0; column < 4; ++column) // Resharper, quit putting this as one line!
-			{
-				actual(row, column) = matrix.Cofactor(row, column);
-			}
-		}
-
-		Matrix<4> expected
+		constexpr Matrix<4> expected
 		{
 			2, 1, 3, -6,
 			4, 1, 5, -10,
@@ -413,7 +405,7 @@ namespace Engine3
 
 	TEST(Matrix4x4FloatTest, Determinant)
 	{
-		Matrix<4> matrix
+		constexpr Matrix<4> matrix
 		{
 			3, -2, 0, 1,
 			1, 4, 0, 1,
@@ -421,9 +413,9 @@ namespace Engine3
 			1, 1, 1, 1
 		};
 
-		float actual = matrix.Determinant();
+		constexpr float actual = matrix.Determinant();
 
-		float expected = -2;
+		constexpr float expected = -2;
 		ASSERT_EQ(expected, actual);
 	}
 }

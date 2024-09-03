@@ -6,14 +6,14 @@ namespace Engine3
 {
 	TEST(Matrix3x3FloatTest, IdentityMatrix)
 	{
-		Matrix<3> expected =
+		constexpr Matrix<3> expected =
 		{
 			1, 0, 0,
 			0, 1, 0,
 			0, 0, 1
 		};
-
-		ASSERT_EQ(Matrix<3>::IdentityMatrix(), expected);
+		constexpr Matrix<3> actual = Matrix<3>::IdentityMatrix();
+		static_assert(expected == actual);
 	}
 
 	TEST(Matrix3x3FloatTest, Transpose)
@@ -431,15 +431,15 @@ namespace Engine3
 
 	TEST(Matrix3x3FloatTest, Submatrix)
 	{
-		Matrix<3> matrix
+		constexpr Matrix<3> matrix
 		{
 			3, -2, 0,
 			1, 4, 0,
 			0, 0, 2
 		};
-		Matrix<2> actual = matrix.Submatrix(1, 1);
+		constexpr Matrix<2> actual = matrix.Submatrix(1, 1);
 
-		Matrix<2> expected
+		constexpr Matrix<2> expected
 		{
 			3, 0,
 			0, 2
@@ -449,7 +449,7 @@ namespace Engine3
 
 	TEST(Matrix3x3FloatTest, CofactorMatrix)
 	{
-		Matrix<3> actual =
+		constexpr Matrix<3> actual =
 			Matrix<3>
 			{
 				3, -2, 0,
@@ -457,7 +457,7 @@ namespace Engine3
 				0, 0, 2
 			}.CofactorMatrix();
 
-		Matrix<3> expected
+		constexpr Matrix<3> expected
 		{
 			8, -2, 0,
 			4, 6, 0,
@@ -469,7 +469,7 @@ namespace Engine3
 
 	TEST(Matrix3x3FloatTest, Adjoint)
 	{
-		Matrix<3> actual =
+		constexpr Matrix<3> actual =
 			Matrix<3>
 			{
 				3, -2, 0,
@@ -477,7 +477,7 @@ namespace Engine3
 				0, 0, 2
 			}.Adjoint();
 
-		Matrix<3> expected
+		constexpr Matrix<3> expected
 		{
 			8, 4, 0,
 			-2, 6, 0,
@@ -489,7 +489,7 @@ namespace Engine3
 
 	TEST(Matrix3x3FloatTest, Inverted)
 	{
-		Matrix<3> actual =
+		constexpr Matrix<3> actual =
 			Matrix<3>
 			{
 				3, -2, 0,
@@ -497,7 +497,7 @@ namespace Engine3
 				0, 0, 2
 			}.Inverted();
 
-		Matrix<3> expected
+		constexpr Matrix<3> expected
 		{
 			8 / 28.f, 4 / 28.f, 0,
 			-2 / 28.f, 6 / 28.f, 0,

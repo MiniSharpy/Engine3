@@ -108,11 +108,11 @@ namespace Engine3
 
 		static constexpr bool IsParallel(const Vector& lhs, const Vector& rhs)
 		{
-			return Vector::CrossProduct(lhs, rhs).IsZeroVector();
+			return Vector::CrossProduct(lhs, rhs).IsZero();
 		}
 
 		/* Methods */
-		constexpr bool IsZeroVector()
+		constexpr bool IsZero() const
 		{
 			return std::all_of(this->begin(), this->end(), [](T value) { return AlmostEquals<T>(0, value); });
 		}
@@ -139,13 +139,17 @@ namespace Engine3
 
 		/// Calculates the length of a vector by applying Pythagoras' theorem.
 		/// @return Magnitude of the vector. The type is determined by the overload of std::sqrt.
-		constexpr auto Length() const { return std::sqrt(LengthSquared()); }
+		constexpr auto Length() const { return SquareRoot(LengthSquared()); }
 
 		/// Normalises a vector by dividing each of its components by the vector's magnitude.
-		void Normalise() requires std::floating_point<T>
+		constexpr Vector& Normalise() requires std::floating_point<T>
 		{
+			assert(!IsZero());
+			// Multiply multiple times vs divide multiple times. This is probably better.
 			auto scale = 1 / Length();
 			*this *= scale;
+
+			return *this;
 		}
 
 		/// Normalises a vector by dividing each of its components by the vector's magnitude.
@@ -153,10 +157,9 @@ namespace Engine3
 		[[nodiscard]] constexpr Vector Normalised() const requires std::floating_point<T>
 		// [[nodiscard]] to help emphasise this is not the same as Normalise().
 		{
-			Vector copy = *this;
-			copy.Normalise();
-
-			return copy;
+			// Multiply multiple times vs divide multiple times. This is probably better.
+			auto scale = 1 / Length();
+			return (*this) * scale;
 		}
 
 		/// Calculates the squared distance between two vectors.
@@ -170,19 +173,19 @@ namespace Engine3
 		/* Getters and Setters */
 		constexpr T X() const requires (Dimensions <= 4) { return (*this)[0]; }
 
-		void X(T value) requires (Dimensions <= 4) { (*this)[0] = value; }
+		constexpr void X(T value) requires (Dimensions <= 4) { (*this)[0] = value; }
 
 		constexpr T Y() const requires (Dimensions <= 4 && Dimensions > 1) { return (*this)[1]; }
 
-		void Y(T value) requires (Dimensions <= 4 && Dimensions > 1) { (*this)[1] = value; }
+		constexpr void Y(T value) requires (Dimensions <= 4 && Dimensions > 1) { (*this)[1] = value; }
 
 		constexpr T Z() const requires (Dimensions <= 4 && Dimensions > 2) { return (*this)[2]; }
 
-		void Z(T value) requires (Dimensions <= 4 && Dimensions > 2) { (*this)[2] = value; }
+		constexpr void Z(T value) requires (Dimensions <= 4 && Dimensions > 2) { (*this)[2] = value; }
 
 		constexpr T W() const requires (Dimensions <= 4 && Dimensions > 3) { return (*this)[3]; }
 
-		void W(T value) requires (Dimensions <= 4 && Dimensions > 3) { (*this)[3] = value; }
+		constexpr void W(T value) requires (Dimensions <= 4 && Dimensions > 3) { (*this)[3] = value; }
 
 		constexpr bool IsUnit() const
 		{
@@ -192,7 +195,7 @@ namespace Engine3
 
 		/* Operator Overloading */
 		/// @return A negated copy of the vector.
-		Vector operator-() const
+		constexpr Vector operator-() const
 		{
 			Vector negated;
 			for (size_t i = 0; i < Dimensions; ++i) { negated[i] = -(*this)[i]; }
@@ -236,12 +239,11 @@ namespace Engine3
 		/// @return A copy of the passed vector, multiplied by the scalar.
 		constexpr friend Vector operator*(Vector lhs, T rhs) { return lhs *= rhs; }
 
-		// Intentionally copied parameter to re-use already implemented operator.
 		/// Multiplies each element in a vector by a scalar.
 		/// @param lhs Scalar value by which to multiply each element.
 		/// @param rhs Vector that's elements will be multiplied.
 		/// @return A copy of the passed vector, multiplied by the scalar.
-		friend Vector operator*(T lhs, const Vector& rhs) { return rhs * lhs; }
+		constexpr friend Vector operator*(T lhs, const Vector& rhs) { return rhs * lhs; }
 
 		/// Divides each element in the vector by a scalar.
 		/// @param rhs Scalar value.
@@ -252,31 +254,32 @@ namespace Engine3
 			return *this;
 		}
 
-		// Intentionally copied parameter to re-use already implemented operator.
 		/// Divides each element in a vector by a scalar.
 		/// @param lhs Vector that's elements will be divided.
 		/// @param rhs Scalar value by which to multiply each element.
 		/// @return A copy of the passed vector, divided by the scalar.
+		// Intentional copy.
 		constexpr friend Vector operator/(Vector lhs, T rhs) { return lhs /= rhs; }
 
-		friend bool operator==(const Vector& lhs, const Vector& rhs) = default;
+		constexpr friend bool operator==(const Vector& lhs, const Vector& rhs) = default;
 
-		friend bool operator<(const Vector& lhs, const Vector& rhs)
+		constexpr friend bool operator<(const Vector& lhs, const Vector& rhs)
 		{
 			return lhs.LengthSquared() < rhs.LengthSquared();
 		}
 
-		friend bool operator!=(const Vector& lhs, const Vector& rhs) { return !(lhs == rhs); }
+		constexpr friend bool operator!=(const Vector& lhs, const Vector& rhs) { return !(lhs == rhs); }
 
-		friend bool operator<=(const Vector& lhs, const Vector& rhs) { return !(rhs < lhs); }
+		constexpr friend bool operator<=(const Vector& lhs, const Vector& rhs) { return !(rhs < lhs); }
 
-		friend bool operator>(const Vector& lhs, const Vector& rhs) { return rhs < lhs; }
+		constexpr friend bool operator>(const Vector& lhs, const Vector& rhs) { return rhs < lhs; }
 
-		friend bool operator>=(const Vector& lhs, const Vector& rhs) { return !(lhs < rhs); }
+		constexpr friend bool operator>=(const Vector& lhs, const Vector& rhs) { return !(lhs < rhs); }
 
 		// If these aren't deleted it makes it possible to compare to a plain array of the same type and size.
 		friend auto operator==(const std::array<T, Dimensions>& lhs, const std::array<T, Dimensions>& rhs) = delete;
 
-		friend auto operator<=>(const std::array<T, Dimensions>& lhs, const std::array<T, Dimensions>& rhs) = delete;
+		friend auto operator<=>(const std::array<T, Dimensions>& lhs, const std::array<T, Dimensions>& rhs)
+		= delete;
 	};
 }
