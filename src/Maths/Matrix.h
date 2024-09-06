@@ -193,42 +193,35 @@ namespace Engine3
 				return isOrthogonal;
 			}
 
-			Matrix<RowSize, ColumnSize, T> Orthonormalised() requires
-				(IsSquare<RowSize, ColumnSize> && RowSize > 1)
+			/// Gram-Schmidt orthonormalisation to construct a set of orthonormal vectors given a finite, 
+			/// linearly independent set of vectors.
+			/// @return The orthogonal matrix.
+			constexpr Matrix<RowSize, ColumnSize, T> Orthonormalised() const
+				requires (IsSquare<RowSize, ColumnSize> && RowSize > 1)
 			{
+				// TODO: Handle invalid cases, such as linearly dependent inputs.
 				using Vector = Vector<RowSize, T>;
 
-				// "...subtract off the portion of that vector that is parallel to the proceeding basis vectors."
-				// - 3D Math Primer for Graphics and Game Development
-				auto lambda = [](const Vector& currentRow, const Vector& previousRow)
-				{
-					// This is similar to Vector::ProjectPerpendicular except we're normalising.
-					T currentDotPreviousNormalised =
-						Vector::DotProduct(currentRow, previousRow) /
-						Vector::DotProduct(previousRow, previousRow);
-
-					return currentDotPreviousNormalised * previousRow;
-				};
-
-				Matrix<RowSize, ColumnSize, T> orthonormalised;
-
-				const Vector rowZero = GetRow(0);
-				orthonormalised.SetRow(0, rowZero);
+				Matrix<RowSize, ColumnSize, T> orthogonalised;
+				orthogonalised.SetRow(0, GetRow(0).Normalise());
 
 				for (int i = 1; i < RowSize; ++i)
 				{
 					const Vector currentRow = GetRow(i);
-					// For each previous row, subtract the normalised projection.
+
+					// "...subtract off the portion of that vector that is parallel to the proceeding basis vectors."
+					// - 3D Math Primer for Graphics and Game Development
+					Vector newRow = currentRow;
 					for (int j = 0; j < i; ++j)
 					{
-						const Vector previousRow = GetRow(j);
-						currentRow - lambda(currentRow, previousRow);
+						const Vector previousRow = orthogonalised.GetRow(j);
+						newRow -= Vector::Project(currentRow, previousRow);
 					}
 
-					orthonormalised.SetRow(i, currentRow);
+					orthogonalised.SetRow(i, newRow.Normalise());
 				}
 
-				return orthonormalised;
+				return orthogonalised;
 			}
 
 			/// @param row The row to return, indexed from zero/
@@ -724,32 +717,6 @@ namespace Engine3
 				m(0, 1) * (m(1, 2) * m(2, 0) - m(1, 0) * m(2, 2)) +
 				m(0, 2) * (m(1, 0) * m(2, 1) - m(1, 1) * m(2, 0))
 			};
-		}
-
-		// TODO: Would methods within MatrixBase calling Orthonormalised call this one of the base implemetnation?
-		Matrix Orthonormalised()
-		{
-			Matrix orthonormalised;
-
-			// Row one is left as is.
-			const Vector<3, T> rowOne = this->GetRow(0);
-
-			// Calculating row two.
-			const Vector<3, T> unalteredRowTwo = this->GetRow(1);
-			const T twoDotOneNormalised =
-				Vector<3, T>::DotProduct(unalteredRowTwo, rowOne) /
-				Vector<3, T>::DotProduct(rowOne, rowOne);
-
-			const Vector<3, T> rowTwo = unalteredRowTwo - (twoDotOneNormalised * rowOne);
-
-			// Row three is the cross of one and two.
-			const Vector<3, T> rowThree = Vector<3, T>::CrossProduct(rowOne, rowTwo);
-
-			orthonormalised.SetRow(0, rowOne);
-			orthonormalised.SetRow(1, rowTwo);
-			orthonormalised.SetRow(2, rowThree);
-
-			return orthonormalised;
 		}
 	};
 

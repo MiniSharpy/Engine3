@@ -9,6 +9,11 @@ int main(int argc, char* argv[])
 {
 	using namespace Engine3;
 
+	Vector<3> test{1, 1, 1};
+	Vector<3> test1{1, 1, 1};
+	test.Normalise();
+	test1.Normalised();
+
 	Engine engine;
 	if (!engine) { return -1; }
 

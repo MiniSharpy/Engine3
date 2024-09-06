@@ -1,5 +1,6 @@
 #include "../src/Maths/Maths.h"
 #include "../src/Maths/Matrix.h"
+#include <numbers>
 #include <gtest/gtest.h>
 
 namespace Engine3
@@ -530,8 +531,8 @@ namespace Engine3
 
 	TEST(Matrix3x3FloatTest, IsOrthogonal)
 	{
-		constexpr Vector<3> row1 = Vector<3>::Up();
-		constexpr Vector<3> row2 = Vector<3>::Right();
+		constexpr Vector<3> row1 = Vector<3>::Right();
+		constexpr Vector<3> row2 = Vector<3>::Up();
 		constexpr Vector<3> row3 = Vector<3>::Forward();
 
 		bool actual = Matrix<3>
@@ -543,5 +544,71 @@ namespace Engine3
 
 		bool expected = true;
 		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, Orthonormalised_BasisIsOrthogonal)
+	{
+		constexpr Matrix<3> actual = Matrix<3>{
+			1, 0, 0,
+			0, 5, 0,
+			0, 0, 1
+		}.Orthonormalised();
+
+		constexpr Matrix<3> expected{
+			1, 0, 0,
+			0, 1, 0,
+			0, 0, 1
+		};
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, Orthonormalised_BasisIsOrthonormal)
+	{
+		constexpr Matrix<3> actual = Matrix<3>{
+			1, 0, 0,
+			0, 1, 0,
+			0, 0, 1
+		}.Orthonormalised();
+
+		constexpr Matrix<3> expected{
+			1, 0, 0,
+			0, 1, 0,
+			0, 0, 1
+		};
+		ASSERT_EQ(expected, actual);
+	}
+
+	TEST(Matrix3x3FloatTest, Orthonormalised_BasisLinearlyIndependent)
+	{
+		constexpr Matrix<3> actual = Matrix<3>{
+			1, 2, -2,
+			1, 0, -4,
+			5, 2, 0
+		}.Orthonormalised();
+
+		// Non-normalised output.
+		//constexpr Matrix<3> expected
+		//{
+		//	1, 2, -2,
+		//	0, -2, -2,
+		//	4, -1, 1
+		//};
+
+		constexpr Matrix<3> expected
+		{
+			1 / 3.f, 2 / 3.f, -2 / 3.f,
+			0, -0.7071067812f, -0.7071067812f,
+			0.9428090416f, -0.2357022604f, 0.2357022604f
+		};
+
+		EXPECT_NEAR(actual[0], expected[0], 0.01);
+		EXPECT_NEAR(actual[1], expected[1], 0.01);
+		EXPECT_NEAR(actual[2], expected[2], 0.01);
+		EXPECT_NEAR(actual[3], expected[3], 0.01);
+		EXPECT_NEAR(actual[4], expected[4], 0.01);
+		EXPECT_NEAR(actual[5], expected[5], 0.01);
+		EXPECT_NEAR(actual[6], expected[6], 0.01);
+		EXPECT_NEAR(actual[7], expected[7], 0.01);
+		EXPECT_NEAR(actual[8], expected[8], 0.01);
 	}
 }

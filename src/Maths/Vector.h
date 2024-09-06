@@ -74,32 +74,28 @@ namespace Engine3
 		/// @return The magnitude of the vector \p rhs - \p lhs.
 		static constexpr auto Distance(const Vector& lhs, const Vector& rhs) { return (rhs - lhs).Length(); }
 
-		// Static to better emphasise the usage of the unit vector.
-		/// Projects a vector onto an infinitely long line. \n
-		///	Consider a right-angled triangle made up of vectors where the hypotenuse is \p rhs,
+		/// Projects vector \p lhs onto an infinitely long line in the direction of \p rhs. \n
+		///	Consider a right-angled triangle made up of vectors where the hypotenuse is \p lhs,
 		///	the adjacent side \p Project(lhs, \p rhs), and the opposite side is \p ProjectPerpendicular(lhs, \p rhs).
-		/// @param lhs Unit vector that determines the direction of the line that \p rhs will be projected upon.
-		/// @param rhs Vector to project.
-		/// @return The projection of \p rhs onto an infinitely long line which is parallel to \p lhs. 
-		static constexpr Vector Project(const Vector& lhs, const Vector& rhs) requires std::floating_point<T>
+		/// @param lhs Vector to project.
+		/// @param rhs Vector that determines the direction of the line that \p rhs will be projected upon.
+		/// @return The projection of \p lhs onto an infinitely long line which is parallel to \p rhs. 
+		static constexpr Vector Project(const Vector& lhs, const Vector& rhs)
+			requires std::floating_point<T>
 		{
-			assert(lhs.IsUnit());
-			return DotProduct(lhs, rhs) * lhs;
+			const Vector rhsNormalised = rhs.Normalised();
+			return DotProduct(lhs, rhsNormalised) * rhsNormalised;
 		}
 
 		// Static to better emphasise the usage of the unit vector.
-		/// Calculates the vector from \p Project(lhs, \p b) to \p rhs. \n
-		///	Consider a right-angled triangle made up of vectors where the hypotenuse is \p rhs,
+		/// Calculates the vector from \p Project(lhs, \p rhs) to \p lhs. \n
+		///	Consider a right-angled triangle made up of vectors where the hypotenuse is \p lhs,
 		///	the adjacent side \p Project(lhs, \p rhs), and the opposite side is \p ProjectPerpendicular(lhs, \p rhs).
-		/// @param lhs Unit vector that determines the direction of the line that \p rhs will be projected upon.
-		/// @param rhs Vector to project.
-		/// @return The vector of \p rhs, which is parallel to \p lhs. 
-		static constexpr Vector ProjectPerpendicular(const Vector& lhs, const Vector& rhs) requires std::floating_point<
-			T>
-		{
-			assert(lhs.IsUnit());
-			return rhs - (DotProduct(lhs, rhs) * lhs);
-		}
+		/// @param lhs Vector to project.
+		/// @param rhs Vector that determines the direction of the line that \p rhs will be projected upon.
+		/// @return The vector orthogonal to \p rhs that leads to \p lhs. 
+		static constexpr Vector ProjectPerpendicular(const Vector& lhs, const Vector& rhs)
+			requires std::floating_point<T> { return lhs - Project(lhs, rhs); }
 
 		static constexpr bool IsPerpendicular(const Vector& lhs, const Vector& rhs)
 		{
@@ -144,7 +140,8 @@ namespace Engine3
 		/// Normalises a vector by dividing each of its components by the vector's magnitude.
 		constexpr Vector& Normalise() requires std::floating_point<T>
 		{
-			assert(!IsZero());
+			//assert(!IsZero());
+
 			// Multiply multiple times vs divide multiple times. This is probably better.
 			auto scale = 1 / Length();
 			*this *= scale;
@@ -157,6 +154,8 @@ namespace Engine3
 		[[nodiscard]] constexpr Vector Normalised() const requires std::floating_point<T>
 		// [[nodiscard]] to help emphasise this is not the same as Normalise().
 		{
+			//assert(!IsZero());
+
 			// Multiply multiple times vs divide multiple times. This is probably better.
 			auto scale = 1 / Length();
 			return (*this) * scale;

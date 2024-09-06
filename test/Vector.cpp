@@ -326,8 +326,8 @@ namespace Engine3
 		constexpr Vector<3> vector{4.f, 3.f, -1.f};
 		constexpr Vector<3> unit{0.7071067812f, 0.7071067812f, 0.f};
 
-		constexpr auto parallel = Vector<3>::Project(unit, vector);
-		constexpr auto perpendicular = Vector<3>::ProjectPerpendicular(unit, vector);
+		constexpr auto parallel = Vector<3>::Project(vector, unit);
+		constexpr auto perpendicular = Vector<3>::ProjectPerpendicular(vector, unit);
 
 		EXPECT_FLOAT_EQ(parallel.X(), 3.5f);
 		EXPECT_FLOAT_EQ(parallel.Y(), 3.5f);

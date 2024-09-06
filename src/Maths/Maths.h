@@ -6,14 +6,14 @@
 
 namespace Engine3
 {
-	template <std::floating_point T>
-	constexpr T DegreesToRadians(T degrees) { return degrees * (std::numbers::pi_v<T> / static_cast<T>(180)); }
-
 	template <class T>
 	concept Number = std::is_floating_point_v<T> || std::is_integral_v<T>;
 
 	template <std::size_t a, std::size_t b>
 	concept IsSquare = (a == b);
+
+	template <std::floating_point T>
+	constexpr T DegreesToRadians(T degrees) { return degrees * (std::numbers::pi_v<T> / static_cast<T>(180)); }
 
 	template <typename T>
 	constexpr bool AlmostEquals(T lhs, T rhs)
