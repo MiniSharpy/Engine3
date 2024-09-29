@@ -252,13 +252,13 @@ namespace Engine3
 
 	TEST(Matrix4x4FloatTest, ScalingCardinal)
 	{
-		Matrix<4> actual = Matrix<4>::ScalingAlongCardinalAxes(2, 2, 2, 2);
+		Matrix<4> actual = Matrix<4>::ScalingAlongCardinalAxes(2, 2, 2);
 		Matrix<4> expected
 		{
 			2, 0, 0, 0,
 			0, 2, 0, 0,
 			0, 0, 2, 0,
-			0, 0, 0, 2
+			0, 0, 0, 1
 		};
 
 		ASSERT_EQ(actual, expected);

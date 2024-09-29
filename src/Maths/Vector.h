@@ -140,7 +140,7 @@ namespace Engine3
 		/// Normalises a vector by dividing each of its components by the vector's magnitude.
 		constexpr Vector& Normalise() requires std::floating_point<T>
 		{
-			//assert(!IsZero());
+			assert(!IsZero());
 
 			// Multiply multiple times vs divide multiple times. This is probably better.
 			auto scale = 1 / Length();
@@ -154,7 +154,7 @@ namespace Engine3
 		[[nodiscard]] constexpr Vector Normalised() const requires std::floating_point<T>
 		// [[nodiscard]] to help emphasise this is not the same as Normalise().
 		{
-			//assert(!IsZero());
+			assert(!IsZero());
 
 			// Multiply multiple times vs divide multiple times. This is probably better.
 			auto scale = 1 / Length();
@@ -278,7 +278,6 @@ namespace Engine3
 		// If these aren't deleted it makes it possible to compare to a plain array of the same type and size.
 		friend auto operator==(const std::array<T, Dimensions>& lhs, const std::array<T, Dimensions>& rhs) = delete;
 
-		friend auto operator<=>(const std::array<T, Dimensions>& lhs, const std::array<T, Dimensions>& rhs)
-		= delete;
+		friend auto operator<=>(const std::array<T, Dimensions>& lhs, const std::array<T, Dimensions>& rhs) = delete;
 	};
 }

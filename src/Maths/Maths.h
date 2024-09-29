@@ -12,6 +12,9 @@ namespace Engine3
 	template <std::size_t a, std::size_t b>
 	concept IsSquare = (a == b);
 
+	template <std::size_t Size, std::size_t ... ValidSizes>
+	concept IsValidDimensions = ((Size == ValidSizes) || ...);
+
 	template <std::floating_point T>
 	constexpr T DegreesToRadians(T degrees) { return degrees * (std::numbers::pi_v<T> / static_cast<T>(180)); }
 
