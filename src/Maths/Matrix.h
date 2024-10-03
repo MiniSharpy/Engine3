@@ -117,7 +117,7 @@ namespace Engine3
 			constexpr Matrix<RowSize, ColumnSize, T>& Transpose() requires (RowSize == ColumnSize)
 			{
 				// Effectively swapping rows with columns.
-				// Could do in place, not sure if there's much benefit.
+				// Could do in place, not sure if there would be any performance benefits besides memory usage.
 				// https://en.wikipedia.org/wiki/In-place_matrix_transposition#Square_matrices
 				*this = Transposed();
 
@@ -143,24 +143,19 @@ namespace Engine3
 
 			constexpr Matrix<RowSize, ColumnSize, T> Adjoint() requires (IsSquare<RowSize, ColumnSize>)
 			{
-				Matrix<RowSize, ColumnSize, T> adjoint = CofactorMatrix();
-				adjoint.Transpose();
-
-				return adjoint;
+				return CofactorMatrix().Transpose();
 			}
 
 			constexpr bool IsInvertible() const requires (IsSquare<RowSize, ColumnSize>)
 			{
-				return !AlmostEquals<T>(0, Determinant());
+				// A matrix is inverted by dividing its adjoint by the determinant.
+				return !(Determinant() == 0);
 			}
 
 			constexpr Matrix<RowSize, ColumnSize, T> Inverted() requires (IsSquare<RowSize, ColumnSize>)
 			{
 				assert(IsInvertible());
-				Matrix<RowSize, ColumnSize, T> inverted = Adjoint();
-				inverted /= Determinant();
-
-				return inverted;
+				return Adjoint() / Determinant();
 			}
 
 			constexpr Matrix<RowSize, ColumnSize, T>& Invert() requires (IsSquare<RowSize, ColumnSize>)
@@ -632,6 +627,7 @@ namespace Engine3
 
 	// Row first, then column to follow normal matrix conventions.
 	/// Matrix with its elements stored in row-major order.
+	///	Linear transformations assume row vectors.
 	/// @tparam RowSize The vertical size of the matrix.
 	/// @tparam ColumnSize The horizontal size of the matrix.
 	/// @tparam T The type of each element stored in the matrix.
@@ -640,6 +636,7 @@ namespace Engine3
 
 	// Row first, then column to follow normal matrix conventions.
 	/// Matrix with its elements stored in row-major order.
+	///	Linear transformations assume row vectors.
 	/// @tparam RowSize The vertical size of the matrix.
 	/// @tparam ColumnSize The horizontal size of the matrix.
 	/// @tparam T The type of each element stored in the matrix.
@@ -757,6 +754,7 @@ namespace Engine3
 
 	// Row first, then column to follow normal matrix conventions.
 	/// Matrix with its elements stored in row-major order.
+	///	Linear transformations assume row vectors.
 	/// @tparam RowSize The vertical size of the matrix.
 	/// @tparam ColumnSize The horizontal size of the matrix.
 	/// @tparam T The type of each element stored in the matrix.
@@ -778,6 +776,7 @@ namespace Engine3
 
 	// Row first, then column to follow normal matrix conventions.
 	/// Matrix with its elements stored in row-major order.
+	///	Linear transformations assume row vectors.
 	/// @tparam RowSize The vertical size of the matrix.
 	/// @tparam ColumnSize The horizontal size of the matrix.
 	/// @tparam T The type of each element stored in the matrix.
@@ -792,18 +791,6 @@ namespace Engine3
 				0, 1, 0, 0,
 				0, 0, 1, 0,
 				dx, dy, dz, 1
-			};
-		}
-
-		static constexpr Matrix PerspectiveProjection(T distanceFromProjectionPlane)
-			requires std::floating_point<T>
-		{
-			return
-			{
-				1, 0, 0, 0,
-				0, 1, 0, 0,
-				0, 0, 1, 1 / distanceFromProjectionPlane,
-				0, 0, 0, 0
 			};
 		}
 	};

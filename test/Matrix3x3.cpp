@@ -1,7 +1,10 @@
+#include "CustomMatchers.h"
 #include "../src/Maths/Maths.h"
 #include "../src/Maths/Matrix.h"
+#include "gmock/gmock-matchers.h"
 #include <numbers>
 #include <gtest/gtest.h>
+using testing::Pointwise;
 
 namespace Engine3
 {
@@ -230,15 +233,7 @@ namespace Engine3
 			0.146f, 0.054f, 0.988f
 		};
 
-		EXPECT_NEAR(actual[0], expected[0], 0.001);
-		EXPECT_NEAR(actual[1], expected[1], 0.001);
-		EXPECT_NEAR(actual[2], expected[2], 0.001);
-		EXPECT_NEAR(actual[3], expected[3], 0.001);
-		EXPECT_NEAR(actual[4], expected[4], 0.001);
-		EXPECT_NEAR(actual[5], expected[5], 0.001);
-		EXPECT_NEAR(actual[6], expected[6], 0.001);
-		EXPECT_NEAR(actual[7], expected[7], 0.001);
-		EXPECT_NEAR(actual[8], expected[8], 0.001);
+		EXPECT_THAT(actual, Pointwise(NearWithPrecision(0.001), expected));
 	}
 
 	TEST(Matrix3x3FloatTest, ScalingCardinal)
@@ -266,15 +261,7 @@ namespace Engine3
 			0.857f, -1.716f, 3.573f
 		};
 
-		EXPECT_NEAR(actual[0], expected[0], 0.01);
-		EXPECT_NEAR(actual[1], expected[1], 0.01);
-		EXPECT_NEAR(actual[2], expected[2], 0.01);
-		EXPECT_NEAR(actual[3], expected[3], 0.01);
-		EXPECT_NEAR(actual[4], expected[4], 0.01);
-		EXPECT_NEAR(actual[5], expected[5], 0.01);
-		EXPECT_NEAR(actual[6], expected[6], 0.01);
-		EXPECT_NEAR(actual[7], expected[7], 0.01);
-		EXPECT_NEAR(actual[8], expected[8], 0.01);
+		EXPECT_THAT(actual, Pointwise(NearWithPrecision(0.01), expected));
 	}
 
 	TEST(Matrix3x3FloatTest, OrthographicProjectXY)
@@ -328,15 +315,7 @@ namespace Engine3
 			-0.214134f, 0.42907f, 0.356796f
 		};
 
-		EXPECT_NEAR(actual[0], expected[0], 0.01);
-		EXPECT_NEAR(actual[1], expected[1], 0.01);
-		EXPECT_NEAR(actual[2], expected[2], 0.01);
-		EXPECT_NEAR(actual[3], expected[3], 0.01);
-		EXPECT_NEAR(actual[4], expected[4], 0.01);
-		EXPECT_NEAR(actual[5], expected[5], 0.01);
-		EXPECT_NEAR(actual[6], expected[6], 0.01);
-		EXPECT_NEAR(actual[7], expected[7], 0.01);
-		EXPECT_NEAR(actual[8], expected[8], 0.01);
+		EXPECT_THAT(actual, Pointwise(NearWithPrecision(0.001), expected));
 	}
 
 	TEST(Matrix3x3FloatTest, Reflection)
@@ -351,15 +330,7 @@ namespace Engine3
 			-0.428268f, 0.85814f, -0.286408f
 		};
 
-		EXPECT_NEAR(actual[0], expected[0], 0.01);
-		EXPECT_NEAR(actual[1], expected[1], 0.01);
-		EXPECT_NEAR(actual[2], expected[2], 0.01);
-		EXPECT_NEAR(actual[3], expected[3], 0.01);
-		EXPECT_NEAR(actual[4], expected[4], 0.01);
-		EXPECT_NEAR(actual[5], expected[5], 0.01);
-		EXPECT_NEAR(actual[6], expected[6], 0.01);
-		EXPECT_NEAR(actual[7], expected[7], 0.01);
-		EXPECT_NEAR(actual[8], expected[8], 0.01);
+		EXPECT_THAT(actual, Pointwise(NearWithPrecision(0.001), expected));
 	}
 
 	TEST(Matrix3x3FloatTest, ShearXInProportionToY)
@@ -493,19 +464,19 @@ namespace Engine3
 		constexpr Matrix<3> actual =
 			Matrix<3>
 			{
-				3, -2, 0,
-				1, 4, 0,
-				0, 0, 2
+				-0.1495f, -0.1986f, -0.9685f,
+				-0.8256f, 0.5640f, 0.0117f,
+				-0.5439f, -0.8015f, 0.2484f
 			}.Inverted();
 
 		constexpr Matrix<3> expected
 		{
-			8 / 28.f, 4 / 28.f, 0,
-			-2 / 28.f, 6 / 28.f, 0,
-			0, 0, 14 / 28.f
+			-0.1495f, -0.8258f, -0.5440f,
+			-0.1988f, 0.5640f, -0.8015f,
+			-0.9687f, 0.0118f, 0.2483f
 		};
 
-		ASSERT_EQ(expected, actual);
+		EXPECT_THAT(actual, Pointwise(NearWithPrecision(0.0001), expected));
 	}
 
 	TEST(Matrix3x3FloatTest, Inverse)
@@ -513,20 +484,20 @@ namespace Engine3
 		Matrix<3> actual =
 			Matrix<3>
 			{
-				3, -2, 0,
-				1, 4, 0,
-				0, 0, 2
+				-0.1495f, -0.1986f, -0.9685f,
+				-0.8256f, 0.5640f, 0.0117f,
+				-0.5439f, -0.8015f, 0.2484f
 			};
 		actual.Invert();
 
 		Matrix<3> expected
 		{
-			8 / 28.f, 4 / 28.f, 0,
-			-2 / 28.f, 6 / 28.f, 0,
-			0, 0, 14 / 28.f
+			-0.1495f, -0.8258f, -0.5440f,
+			-0.1988f, 0.5640f, -0.8015f,
+			-0.9687f, 0.0118f, 0.2483f
 		};
 
-		ASSERT_EQ(expected, actual);
+		EXPECT_THAT(actual, Pointwise(NearWithPrecision(0.0001), expected));
 	}
 
 	TEST(Matrix3x3FloatTest, IsOrthogonal)
@@ -601,14 +572,6 @@ namespace Engine3
 			0.9428090416f, -0.2357022604f, 0.2357022604f
 		};
 
-		EXPECT_NEAR(actual[0], expected[0], 0.01);
-		EXPECT_NEAR(actual[1], expected[1], 0.01);
-		EXPECT_NEAR(actual[2], expected[2], 0.01);
-		EXPECT_NEAR(actual[3], expected[3], 0.01);
-		EXPECT_NEAR(actual[4], expected[4], 0.01);
-		EXPECT_NEAR(actual[5], expected[5], 0.01);
-		EXPECT_NEAR(actual[6], expected[6], 0.01);
-		EXPECT_NEAR(actual[7], expected[7], 0.01);
-		EXPECT_NEAR(actual[8], expected[8], 0.01);
+		EXPECT_THAT(actual, Pointwise(NearWithPrecision(0.01), expected));
 	}
 }

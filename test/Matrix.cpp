@@ -1,6 +1,9 @@
 #include "../src/Maths/Matrix.h"
+#include "CustomMatchers.h"
 #include "../src/Maths/Maths.h"
+#include "gmock/gmock-matchers.h"
 #include <gtest/gtest.h>
+using testing::Pointwise;
 
 namespace Engine3
 {
@@ -296,10 +299,7 @@ namespace Engine3
 		Matrix<2> actual = Matrix<2>::ProjectionOntoAxis(axis);
 		Matrix<2> expected{0.5f, 0.5f, 0.5f, 0.5f};
 
-		EXPECT_NEAR(actual[0], expected[0], 0.01);
-		EXPECT_NEAR(actual[1], expected[1], 0.01);
-		EXPECT_NEAR(actual[2], expected[2], 0.01);
-		EXPECT_NEAR(actual[3], expected[3], 0.01);
+		EXPECT_THAT(actual, Pointwise(NearWithPrecision(0.01), expected));
 	}
 
 	TEST(Matrix2x2FloatTest, Reflection)
@@ -313,10 +313,7 @@ namespace Engine3
 			-0.999698f, 0.000302f
 		};
 
-		EXPECT_NEAR(actual[0], expected[0], 0.01);
-		EXPECT_NEAR(actual[1], expected[1], 0.01);
-		EXPECT_NEAR(actual[2], expected[2], 0.01);
-		EXPECT_NEAR(actual[3], expected[3], 0.01);
+		EXPECT_THAT(actual, Pointwise(NearWithPrecision(0.01), expected));
 	}
 
 	TEST(Matrix2x2FloatTest, Shearing)
@@ -330,10 +327,7 @@ namespace Engine3
 			-0.999698f, 0.000302f
 		};
 
-		EXPECT_NEAR(actual[0], expected[0], 0.01);
-		EXPECT_NEAR(actual[1], expected[1], 0.01);
-		EXPECT_NEAR(actual[2], expected[2], 0.01);
-		EXPECT_NEAR(actual[3], expected[3], 0.01);
+		EXPECT_THAT(actual, Pointwise(NearWithPrecision(0.01), expected));
 	}
 
 	TEST(Matrix2x2FloatTest, Determinant)
