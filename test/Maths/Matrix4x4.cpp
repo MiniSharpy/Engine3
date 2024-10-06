@@ -1,6 +1,6 @@
-#include "CustomMatchers.h"
-#include "../src/Maths/Maths.h"
-#include "../src/Maths/Matrix.h"
+#include "../CustomMatchers.h"
+#include "../../src/Maths/Maths.h"
+#include "../../src/Maths/Matrix.h"
 #include <numbers>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

@@ -2,6 +2,7 @@
 #include "Input.h"
 #include "Renderer.h"
 #include "Window.h"
+#include "Maths/PolarPoint.h"
 
 int main(int argc, char* argv[])
 {

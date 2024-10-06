@@ -3,6 +3,7 @@
 #include <concepts>
 #include <limits>
 #include <numbers>
+#include <print>
 
 namespace Engine3
 {
@@ -19,20 +20,24 @@ namespace Engine3
 	constexpr T DegreesToRadians(T degrees) { return degrees * (std::numbers::pi_v<T> / static_cast<T>(180)); }
 
 	template <typename T>
-	constexpr bool AlmostEquals(T lhs, T rhs)
+	constexpr T Abs(T value)
 	{
 		// TODO: Use constexpr std::abs: P0533 https://en.cppreference.com/w/cpp/compiler_support
-		T difference = lhs - rhs;
-		T abs = difference < 0 ? -difference : difference;
+		return value < 0 ? -value : value;
+	}
 
-		return abs < std::numeric_limits<T>::epsilon() * 100;
+	template <typename T>
+	constexpr bool AlmostEquals(T lhs, T rhs, T epsilon = std::numeric_limits<T>::epsilon() * 100)
+	{
+		T difference = lhs - rhs;
+		return Abs(difference) < epsilon;
 	}
 
 	template <std::floating_point T>
 	constexpr T SquareRoot(T number)
 	{
 		// TODO: Use constexpr std::sqrt: P0533 https://en.cppreference.com/w/cpp/compiler_support
-		// TODO: Consider edge cases.
+		// TODO: Handle edge cases/Hope by the time there's problems the compilers are updated.
 
 		// https://stackoverflow.com/a/34134071
 		constexpr auto newtonRaphson = [](this auto const& newtonRaphson,

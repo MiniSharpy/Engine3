@@ -1,4 +1,4 @@
-#include "../src/Maths/Vector.h"
+#include "../../src/Maths/Vector.h"
 #include <gtest/gtest.h>
 
 namespace Engine3

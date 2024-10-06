@@ -1,6 +1,6 @@
-#include "../src/Maths/Matrix.h"
-#include "CustomMatchers.h"
-#include "../src/Maths/Maths.h"
+#include "../../src/Maths/Matrix.h"
+#include "../CustomMatchers.h"
+#include "../../src/Maths/Maths.h"
 #include "gmock/gmock-matchers.h"
 #include <gtest/gtest.h>
 using testing::Pointwise;
