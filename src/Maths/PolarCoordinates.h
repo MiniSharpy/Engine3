@@ -1,5 +1,6 @@
 #pragma once
 #include "Maths.h"
+#include "Vector.h"
 #include <concepts>
 #include <numbers>
 #include <tuple>
@@ -14,6 +15,38 @@ namespace Engine3
 
 		// The angle in radians.
 		T Angle;
+
+		constexpr PolarPoint() = default;
+
+		constexpr PolarPoint(T distance, T angle) : Distance(distance), Angle(angle) {}
+
+		/// Converts a point in cartesian space to polar space. 
+		/// @param cartesianCoordinate The point in cartesian space to convert to polar space.
+		// explicit to prevent something like "PolarPoint{} == Vector<2>{}" from compiling.
+		explicit constexpr PolarPoint(Vector<2, T> cartesianCoordinate)
+		{
+			if (cartesianCoordinate.X() == 0 && cartesianCoordinate.Y() == 0)
+			{
+				Distance = 0;
+				Angle = 0;
+			}
+			else
+			{
+				// TODO: std::atan2 prevents constexpr.
+				Distance = cartesianCoordinate.Length();
+				Angle = std::atan2(cartesianCoordinate.Y(), cartesianCoordinate.X());
+			}
+		}
+
+		constexpr Vector<2, T> ToCartesian()
+		{
+			// TODO: std::cos/std::sin prevents constexpr.
+			return
+			{
+				Distance * std::cos(Angle),
+				Distance * std::sin(Angle)
+			};
+		}
 
 		/// Simplifies the polar point into its canonical form, where:
 		///	\n \p Distance >= 0,
@@ -54,8 +87,7 @@ namespace Engine3
 			}
 
 			// When really close to being on the lower bounds it may result in incorrect results,
-			// such as (-5 distance, -720 degrees) ending up as effectively (5, -180)
-			// when it should be (5, 180).
+			// such as (-5 distance, -720 degrees) ending up as (5, -180) when it should be (5, 180).
 			// TODO: I wonder if by solving such an edge case it'll cause another?
 			if (AlmostEquals(canonical.Angle, -halfTurn)) { canonical.Angle = halfTurn; }
 
