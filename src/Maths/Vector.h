@@ -9,6 +9,9 @@
 
 namespace Engine3
 {
+	template <typename T>
+	struct PolarCoordinates;
+
 	template <std::size_t Dimensions, Number T = float>
 	struct Vector : std::array<T, Dimensions>
 	{
@@ -279,5 +282,27 @@ namespace Engine3
 		friend auto operator==(const std::array<T, Dimensions>& lhs, const std::array<T, Dimensions>& rhs) = delete;
 
 		friend auto operator<=>(const std::array<T, Dimensions>& lhs, const std::array<T, Dimensions>& rhs) = delete;
+
+		PolarCoordinates<T> ToPolarCoordinates();
 	};
+}
+
+#include "PolarCoordinates.h"
+
+template <std::size_t Dimensions, Engine3::Number T>
+Engine3::PolarCoordinates<T> Engine3::Vector<Dimensions, T>::ToPolarCoordinates()
+{
+	Engine3::PolarCoordinates<T> point;
+	if (X() == 0 && Y() == 0)
+	{
+		point.Distance = 0;
+		point.Angle = 0;
+	}
+	else
+	{
+		// TODO: std::atan2 prevents constexpr.
+		point.Distance = Length();
+		point.Angle = std::atan2(Y(), X());
+	}
+	return point;
 }

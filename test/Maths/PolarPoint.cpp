@@ -5,85 +5,85 @@ using testing::Pointwise;
 
 namespace Engine3
 {
-	TEST(PolarPointFloat, CanonicalForm_ZeroDistance)
+	TEST(PolarCoordinatesFloat, CanonicalForm_ZeroDistance)
 	{
-		constexpr PolarPoint actual = PolarPoint{0.f, 100.f}.CanonicalForm();
-		constexpr PolarPoint expected{0.f, 0.f};
+		constexpr PolarCoordinates actual = PolarCoordinates{0.f, 100.f}.CanonicalForm();
+		constexpr PolarCoordinates expected{0.f, 0.f};
 
 		EXPECT_EQ(actual, expected);
 	}
 
-	TEST(PolarPointFloat, CanonicalForm_NegativeDistance)
+	TEST(PolarCoordinatesFloat, CanonicalForm_NegativeDistance)
 	{
-		PolarPoint actual = PolarPoint{-10.f, 0.f}.CanonicalForm();
-		PolarPoint expected{10.f, std::numbers::pi_v<float>};
+		PolarCoordinates actual = PolarCoordinates{-10.f, 0.f}.CanonicalForm();
+		PolarCoordinates expected{10.f, std::numbers::pi_v<float>};
 
 		EXPECT_NEAR(actual.Distance, expected.Distance, 0.00001);
 		EXPECT_NEAR(actual.Angle, expected.Angle, 0.00001);
 	}
 
-	TEST(PolarPointFloat, CanonicalForm_AngleOutOfRange)
+	TEST(PolarCoordinatesFloat, CanonicalForm_AngleOutOfRange)
 	{
-		PolarPoint actual = PolarPoint{4.f, DegreesToRadians(207.f)}.CanonicalForm();
-		PolarPoint expected{4.f, DegreesToRadians(-153.f)};
+		PolarCoordinates actual = PolarCoordinates{4.f, DegreesToRadians(207.f)}.CanonicalForm();
+		PolarCoordinates expected{4.f, DegreesToRadians(-153.f)};
 
 		EXPECT_NEAR(actual.Distance, expected.Distance, 0.00001);
 		EXPECT_NEAR(actual.Angle, expected.Angle, 0.00001);
 	}
 
-	TEST(PolarPointFloat, CanonicalForm_NegativeDistanceAndAngleOutOfRange)
+	TEST(PolarCoordinatesFloat, CanonicalForm_NegativeDistanceAndAngleOutOfRange)
 	{
-		PolarPoint actual = PolarPoint{-5.f, DegreesToRadians(-720.f)}.CanonicalForm();
-		PolarPoint expected{5.f, DegreesToRadians(180.f)};
+		PolarCoordinates actual = PolarCoordinates{-5.f, DegreesToRadians(-720.f)}.CanonicalForm();
+		PolarCoordinates expected{5.f, DegreesToRadians(180.f)};
 
 		EXPECT_NEAR(actual.Distance, expected.Distance, 0.00001);
 		EXPECT_NEAR(actual.Angle, expected.Angle, 0.00001);
 	}
 
-	TEST(PolarPointFloat, ToCartesian)
+	TEST(PolarCoordinatesFloat, ToCartesian)
 	{
-		Vector<2> actual = PolarPoint{5.f, DegreesToRadians(180.f)}.ToCartesian();
+		Vector<2> actual = PolarCoordinates{5.f, DegreesToRadians(180.f)}.ToVector2();
 		Vector<2> expected{-5, 0};
 		EXPECT_THAT(actual, Pointwise(NearWithPrecision(1e-05), expected));
 	}
 
-	TEST(PolarPointFloat, ToCartesian_ZeroAngle)
+	TEST(PolarCoordinatesFloat, ToCartesian_ZeroAngle)
 	{
-		Vector<2> actual = PolarPoint{3.f, 0.f}.ToCartesian();
+		Vector<2> actual = PolarCoordinates{3.f, 0.f}.ToVector2();
 		Vector<2> expected{3, 0};
 
 		EXPECT_EQ(actual, expected);
 	}
 
-	TEST(PolarPointFloat, ToCartesian_ZeroDistance)
+	TEST(PolarCoordinatesFloat, ToCartesian_ZeroDistance)
 	{
-		Vector<2> actual = PolarPoint{0.f, DegreesToRadians(-720.f)}.ToCartesian();
+		Vector<2> actual = PolarCoordinates{0.f, DegreesToRadians(-720.f)}.ToVector2();
 		Vector<2> expected{0, 0};
 
 		EXPECT_EQ(actual, expected);
 	}
 
-	TEST(PolarPointFloat, ToCartesian_NonCanoncial)
+	TEST(PolarCoordinatesFloat, ToCartesian_NonCanoncial)
 	{
-		Vector<2> actual = PolarPoint{-5.f, DegreesToRadians(-720.f)}.ToCartesian();
+		Vector<2> actual = PolarCoordinates{-5.f, DegreesToRadians(-720.f)}.ToVector2();
 		Vector<2> expected{-5, 0};
 
 		EXPECT_THAT(actual, Pointwise(NearWithPrecision(1e-05), expected));
 	}
 
-	TEST(PolarPointFloat, FromCartesian)
+	TEST(Vector2Float, ToPolarCoordinates)
 	{
-		PolarPoint actual{Vector<2>{-3, 4}};
-		PolarPoint expected{5.f, DegreesToRadians(126.87f)};
+		PolarCoordinates actual = Vector<2>{-3, 4}.ToPolarCoordinates();
+		PolarCoordinates expected{5.f, DegreesToRadians(126.87f)};
 
 		EXPECT_NEAR(actual.Distance, expected.Distance, 0.001);
 		EXPECT_NEAR(actual.Angle, expected.Angle, 0.001);
 	}
 
-	TEST(PolarPointFloat, FromCartesian_Origin)
+	TEST(Vector2Float, ToPolarCoordinates_Origin)
 	{
-		PolarPoint actual{Vector<2>{0, 0}};
-		PolarPoint expected{0.f, 0.f};
+		PolarCoordinates actual = Vector<2>{0, 0}.ToPolarCoordinates();
+		PolarCoordinates expected{0.f, 0.f};
 
 		EXPECT_EQ(actual, expected);
 	}

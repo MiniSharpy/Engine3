@@ -2,10 +2,12 @@
 #include "Input.h"
 #include "Renderer.h"
 #include "Window.h"
+#include "Maths/PolarCoordinates.h"
 
 int main(int argc, char* argv[])
 {
 	using namespace Engine3;
+	Vector<2> test = PolarCoordinates{}.ToVector2();
 
 	Engine engine;
 	if (!engine) { return -1; }

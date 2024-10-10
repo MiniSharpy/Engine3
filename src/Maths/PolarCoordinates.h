@@ -1,14 +1,14 @@
 #pragma once
 #include "Maths.h"
-#include "Vector.h"
-#include <concepts>
 #include <numbers>
-#include <tuple>
 
 namespace Engine3
 {
-	template <std::floating_point T = float>
-	struct PolarPoint
+	template <std::size_t Dimensions, Number T>
+	struct Vector;
+
+	template <typename T = float>
+	struct PolarCoordinates
 	{
 		// aka radius
 		T Distance;
@@ -16,49 +16,23 @@ namespace Engine3
 		// The angle in radians.
 		T Angle;
 
-		constexpr PolarPoint() = default;
+		constexpr PolarCoordinates() = default;
 
-		constexpr PolarPoint(T distance, T angle) : Distance(distance), Angle(angle) {}
+		constexpr PolarCoordinates(T distance, T angle) : Distance(distance), Angle(angle) {}
 
-		/// Converts a point in cartesian space to polar space. 
-		/// @param cartesianCoordinate The point in cartesian space to convert to polar space.
-		// explicit to prevent something like "PolarPoint{} == Vector<2>{}" from compiling.
-		explicit constexpr PolarPoint(Vector<2, T> cartesianCoordinate)
-		{
-			if (cartesianCoordinate.X() == 0 && cartesianCoordinate.Y() == 0)
-			{
-				Distance = 0;
-				Angle = 0;
-			}
-			else
-			{
-				// TODO: std::atan2 prevents constexpr.
-				Distance = cartesianCoordinate.Length();
-				Angle = std::atan2(cartesianCoordinate.Y(), cartesianCoordinate.X());
-			}
-		}
-
-		constexpr Vector<2, T> ToCartesian()
-		{
-			// TODO: std::cos/std::sin prevents constexpr.
-			return
-			{
-				Distance * std::cos(Angle),
-				Distance * std::sin(Angle)
-			};
-		}
+		constexpr Vector<2, T> ToVector2();
 
 		/// Simplifies the polar point into its canonical form, where:
 		///	\n \p Distance >= 0,
 		///	\n -pi < \p Angle <= pi,
 		/// \n \p Distance = 0 => \p Angle = 0
 		/// @return The canonical polar coordinate in radians.
-		constexpr PolarPoint CanonicalForm()
+		constexpr PolarCoordinates CanonicalForm()
 		{
 			constexpr T halfTurn = std::numbers::pi_v<T>;
 			constexpr T fullTurn = 2 * std::numbers::pi_v<T>;
 
-			PolarPoint canonical = *this;
+			PolarCoordinates canonical = *this;
 
 			// Distance is 0, making angle irrelevant.
 			// None of the other code needs to be run if this is the case.
@@ -94,12 +68,25 @@ namespace Engine3
 			return canonical;
 		}
 
-		friend bool operator==(const PolarPoint& lhs, const PolarPoint& rhs)
+		friend bool operator==(const PolarCoordinates& lhs, const PolarCoordinates& rhs)
 		{
 			return lhs.Distance == rhs.Distance
 				&& lhs.Angle == rhs.Angle;
 		}
 
-		friend bool operator!=(const PolarPoint& lhs, const PolarPoint& rhs) { return !(lhs == rhs); }
+		friend bool operator!=(const PolarCoordinates& lhs, const PolarCoordinates& rhs) { return !(lhs == rhs); }
+	};
+}
+
+#include "Vector.h"
+
+template <typename T>
+constexpr Engine3::Vector<2, T> Engine3::PolarCoordinates<T>::ToVector2()
+{
+	// TODO: std::cos/std::sin prevents constexpr.
+	return
+	{
+		Distance * std::cos(Angle),
+		Distance * std::sin(Angle)
 	};
 }
