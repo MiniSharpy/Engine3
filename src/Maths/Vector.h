@@ -9,7 +9,7 @@
 
 namespace Engine3
 {
-	template <typename T>
+	template <std::floating_point T>
 	struct PolarCoordinates;
 
 	template <std::size_t Dimensions, Number T = float>
@@ -283,16 +283,25 @@ namespace Engine3
 
 		friend auto operator<=>(const std::array<T, Dimensions>& lhs, const std::array<T, Dimensions>& rhs) = delete;
 
-		PolarCoordinates<T> ToPolarCoordinates();
+		/*
+		 * Conversions
+		 *
+		 */
+		// Can't just match the class's template parameter as it seems it will evaluate the return type before any potential
+		// requires statement, violating PolarCoordinates' std::floating_point<T> constraint.
+		// Instead, use the class's internal type by default but allow specifying for integer types.
+		template <std::floating_point U = T>
+		constexpr PolarCoordinates<U> ToPolarCoordinates() requires (Dimensions == 2);
 	};
 }
 
 #include "PolarCoordinates.h"
 
 template <std::size_t Dimensions, Engine3::Number T>
-Engine3::PolarCoordinates<T> Engine3::Vector<Dimensions, T>::ToPolarCoordinates()
+template <std::floating_point U>
+constexpr Engine3::PolarCoordinates<U> Engine3::Vector<Dimensions, T>::ToPolarCoordinates() requires (Dimensions == 2)
 {
-	Engine3::PolarCoordinates<T> point;
+	Engine3::PolarCoordinates<U> point;
 	if (X() == 0 && Y() == 0)
 	{
 		point.Distance = 0;
@@ -302,7 +311,7 @@ Engine3::PolarCoordinates<T> Engine3::Vector<Dimensions, T>::ToPolarCoordinates(
 	{
 		// TODO: std::atan2 prevents constexpr.
 		point.Distance = Length();
-		point.Angle = std::atan2(Y(), X());
+		point.Angle = std::atan2<U>(Y(), X());
 	}
 	return point;
 }

@@ -7,7 +7,7 @@ namespace Engine3
 	template <std::size_t Dimensions, Number T>
 	struct Vector;
 
-	template <typename T = float>
+	template <std::floating_point T = float>
 	struct PolarCoordinates
 	{
 		// aka radius
@@ -80,7 +80,7 @@ namespace Engine3
 
 #include "Vector.h"
 
-template <typename T>
+template <std::floating_point T>
 constexpr Engine3::Vector<2, T> Engine3::PolarCoordinates<T>::ToVector2()
 {
 	// TODO: std::cos/std::sin prevents constexpr.

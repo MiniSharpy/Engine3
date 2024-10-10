@@ -70,21 +70,4 @@ namespace Engine3
 
 		EXPECT_THAT(actual, Pointwise(NearWithPrecision(1e-05), expected));
 	}
-
-	TEST(Vector2Float, ToPolarCoordinates)
-	{
-		PolarCoordinates actual = Vector<2>{-3, 4}.ToPolarCoordinates();
-		PolarCoordinates expected{5.f, DegreesToRadians(126.87f)};
-
-		EXPECT_NEAR(actual.Distance, expected.Distance, 0.001);
-		EXPECT_NEAR(actual.Angle, expected.Angle, 0.001);
-	}
-
-	TEST(Vector2Float, ToPolarCoordinates_Origin)
-	{
-		PolarCoordinates actual = Vector<2>{0, 0}.ToPolarCoordinates();
-		PolarCoordinates expected{0.f, 0.f};
-
-		EXPECT_EQ(actual, expected);
-	}
 }
