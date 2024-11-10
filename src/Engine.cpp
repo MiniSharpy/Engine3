@@ -13,6 +13,8 @@ Engine3::Engine::Engine()
 		assert(false);
 	}
 
+	SDL_GL_SetSwapInterval(1);
+
 	// Set OpenGL version. This should be done before creating an OpenGL window.
 	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3) != 0)
 	{

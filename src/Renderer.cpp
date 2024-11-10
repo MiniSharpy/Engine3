@@ -157,7 +157,6 @@ Engine3::Renderer::Renderer(Window& window) :
 {
 	int value;
 	SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &value);
-
 	// Check OpenGL context was correctly initialised.
 	if (!OpenGLContext_)
 	{

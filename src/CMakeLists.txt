@@ -12,11 +12,13 @@ find_package(GLEW REQUIRED)
 add_library(${PROJECT_NAME}_static STATIC ${ALL_FILES} 
 	"Window.h" 
 	"Engine.h" "Engine.cpp"
-	"Input.h" "Input.cpp" 
+	"Events.h" "Events.cpp" 
 	"Renderer.h" "Renderer.cpp" 
 	"Maths/Vector.h" 
 	"Maths/Matrix.h" 
-	"Maths/Maths.h" "Maths/PolarCoordinates.h")
+	"Maths/Maths.h" "Maths/PolarCoordinates.h" 
+	"Input/InputManager.h"  
+	"Input/Action.h" "Input/Action.cpp" "Input/Conditions/Condition.h" "Input/Conditions/PressedCondition.h" "Input/Conditions/ReleasedCondition.h" "Input/Modifiers/DeadZoneModifier.h" "Input/Modifiers/SwizzleModifier.h" "Input/Modifiers/Modifier.h" )
 set_target_properties(${PROJECT_NAME}_static PROPERTIES LINKER_LANGUAGE CXX) # Not strictly speaking neccesary. CMake will infer off the types.
 
 # Linking against static library.
