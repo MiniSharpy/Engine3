@@ -24,22 +24,22 @@ namespace Engine3
 			Resizable = SDL_WINDOW_RESIZABLE,
 			Minimised = SDL_WINDOW_MINIMIZED,
 			Maximised = SDL_WINDOW_MAXIMIZED,
-			//Grabbed = SDL_WINDOW_MOUSE_GRABBED,
-			//InputFocus = SDL_WINDOW_INPUT_FOCUS,
-			//MouseFocus = SDL_WINDOW_MOUSE_FOCUS,
+			Grabbed = SDL_WINDOW_MOUSE_GRABBED,
+			InputFocus = SDL_WINDOW_INPUT_FOCUS,
+			MouseFocus = SDL_WINDOW_MOUSE_FOCUS,
 			FullScreenDesktop = SDL_WINDOW_FULLSCREEN_DESKTOP,
-			//Foreign = SDL_WINDOW_FOREIGN,
-			//AllowHighDPI = SDL_WINDOW_ALLOW_HIGHDPI, // Need to look into how this works.
-			//MouseCapture = SDL_WINDOW_MOUSE_CAPTURE,
-			//AlwaysOnTop = SDL_WINDOW_ALWAYS_ON_TOP,
-			//SkipTaskbar = SDL_WINDOW_SKIP_TASKBAR,
-			//Utility = SDL_WINDOW_UTILITY,
-			//ToolTip = SDL_WINDOW_TOOLTIP,
-			//PopupMenu = SDL_WINDOW_POPUP_MENU,
-			//KeyboardGrabbed = SDL_WINDOW_KEYBOARD_GRABBED,
-			//Vulkan = SDL_WINDOW_VULKAN,
-			//Metal = SDL_WINDOW_METAL,
-			//InputGrabbed = SDL_WINDOW_INPUT_GRABBED
+			Foreign = SDL_WINDOW_FOREIGN,
+			AllowHighDPI = SDL_WINDOW_ALLOW_HIGHDPI,
+			MouseCapture = SDL_WINDOW_MOUSE_CAPTURE,
+			AlwaysOnTop = SDL_WINDOW_ALWAYS_ON_TOP,
+			SkipTaskbar = SDL_WINDOW_SKIP_TASKBAR,
+			Utility = SDL_WINDOW_UTILITY,
+			ToolTip = SDL_WINDOW_TOOLTIP,
+			PopupMenu = SDL_WINDOW_POPUP_MENU,
+			KeyboardGrabbed = SDL_WINDOW_KEYBOARD_GRABBED,
+			Vulkan = SDL_WINDOW_VULKAN,
+			Metal = SDL_WINDOW_METAL,
+			InputGrabbed = SDL_WINDOW_INPUT_GRABBED
 		};
 
 		// SDL uses a macro to centre the window on the specified

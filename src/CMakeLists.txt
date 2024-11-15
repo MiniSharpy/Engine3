@@ -10,16 +10,18 @@ find_package(GLEW REQUIRED)
 
 # Create project as static library to link against in testing.
 add_library(${PROJECT_NAME}_static STATIC ${ALL_FILES} 
-	"Window.h" 
-	"Engine.h" "Engine.cpp"
-	"Events.h" "Events.cpp" 
-	"Renderer.h" "Renderer.cpp" 
-	"Maths/Vector.h" 
-	"Maths/Matrix.h" 
-	"Maths/Maths.h" "Maths/PolarCoordinates.h" 
+	"Core/Window.h" 
+	"Core/Engine.h" "Core/Engine.cpp"
+	"Core/Events.h" "Core/Events.cpp" 
+	"Core/Renderer.h" "Core/Renderer.cpp" 
+	
+	"Maths/Maths.h" "Maths/Vector.h" "Maths/Matrix.h" "Maths/PolarCoordinates.h" 
+
 	"Input/InputManager.h"  
-	"Input/Action.h" "Input/Action.cpp" "Input/Conditions/Condition.h" "Input/Conditions/PressedCondition.h" "Input/Conditions/ReleasedCondition.h" "Input/Modifiers/DeadZoneModifier.h" "Input/Modifiers/SwizzleModifier.h" "Input/Modifiers/Modifier.h" )
-set_target_properties(${PROJECT_NAME}_static PROPERTIES LINKER_LANGUAGE CXX) # Not strictly speaking neccesary. CMake will infer off the types.
+	"Input/Action.h" "Input/Action.cpp" 
+	"Input/Conditions/Condition.h" "Input/Conditions/PressedCondition.h" "Input/Conditions/ReleasedCondition.h" 
+	"Input/Modifiers/Modifier.h" "Input/Modifiers/DeadZoneModifier.h" "Input/Modifiers/SwizzleModifier.h"  )
+set_target_properties(${PROJECT_NAME}_static PROPERTIES LINKER_LANGUAGE CXX) # Not strictly speaking neccesary. CMake will infer off the types, but with just header files it can cause problems.
 
 # Linking against static library.
 target_link_libraries(${PROJECT_NAME}_static PRIVATE SDL2::SDL2)

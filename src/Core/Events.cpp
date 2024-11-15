@@ -1,7 +1,8 @@
 #include "Events.h"
 #include "Renderer.h"
 #include "Window.h"
-#include "Input/InputManager.h"
+#include "../Input/InputManager.h"
+#include <SDL.h>
 
 std::string_view Engine3::Events::GetMouseButtonName(const SDL_Event& event)
 {
@@ -44,6 +45,7 @@ bool Engine3::Events::Process(Window& window, Renderer& renderer, InputManager& 
 		}
 		break;
 	case SDL_KEYDOWN:
+		SDL_Log("%d", event.key.keysym.scancode);
 		inputManager.Update(SDL_GetScancodeName(event.key.keysym.scancode), ProcessState::Continuous, {});
 		break;
 	case SDL_KEYUP:
@@ -51,7 +53,7 @@ bool Engine3::Events::Process(Window& window, Renderer& renderer, InputManager& 
 		break;
 	case SDL_MOUSEMOTION:
 		inputManager.Update("Mouse Axis X", ProcessState::Once, static_cast<float>(event.motion.xrel));
-		inputManager.Update("Mouse Axis X", ProcessState::Once, static_cast<float>(event.motion.yrel));
+		inputManager.Update("Mouse Axis Y", ProcessState::Once, static_cast<float>(event.motion.yrel));
 		break;
 	case SDL_MOUSEBUTTONDOWN:
 		inputManager.Update(GetMouseButtonName(event),
@@ -64,6 +66,7 @@ bool Engine3::Events::Process(Window& window, Renderer& renderer, InputManager& 
 		                    Vector<2>{static_cast<float>(event.button.x), static_cast<float>(event.button.y)});
 		break;
 	case SDL_MOUSEWHEEL:
+		inputManager.Update("Mouse Wheel X", ProcessState::Once, event.wheel.preciseX);
 		inputManager.Update("Mouse Wheel Y", ProcessState::Once, event.wheel.preciseY);
 		break;
 	case SDL_CONTROLLERDEVICEADDED:

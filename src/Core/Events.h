@@ -1,8 +1,13 @@
 #pragma once
 #include <memory>
-#include <SDL.h>
+#include <string>
 #include <vector>
-#include <xstring>
+
+union SDL_Event;
+
+struct _SDL_GameController;
+
+typedef struct _SDL_GameController SDL_GameController;
 
 namespace Engine3
 {

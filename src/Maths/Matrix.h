@@ -325,8 +325,7 @@ namespace Engine3
 			/// @return A matrix with the same number of rows as \p lhs and the same number of columns as \p rhs.
 			template <std::size_t OtherColumnSize>
 			constexpr friend auto operator*(const Matrix<RowSize, ColumnSize, T>& lhs,
-			                                const Matrix<ColumnSize, OtherColumnSize, T>&
-			                                rhs)
+			                                const Matrix<ColumnSize, OtherColumnSize, T>& rhs)
 			{
 				Matrix<RowSize, OtherColumnSize, T> result;
 				for (std::size_t row = 0; row < RowSize; ++row)

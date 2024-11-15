@@ -1,6 +1,6 @@
 #pragma once
 #include "Window.h"
-#include "Maths/Matrix.h"
+#include "../Maths/Matrix.h"
 #include <array>
 #include <vector>
 #include <GL/glew.h>

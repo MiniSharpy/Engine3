@@ -1,6 +1,16 @@
 #include "Action.h"
 #include <ranges>
 
+void Engine3::Action::Update(std::string_view name, ProcessState state, InputValue value)
+{
+	auto iterator = BoundInputs.find(name);
+	if (iterator == BoundInputs.end()) { return; }
+
+	Input& input = iterator->second;
+	input.CurrentState = state;
+	input.Value = value;
+}
+
 template <typename... T>
 auto Engine3::Implementation::Action<T...>::FilterInputs()
 {
