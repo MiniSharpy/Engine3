@@ -23,9 +23,9 @@ namespace Engine3
 	private:
 		std::vector<std::unique_ptr<Action>> Actions;
 
-		void Update(std::string_view name, ProcessState state, InputValue value) const
+		void Update(InternalInputType type, ProcessState state, InputValue value) const
 		{
-			for (auto& action : Actions) { action->Update(name, state, value); }
+			for (auto& action : Actions) { action->Update(type, state, value); }
 		}
 
 		void Process() const { for (const auto& action : Actions) { action->Process(); } }

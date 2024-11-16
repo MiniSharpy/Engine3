@@ -1,6 +1,5 @@
 #pragma once
 #include <memory>
-#include <string>
 #include <vector>
 
 union SDL_Event;
@@ -19,9 +18,6 @@ namespace Engine3
 
 	class Events
 	{
-	private:
-		static std::string_view GetMouseButtonName(const SDL_Event& event);
-
 		std::vector<std::unique_ptr<SDL_GameController, void(*)(SDL_GameController*)>> Controllers;
 
 	public:

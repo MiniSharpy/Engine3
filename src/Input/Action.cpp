@@ -1,9 +1,9 @@
 #include "Action.h"
 #include <ranges>
 
-void Engine3::Action::Update(std::string_view name, ProcessState state, InputValue value)
+void Engine3::Action::Update(InternalInputType type, ProcessState state, InputValue value)
 {
-	auto iterator = BoundInputs.find(name);
+	auto iterator = BoundInputs.find(type);
 	if (iterator == BoundInputs.end()) { return; }
 
 	Input& input = iterator->second;

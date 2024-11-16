@@ -3,6 +3,9 @@
 #include "Core/Renderer.h"
 #include "Core/Window.h"
 #include "Input/InputManager.h"
+#include "Input/Conditions/PressedCondition.h"
+#include "Input/Modifiers/DeadZoneModifier.h"
+#include "Input/Modifiers/SwizzleModifier.h"
 
 int main(int argc, char* argv[])
 {
@@ -18,6 +21,14 @@ int main(int argc, char* argv[])
 	if (!renderer) { return EXIT_FAILURE; }
 
 	InputManager inputManager;
+
+	std::function printVector2 = [](Vector<2> value) { std::print("{}\n", value); };
+	Action& mousePos = inputManager.AddAction(printVector2);
+	mousePos.AddInput(Input::Mouse::Left).AddCondition<PressedCondition>();
+
+	Action& leftAxis = inputManager.AddAction(printVector2);
+	leftAxis.AddInput(Input::GamepadAxis::LeftX).AddModifier<DeadZoneModifier>();
+	leftAxis.AddInput(Input::GamepadAxis::LeftY).AddModifier<DeadZoneModifier>().AddModifier<SwizzleModifier>();
 
 	Events events;
 	while (events.Process(window, renderer, inputManager))
