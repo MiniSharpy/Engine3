@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 
 	InputManager inputManager;
 
-	std::function printVector2 = [](Vector<2> value) { std::print("{}\n", value); };
+	std::function printVector2 = [](Vector<2> value) { std::print("X:{} Y:{}\n", value.X(), value.Y()); };
 	Action& mousePos = inputManager.AddAction(printVector2);
 	mousePos.AddInput(Input::Mouse::Left).AddCondition<PressedCondition>();
 

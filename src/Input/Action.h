@@ -16,6 +16,8 @@ namespace Engine3::Implementation
 
 namespace Engine3
 {
+	class InputManager;
+
 	using InputValue = std::variant<std::monostate, float, Vector<2>>;
 
 	enum class ProcessState
@@ -346,7 +348,7 @@ namespace Engine3
 		}
 	};
 
-	// Mouse inputs in SDL don't have enums, so need to use my own.
+	// Mouse inputs Engine3in SDL don't have enums, so need to use my own.
 	// This is used internally so that rebinding can be done dynamically at runtime without me having
 	// to explicitly support the type. As long as SDL does, and it's in these enums then it can be used.
 	using InternalInputType = std::variant<
