@@ -355,12 +355,6 @@ namespace Engine3
 		SDL_Scancode, Input::Mouse, SDL_GameControllerButton, SDL_GameControllerAxis
 	>;
 
-	// These are only used to create a non-SDL dependent public interface when setting the initial
-	// bindings.
-	using InputType = std::variant<
-		Input::Key, Input::Mouse, Input::GamepadButton, Input::GamepadAxis
-	>;
-
 	class Action
 	{
 		friend class InputManager;

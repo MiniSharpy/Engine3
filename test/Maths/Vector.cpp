@@ -461,7 +461,7 @@ namespace Engine3
 		PolarCoordinates actual = Vector<2>{-3.f, 4.f}.ToPolarCoordinates();
 		PolarCoordinates expected{5.f, DegreesToRadians(126.87f)};
 
-		EXPECT_NEAR(actual.Distance, expected.Distance, 0.001);
+		EXPECT_NEAR(actual.Radius, expected.Radius, 0.001);
 		EXPECT_NEAR(actual.Angle, expected.Angle, 0.001);
 	}
 
@@ -469,6 +469,24 @@ namespace Engine3
 	{
 		PolarCoordinates actual = Vector<2>{0.f, 0.f}.ToPolarCoordinates();
 		PolarCoordinates expected{0.f, 0.f};
+
+		EXPECT_EQ(actual, expected);
+	}
+
+	TEST(Vector2Float, ToCylindricalCoordinates)
+	{
+		CylindricalCoordinates actual = Vector<3>{-3.f, 4.f, 5.f}.ToCylindricalCoordinates();
+		CylindricalCoordinates expected{5.f, DegreesToRadians(126.87f), 5.f};
+
+		EXPECT_NEAR(actual.Radius, expected.Radius, 0.001);
+		EXPECT_NEAR(actual.Angle, expected.Angle, 0.001);
+		EXPECT_NEAR(actual.Z, expected.Z, 0.001);
+	}
+
+	TEST(Vector2Float, ToCylindricalCoordinates_Origin)
+	{
+		CylindricalCoordinates actual = Vector<3>{0.f, 0.f, 0.f}.ToCylindricalCoordinates();
+		CylindricalCoordinates expected{0.f, 0.f, 0.f};
 
 		EXPECT_EQ(actual, expected);
 	}

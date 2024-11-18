@@ -10,15 +10,15 @@ namespace Engine3
 	template <std::floating_point T = float>
 	struct PolarCoordinates
 	{
-		// aka radius
-		T Distance;
+		// Radius, aka distance, relative to the origin.
+		T Radius;
 
-		// The angle in radians.
+		// Relative to the origin and "right" direction in radians.
 		T Angle;
 
 		constexpr PolarCoordinates() = default;
 
-		constexpr PolarCoordinates(T distance, T angle) : Distance(distance), Angle(angle) {}
+		constexpr PolarCoordinates(T radius, T angle) : Radius(radius), Angle(angle) {}
 
 		constexpr Vector<2, T> ToVector2();
 
@@ -36,7 +36,7 @@ namespace Engine3
 
 			// Distance is 0, making angle irrelevant.
 			// None of the other code needs to be run if this is the case.
-			if (canonical.Distance == 0)
+			if (canonical.Radius == 0)
 			{
 				canonical.Angle = 0;
 				return canonical;
@@ -44,9 +44,9 @@ namespace Engine3
 
 			// Negative distance.
 			// Make it positive and add 180-degree turn to get the same position.
-			if (canonical.Distance < 0)
+			if (canonical.Radius < 0)
 			{
-				canonical.Distance = -canonical.Distance;
+				canonical.Radius = -canonical.Radius;
 				canonical.Angle += halfTurn;
 			}
 
@@ -68,16 +68,56 @@ namespace Engine3
 			return canonical;
 		}
 
-		friend bool operator==(const PolarCoordinates& lhs, const PolarCoordinates& rhs)
+		constexpr friend bool operator==(const PolarCoordinates& lhs, const PolarCoordinates& rhs)
 		{
-			return lhs.Distance == rhs.Distance
+			return lhs.Radius == rhs.Radius
 				&& lhs.Angle == rhs.Angle;
 		}
 
-		friend bool operator!=(const PolarCoordinates& lhs, const PolarCoordinates& rhs) { return !(lhs == rhs); }
+		constexpr friend bool operator!=(const PolarCoordinates& lhs, const PolarCoordinates& rhs)
+		{
+			return !(lhs == rhs);
+		}
+	};
+
+	template <std::floating_point T = float>
+	struct CylindricalCoordinates : Engine3::PolarCoordinates<T>
+	{
+		// Height relative to the origin.
+		T Z;
+
+		constexpr CylindricalCoordinates() = default;
+
+		constexpr CylindricalCoordinates(T radius, T angle, T z) : PolarCoordinates<T>(radius, angle), Z{z} {}
+
+		constexpr Vector<3, T> ToVector3();
+
+		/// Simplifies the polar point into its canonical form, where:
+		///	\n \p Distance >= 0,
+		///	\n -pi < \p Angle <= pi,
+		/// \n \p Distance = 0 => \p Angle = 0
+		/// @return The canonical polar coordinate in radians.
+		constexpr CylindricalCoordinates CanonicalForm()
+		{
+			PolarCoordinates<T> base = static_cast<PolarCoordinates<T>*>(this)->CanonicalForm();
+			return {base.Radius, base.Angle, Z};
+		}
+
+		constexpr friend bool operator==(const CylindricalCoordinates& lhs, const CylindricalCoordinates& rhs)
+		{
+			return lhs.Radius == rhs.Radius &&
+				lhs.Angle == rhs.Angle &&
+				lhs.Z == rhs.Z;
+		}
+
+		constexpr friend bool operator!=(const CylindricalCoordinates& lhs, const CylindricalCoordinates& rhs)
+		{
+			return !(lhs == rhs);
+		}
 	};
 }
 
+// This order and prior forward declaration handle the circular dependency.
 #include "Vector.h"
 
 template <std::floating_point T>
@@ -86,7 +126,19 @@ constexpr Engine3::Vector<2, T> Engine3::PolarCoordinates<T>::ToVector2()
 	// TODO: std::cos/std::sin prevents constexpr.
 	return
 	{
-		Distance * std::cos(Angle),
-		Distance * std::sin(Angle)
+		Radius * std::cos(Angle),
+		Radius * std::sin(Angle)
+	};
+}
+
+template <std::floating_point T>
+constexpr Engine3::Vector<3, T> Engine3::CylindricalCoordinates<T>::ToVector3()
+{
+	// TODO: std::cos/std::sin prevents constexpr.
+	return
+	{
+		this->Radius * std::cos(this->Angle),
+		this->Radius * std::sin(this->Angle),
+		Z
 	};
 }

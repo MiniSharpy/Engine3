@@ -12,6 +12,9 @@ namespace Engine3
 	template <std::floating_point T>
 	struct PolarCoordinates;
 
+	template <std::floating_point T>
+	struct CylindricalCoordinates;
+
 	template <std::size_t Dimensions, Number T = float>
 	struct Vector : std::array<T, Dimensions>
 	{
@@ -292,26 +295,40 @@ namespace Engine3
 		// Instead, use the class's internal type by default but allow specifying for integer types.
 		template <std::floating_point U = T>
 		constexpr PolarCoordinates<U> ToPolarCoordinates() requires (Dimensions == 2);
+
+		template <std::floating_point U = T>
+		constexpr CylindricalCoordinates<U> ToCylindricalCoordinates() requires (Dimensions == 3);
 	};
 }
 
+// This order and prior forward declarations handle the circular dependency.
 #include "PolarCoordinates.h"
 
 template <std::size_t Dimensions, Engine3::Number T>
 template <std::floating_point U>
-constexpr Engine3::PolarCoordinates<U> Engine3::Vector<Dimensions, T>::ToPolarCoordinates() requires (Dimensions == 2)
+constexpr Engine3::PolarCoordinates<U> Engine3::Vector<Dimensions, T>::ToPolarCoordinates()
+	requires (Dimensions == 2)
 {
 	Engine3::PolarCoordinates<U> point;
 	if (X() == 0 && Y() == 0)
 	{
-		point.Distance = 0;
+		point.Radius = 0;
 		point.Angle = 0;
 	}
 	else
 	{
 		// TODO: std::atan2 prevents constexpr.
-		point.Distance = Length();
+		point.Radius = Length();
 		point.Angle = std::atan2<U>(Y(), X());
 	}
 	return point;
+}
+
+template <std::size_t Dimensions, Engine3::Number T>
+template <std::floating_point U>
+constexpr Engine3::CylindricalCoordinates<U> Engine3::Vector<Dimensions, T>::ToCylindricalCoordinates()
+	requires (Dimensions == 3)
+{
+	Engine3::PolarCoordinates<U> point = Vector<2, T>{X(), Y()}.template ToPolarCoordinates<U>();
+	return {point.Radius, point.Angle, Z()};
 }
