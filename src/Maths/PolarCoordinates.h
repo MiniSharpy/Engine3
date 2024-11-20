@@ -18,8 +18,6 @@ namespace Engine3
 		// Positive rotation is counterclockwise.
 		T Angle;
 
-		constexpr Vector<2, T> ToVector2();
-
 		/// Simplifies the polar point into its canonical form, where:
 		///	\n \p Distance >= 0,
 		///	\n -pi < \p Angle <= pi,
@@ -67,16 +65,11 @@ namespace Engine3
 			return canonical;
 		}
 
-		constexpr friend bool operator==(const PolarCoordinates2D& lhs, const PolarCoordinates2D& rhs)
-		{
-			return lhs.Radius == rhs.Radius
-				&& lhs.Angle == rhs.Angle;
-		}
+		constexpr Vector<2, T> ToVector2();
 
-		constexpr friend bool operator!=(const PolarCoordinates2D& lhs, const PolarCoordinates2D& rhs)
-		{
-			return !(lhs == rhs);
-		}
+		constexpr friend bool operator==(const PolarCoordinates2D& lhs, const PolarCoordinates2D& rhs) = default;
+
+		constexpr friend bool operator!=(const PolarCoordinates2D& lhs, const PolarCoordinates2D& rhs) = default;
 	};
 
 	// Hopefully things like creating a copy of the 2D coordinates will be optimised away,
@@ -95,8 +88,6 @@ namespace Engine3
 		// Height relative to the origin.
 		T Z;
 
-		constexpr Vector<3, T> ToVector3();
-
 		/// Simplifies the polar point into its canonical form, where:
 		///	\n \p Distance >= 0,
 		///	\n -pi < \p Angle <= pi,
@@ -108,17 +99,13 @@ namespace Engine3
 			return {base.Radius, base.Angle, Z};
 		}
 
-		constexpr friend bool operator==(const CylindricalCoordinates& lhs, const CylindricalCoordinates& rhs)
-		{
-			return lhs.Radius == rhs.Radius &&
-				lhs.Angle == rhs.Angle &&
-				lhs.Z == rhs.Z;
-		}
+		constexpr Vector<3, T> ToVector3();
 
-		constexpr friend bool operator!=(const CylindricalCoordinates& lhs, const CylindricalCoordinates& rhs)
-		{
-			return !(lhs == rhs);
-		}
+		constexpr friend bool operator==(const CylindricalCoordinates& lhs, const CylindricalCoordinates& rhs) = default
+		;
+
+		constexpr friend bool operator!=(const CylindricalCoordinates& lhs, const CylindricalCoordinates& rhs) = default
+		;
 	};
 
 	/// Follows conventions for a left-handed coordinate system.
@@ -141,10 +128,10 @@ namespace Engine3
 		/// @return The canonical spherical coordinate in radians.
 		constexpr SphericalCoordinates CanonicalForm() const
 		{
-			constexpr T quarterTurn = std::numbers::pi_v<T> / 2;
-			constexpr T halfTurn = std::numbers::pi_v<T>;
-			constexpr T threeQuarterTurn = quarterTurn * 3;
-			constexpr T fullTurn = 2 * std::numbers::pi_v<T>;
+			constexpr T quarterTurn = std::numbers::pi_v<T> / 2; // 90
+			constexpr T halfTurn = std::numbers::pi_v<T>; // 180
+			constexpr T threeQuarterTurn = quarterTurn * 3; // 270
+			constexpr T fullTurn = 2 * std::numbers::pi_v<T>; // 370
 
 			SphericalCoordinates canonical = *this;
 			auto& [radius, heading, pitch] = canonical;
@@ -209,6 +196,10 @@ namespace Engine3
 		}
 
 		constexpr Vector<3, T> ToVector3();
+
+		constexpr friend bool operator==(const SphericalCoordinates& lhs, const SphericalCoordinates& rhs) = default;
+
+		constexpr friend bool operator!=(const SphericalCoordinates& lhs, const SphericalCoordinates& rhs) = default;
 	};
 }
 
@@ -241,6 +232,7 @@ constexpr Engine3::Vector<3, T> Engine3::CylindricalCoordinates<T>::ToVector3()
 template <std::floating_point T>
 constexpr Engine3::Vector<3, T> Engine3::SphericalCoordinates<T>::ToVector3()
 {
+	// TODO: std::cos/std::sin prevents constexpr.
 	return
 	{
 		Radius * std::cos(Pitch) * std::sin(Heading),

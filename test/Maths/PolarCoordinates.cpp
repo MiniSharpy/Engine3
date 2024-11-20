@@ -3,6 +3,11 @@
 #include "gtest/gtest.h"
 using testing::Pointwise;
 
+namespace
+{
+	constexpr float Pi = std::numbers::pi_v<float>;
+}
+
 namespace Engine3
 {
 	TEST(PolarCoordinatesFloat, CanonicalForm_ZeroDistance)
@@ -16,7 +21,7 @@ namespace Engine3
 	TEST(PolarCoordinatesFloat, CanonicalForm_NegativeDistance)
 	{
 		PolarCoordinates2D actual = PolarCoordinates2D{-10.f, 0.f}.CanonicalForm();
-		PolarCoordinates2D expected{10.f, std::numbers::pi_v<float>};
+		PolarCoordinates2D expected{10.f, Pi};
 
 		EXPECT_NEAR(actual.Radius, expected.Radius, 0.00001);
 		EXPECT_NEAR(actual.Angle, expected.Angle, 0.00001);
@@ -82,7 +87,7 @@ namespace Engine3
 	TEST(CylindricalCoordinatesFloat, CanonicalForm_NegativeDistance)
 	{
 		CylindricalCoordinates actual = CylindricalCoordinates{-10.f, 0.f, 5.f}.CanonicalForm();
-		CylindricalCoordinates expected{10.f, std::numbers::pi_v<float>, 5.f};
+		CylindricalCoordinates expected{10.f, Pi, 5.f};
 
 		EXPECT_NEAR(actual.Radius, expected.Radius, 0.00001);
 		EXPECT_NEAR(actual.Angle, expected.Angle, 0.00001);
@@ -137,6 +142,73 @@ namespace Engine3
 		Vector<3> actual = CylindricalCoordinates{-5.f, DegreesToRadians(-720.f), 5.f}.ToVector3();
 		Vector<3> expected{-5, 0, 5.f};
 
+		EXPECT_THAT(actual, Pointwise(NearWithPrecision(1e-05), expected));
+	}
+
+	TEST(SphericalCoordinatesFloat, CanonicalForm_ZeroDistance)
+	{
+		constexpr SphericalCoordinates actual = SphericalCoordinates{0.f, 100.f, 100.f}.CanonicalForm();
+		constexpr SphericalCoordinates expected{0.f, 0.f, 0.f};
+
+		EXPECT_EQ(actual, expected);
+	}
+
+	TEST(SphericalCoordinatesFloat, CanonicalForm_NegativeDistance)
+	{
+		SphericalCoordinates actual = SphericalCoordinates{-10.f, 0.f, Pi / 2}.CanonicalForm();
+		SphericalCoordinates expected{10.f, Pi, -Pi / 2};
+
+		EXPECT_NEAR(actual.Radius, expected.Radius, 0.00001);
+		EXPECT_NEAR(actual.Heading, expected.Heading, 0.00001);
+		EXPECT_NEAR(actual.Pitch, expected.Pitch, 0.00001);
+	}
+
+	TEST(SphericalCoordinatesFloat, CanonicalForm_PitchOutOfRange)
+	{
+		SphericalCoordinates actual = SphericalCoordinates
+		{
+			4.f,
+			Pi / 3,
+			(3 * Pi) / 4,
+		}.CanonicalForm();
+
+		SphericalCoordinates expected
+		{
+			4.f,
+			-2 * Pi / 3,
+			Pi / 4
+		};
+
+		EXPECT_NEAR(actual.Radius, expected.Radius, 0.00001);
+		EXPECT_NEAR(actual.Heading, expected.Heading, 0.00001);
+		EXPECT_NEAR(actual.Pitch, expected.Pitch, 0.00001);
+	}
+
+	TEST(SphericalCoordinatesFloat, CanonicalForm_HeadingOutOfRange)
+	{
+		SphericalCoordinates actual = SphericalCoordinates
+		{
+			8.f,
+			(9 * Pi) / 4,
+			Pi / 6,
+		}.CanonicalForm();
+
+		SphericalCoordinates expected
+		{
+			8.f,
+			Pi / 4,
+			Pi / 6
+		};
+
+		EXPECT_NEAR(actual.Radius, expected.Radius, 0.00001);
+		EXPECT_NEAR(actual.Heading, expected.Heading, 0.00001);
+		EXPECT_NEAR(actual.Pitch, expected.Pitch, 0.00001);
+	}
+
+	TEST(SphericalCoordinatesFloat, ToCartesian)
+	{
+		Vector<3> actual = SphericalCoordinates{4.f, Pi / 3, 3 * Pi / 4}.ToVector3();
+		Vector<3> expected{-std::sqrt(6.f), -2.f * std::sqrt(2.f), -std::sqrt(2.f)};
 		EXPECT_THAT(actual, Pointwise(NearWithPrecision(1e-05), expected));
 	}
 }

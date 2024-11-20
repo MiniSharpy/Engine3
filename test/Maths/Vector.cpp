@@ -473,7 +473,7 @@ namespace Engine3
 		EXPECT_EQ(actual, expected);
 	}
 
-	TEST(Vector2Float, ToCylindricalCoordinates)
+	TEST(Vector3Float, ToCylindricalCoordinates)
 	{
 		CylindricalCoordinates actual = Vector<3>{-3.f, 4.f, 5.f}.ToCylindricalCoordinates();
 		CylindricalCoordinates expected{5.f, DegreesToRadians(126.87f), 5.f};
@@ -483,11 +483,31 @@ namespace Engine3
 		EXPECT_NEAR(actual.Z, expected.Z, 0.001);
 	}
 
-	TEST(Vector2Float, ToCylindricalCoordinates_Origin)
+	TEST(Vector3Float, ToCylindricalCoordinates_Origin)
 	{
 		CylindricalCoordinates actual = Vector<3>{0.f, 0.f, 0.f}.ToCylindricalCoordinates();
 		CylindricalCoordinates expected{0.f, 0.f, 0.f};
 
 		EXPECT_EQ(actual, expected);
+	}
+
+	TEST(Vector3Float, ToSphericalCoordinates)
+	{
+		SphericalCoordinates actual = Vector<3>{-1.f, -1.f, -1.f}.ToSphericalCoordinates();
+		SphericalCoordinates expected{std::sqrt(3.f), DegreesToRadians(-135.f), DegreesToRadians(35.26f)};
+
+		EXPECT_NEAR(actual.Radius, expected.Radius, 0.001);
+		EXPECT_NEAR(actual.Heading, expected.Heading, 0.001);
+		EXPECT_NEAR(actual.Pitch, expected.Pitch, 0.001);
+	}
+
+	TEST(Vector3Float, ToSphericalCoordinates_Origin)
+	{
+		SphericalCoordinates actual = Vector<3>{0.f, 0.f, 0.f}.ToSphericalCoordinates();
+		SphericalCoordinates expected{0.f, 0.f, 0.f};
+
+		EXPECT_NEAR(actual.Radius, expected.Radius, 0.001);
+		EXPECT_NEAR(actual.Heading, expected.Heading, 0.001);
+		EXPECT_NEAR(actual.Pitch, expected.Pitch, 0.001);
 	}
 }
