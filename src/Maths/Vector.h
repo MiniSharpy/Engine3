@@ -15,6 +15,9 @@ namespace Engine3
 	template <std::floating_point T>
 	struct CylindricalCoordinates;
 
+	template <std::floating_point T>
+	struct SphericalCoordinates;
+
 	template <std::size_t Dimensions, Number T = float>
 	struct Vector : std::array<T, Dimensions>
 	{
@@ -298,6 +301,9 @@ namespace Engine3
 
 		template <std::floating_point U = T>
 		constexpr CylindricalCoordinates<U> ToCylindricalCoordinates() requires (Dimensions == 3);
+
+		template <std::floating_point U = T>
+		constexpr SphericalCoordinates<U> ToSphericalCoordinates() requires (Dimensions == 3);
 	};
 }
 
@@ -310,7 +316,7 @@ constexpr Engine3::PolarCoordinates<U> Engine3::Vector<Dimensions, T>::ToPolarCo
 	requires (Dimensions == 2)
 {
 	Engine3::PolarCoordinates<U> point;
-	if (X() == 0 && Y() == 0)
+	if (LengthSquared() == 0)
 	{
 		point.Radius = 0;
 		point.Angle = 0;
@@ -319,7 +325,7 @@ constexpr Engine3::PolarCoordinates<U> Engine3::Vector<Dimensions, T>::ToPolarCo
 	{
 		// TODO: std::atan2 prevents constexpr.
 		point.Radius = Length();
-		point.Angle = std::atan2<U>(Y(), X());
+		point.Angle = std::atan2(Y(), X());
 	}
 	return point;
 }
@@ -331,4 +337,27 @@ constexpr Engine3::CylindricalCoordinates<U> Engine3::Vector<Dimensions, T>::ToC
 {
 	Engine3::PolarCoordinates<U> point = Vector<2, T>{X(), Y()}.template ToPolarCoordinates<U>();
 	return {point.Radius, point.Angle, Z()};
+}
+
+template <std::size_t Dimensions, Engine3::Number T>
+template <std::floating_point U>
+constexpr Engine3::SphericalCoordinates<U> Engine3::Vector<Dimensions, T>::ToSphericalCoordinates()
+	requires (Dimensions == 3)
+{
+	Engine3::SphericalCoordinates<U> point;
+	auto &[radius, heading, pitch] = point;
+
+	if (LengthSquared() == 0)
+	{
+		radius = 0;
+		heading = pitch = 0;
+	}
+	else
+	{
+		// TODO: std::atan2 prevents constexpr.
+		radius = Length();
+		heading = std::atan2(X(), Z());
+		pitch = std::asin(-Y() / radius);
+	}
+	return point;
 }

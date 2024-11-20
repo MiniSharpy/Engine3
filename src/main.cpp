@@ -9,6 +9,7 @@
 
 int main(int argc, char* argv[])
 {
+	return 0;
 	using namespace Engine3;
 
 	Engine engine;
