@@ -9,7 +9,7 @@ namespace Engine3
 
 	/// Follows mathematical convention.
 	template <std::floating_point T = float>
-	struct PolarCoordinates
+	struct PolarCoordinates2D
 	{
 		// Radius relative to the origin.
 		T Radius;
@@ -25,12 +25,12 @@ namespace Engine3
 		///	\n -pi < \p Angle <= pi,
 		/// \n \p Distance = 0 => \p Angle = 0
 		/// @return The canonical polar coordinate in radians.
-		constexpr PolarCoordinates CanonicalForm() const
+		constexpr PolarCoordinates2D CanonicalForm() const
 		{
 			constexpr T halfTurn = std::numbers::pi_v<T>;
 			constexpr T fullTurn = 2 * std::numbers::pi_v<T>;
 
-			PolarCoordinates canonical = *this;
+			PolarCoordinates2D canonical = *this;
 			auto& [radius, angle] = canonical;
 
 			// Distance is 0, making angle irrelevant.
@@ -67,13 +67,13 @@ namespace Engine3
 			return canonical;
 		}
 
-		constexpr friend bool operator==(const PolarCoordinates& lhs, const PolarCoordinates& rhs)
+		constexpr friend bool operator==(const PolarCoordinates2D& lhs, const PolarCoordinates2D& rhs)
 		{
 			return lhs.Radius == rhs.Radius
 				&& lhs.Angle == rhs.Angle;
 		}
 
-		constexpr friend bool operator!=(const PolarCoordinates& lhs, const PolarCoordinates& rhs)
+		constexpr friend bool operator!=(const PolarCoordinates2D& lhs, const PolarCoordinates2D& rhs)
 		{
 			return !(lhs == rhs);
 		}
@@ -104,7 +104,7 @@ namespace Engine3
 		/// @return The canonical polar coordinate in radians.
 		constexpr CylindricalCoordinates CanonicalForm() const
 		{
-			PolarCoordinates<T> base = PolarCoordinates<T>{Radius, Angle}.CanonicalForm();
+			PolarCoordinates2D<T> base = PolarCoordinates2D<T>{Radius, Angle}.CanonicalForm();
 			return {base.Radius, base.Angle, Z};
 		}
 
@@ -216,7 +216,7 @@ namespace Engine3
 #include "Vector.h"
 
 template <std::floating_point T>
-constexpr Engine3::Vector<2, T> Engine3::PolarCoordinates<T>::ToVector2()
+constexpr Engine3::Vector<2, T> Engine3::PolarCoordinates2D<T>::ToVector2()
 {
 	// TODO: std::cos/std::sin prevents constexpr.
 	return

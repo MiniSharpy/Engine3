@@ -458,8 +458,8 @@ namespace Engine3
 
 	TEST(Vector2Float, ToPolarCoordinates)
 	{
-		PolarCoordinates actual = Vector<2>{-3.f, 4.f}.ToPolarCoordinates();
-		PolarCoordinates expected{5.f, DegreesToRadians(126.87f)};
+		PolarCoordinates2D actual = Vector<2>{-3.f, 4.f}.ToPolarCoordinates();
+		PolarCoordinates2D expected{5.f, DegreesToRadians(126.87f)};
 
 		EXPECT_NEAR(actual.Radius, expected.Radius, 0.001);
 		EXPECT_NEAR(actual.Angle, expected.Angle, 0.001);
@@ -467,8 +467,8 @@ namespace Engine3
 
 	TEST(Vector2Float, ToPolarCoordinates_Origin)
 	{
-		PolarCoordinates actual = Vector<2>{0.f, 0.f}.ToPolarCoordinates();
-		PolarCoordinates expected{0.f, 0.f};
+		PolarCoordinates2D actual = Vector<2>{0.f, 0.f}.ToPolarCoordinates();
+		PolarCoordinates2D expected{0.f, 0.f};
 
 		EXPECT_EQ(actual, expected);
 	}

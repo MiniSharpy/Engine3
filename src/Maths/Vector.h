@@ -10,7 +10,7 @@
 namespace Engine3
 {
 	template <std::floating_point T>
-	struct PolarCoordinates;
+	struct PolarCoordinates2D;
 
 	template <std::floating_point T>
 	struct CylindricalCoordinates;
@@ -297,7 +297,7 @@ namespace Engine3
 		// requires statement, violating PolarCoordinates' std::floating_point<T> constraint.
 		// Instead, use the class's internal type by default but allow specifying for integer types.
 		template <std::floating_point U = T>
-		constexpr PolarCoordinates<U> ToPolarCoordinates() requires (Dimensions == 2);
+		constexpr PolarCoordinates2D<U> ToPolarCoordinates() requires (Dimensions == 2);
 
 		template <std::floating_point U = T>
 		constexpr CylindricalCoordinates<U> ToCylindricalCoordinates() requires (Dimensions == 3);
@@ -312,10 +312,10 @@ namespace Engine3
 
 template <std::size_t Dimensions, Engine3::Number T>
 template <std::floating_point U>
-constexpr Engine3::PolarCoordinates<U> Engine3::Vector<Dimensions, T>::ToPolarCoordinates()
+constexpr Engine3::PolarCoordinates2D<U> Engine3::Vector<Dimensions, T>::ToPolarCoordinates()
 	requires (Dimensions == 2)
 {
-	Engine3::PolarCoordinates<U> point;
+	Engine3::PolarCoordinates2D<U> point;
 	if (LengthSquared() == 0)
 	{
 		point.Radius = 0;
@@ -335,7 +335,7 @@ template <std::floating_point U>
 constexpr Engine3::CylindricalCoordinates<U> Engine3::Vector<Dimensions, T>::ToCylindricalCoordinates()
 	requires (Dimensions == 3)
 {
-	Engine3::PolarCoordinates<U> point = Vector<2, T>{X(), Y()}.template ToPolarCoordinates<U>();
+	Engine3::PolarCoordinates2D<U> point = Vector<2, T>{X(), Y()}.template ToPolarCoordinates<U>();
 	return {point.Radius, point.Angle, Z()};
 }
 
