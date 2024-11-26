@@ -9,6 +9,9 @@
 
 int main(int argc, char* argv[])
 {
+	std::print("{}\n", Engine3::WrapAngle(Engine3::DegreesToRadians(190.f)));
+	std::print("{}\n", Engine3::WrapAngle(Engine3::DegreesToRadians(-170.f) - Engine3::DegreesToRadians(170.f)));
+
 	return 0;
 	using namespace Engine3;
 

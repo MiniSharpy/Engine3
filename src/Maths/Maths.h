@@ -27,7 +27,7 @@ namespace Engine3
 
 		// https://stackoverflow.com/a/34134071
 		constexpr auto newtonRaphson = [](this auto const& newtonRaphson,
-		                                       T original, T current, T previous) constexpr -> T
+		                                  T original, T current, T previous) constexpr -> T
 		{
 			return current == previous
 				       ? current
@@ -63,5 +63,26 @@ namespace Engine3
 	{
 		T difference = lhs - rhs;
 		return Abs(difference) < epsilon;
+	}
+
+	/// Account for the cyclic nature of angles by wrapping the passed angle around
+	/// in the inclusive, exclusive range (-180, +180].
+	/// \n This is useful for interpolating between the shortest path between two angles.
+	/// @param angle Angle in radians to wrap.
+	/// @return The wrapped angle, e.g. 190 degrees becomes -170 degrees.
+	template <std::floating_point T>
+	constexpr T WrapAngle(T angle)
+	{
+		constexpr T halfTurn = std::numbers::pi_v<T>;
+
+		// If already in range, skip calculations.
+		if (std::abs(angle) <= halfTurn) { return angle; }
+
+		// Add or subtract the necessary full turns to wrap around.
+		constexpr T fullTurn = halfTurn * 2;
+		T revolutions = std::floor((angle + halfTurn) * (1.f / fullTurn));
+		angle -= revolutions * fullTurn;
+
+		return angle;
 	}
 }

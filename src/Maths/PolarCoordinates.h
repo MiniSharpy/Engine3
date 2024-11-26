@@ -101,11 +101,11 @@ namespace Engine3
 
 		constexpr Vector<3, T> ToVector3();
 
-		constexpr friend bool operator==(const CylindricalCoordinates& lhs, const CylindricalCoordinates& rhs) = default
-		;
+		constexpr friend bool operator==(const CylindricalCoordinates& lhs, const CylindricalCoordinates& rhs)
+		= default;
 
-		constexpr friend bool operator!=(const CylindricalCoordinates& lhs, const CylindricalCoordinates& rhs) = default
-		;
+		constexpr friend bool operator!=(const CylindricalCoordinates& lhs, const CylindricalCoordinates& rhs)
+		= default;
 	};
 
 	/// Follows conventions for a left-handed coordinate system.
