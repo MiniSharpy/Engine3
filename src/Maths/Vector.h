@@ -24,18 +24,18 @@ namespace Engine3
 		/* Static Methods */
 		static constexpr Vector Zero() { return {}; }
 
-		static constexpr Vector Up() requires(Dimensions == 2) { return {static_cast<T>(0), static_cast<T>(1)}; }
-
 		static constexpr Vector Right() requires (Dimensions == 2) { return {static_cast<T>(1), static_cast<T>(0)}; }
 
-		static constexpr Vector Up() requires (Dimensions == 3)
-		{
-			return {static_cast<T>(0), static_cast<T>(1), static_cast<T>(0)};
-		}
+		static constexpr Vector Up() requires(Dimensions == 2) { return {static_cast<T>(0), static_cast<T>(1)}; }
 
 		static constexpr Vector Right() requires (Dimensions == 3)
 		{
 			return {static_cast<T>(1), static_cast<T>(0), static_cast<T>(0)};
+		}
+
+		static constexpr Vector Up() requires (Dimensions == 3)
+		{
+			return {static_cast<T>(0), static_cast<T>(1), static_cast<T>(0)};
 		}
 
 		static constexpr Vector Forward() requires (Dimensions == 3)
@@ -345,7 +345,7 @@ constexpr Engine3::SphericalCoordinates<U> Engine3::Vector<Dimensions, T>::ToSph
 	requires (Dimensions == 3)
 {
 	Engine3::SphericalCoordinates<U> point;
-	auto &[radius, heading, pitch] = point;
+	auto& [radius, heading, pitch] = point;
 
 	if (LengthSquared() == 0)
 	{

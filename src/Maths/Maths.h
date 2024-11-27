@@ -66,7 +66,7 @@ namespace Engine3
 	}
 
 	/// Account for the cyclic nature of angles by wrapping the passed angle around
-	/// in the inclusive, exclusive range (-180, +180].
+	/// in the exclusive, inclusive range (-180, +180].
 	/// \n This is useful for interpolating between the shortest path between two angles.
 	/// @param angle Angle in radians to wrap.
 	/// @return The wrapped angle, e.g. 190 degrees becomes -170 degrees.
@@ -76,12 +76,15 @@ namespace Engine3
 		constexpr T halfTurn = std::numbers::pi_v<T>;
 
 		// If already in range, skip calculations.
-		if (std::abs(angle) <= halfTurn) { return angle; }
+		if (angle <= halfTurn && angle > -halfTurn) { return angle; }
 
 		// Add or subtract the necessary full turns to wrap around.
 		constexpr T fullTurn = halfTurn * 2;
-		T revolutions = std::floor((angle + halfTurn) * (1.f / fullTurn));
+		T revolutions = std::floor((angle + halfTurn) * (1 / fullTurn));
 		angle -= revolutions * fullTurn;
+
+		// Handle inclusive case.
+		if (angle == -halfTurn) { return -angle; }
 
 		return angle;
 	}
