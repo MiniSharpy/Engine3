@@ -1,4 +1,5 @@
 #include "../../src/Maths/Vector.h"
+#include "gmock/gmock-matchers.h"
 #include <gtest/gtest.h>
 
 namespace Engine3
@@ -509,5 +510,27 @@ namespace Engine3
 		EXPECT_NEAR(actual.Radius, expected.Radius, 0.001);
 		EXPECT_NEAR(actual.Heading, expected.Heading, 0.001);
 		EXPECT_NEAR(actual.Pitch, expected.Pitch, 0.001);
+	}
+
+	TEST(Vector3Float, StructuredBindings)
+	{
+		// Mostly just a check to ensure compilation.
+		const Vector<2> constant{1280, 720};
+		auto [x, y] = constant;
+		x = 720;
+		EXPECT_EQ(constant.X(), 1280);
+		EXPECT_EQ(constant.Y(), 720);
+
+		Vector<2> reference{1280, 720};
+		auto&& [x1, y1] = reference;
+		x1 = 720;
+		EXPECT_EQ(reference.X(), 720);
+		EXPECT_EQ(reference.Y(), 720);
+
+		Vector<2> copy{1280, 720};
+		auto [x2, y2] = copy;
+		x2 = 720;
+		EXPECT_EQ(copy.X(), 1280);
+		EXPECT_EQ(copy.Y(), 720);
 	}
 }

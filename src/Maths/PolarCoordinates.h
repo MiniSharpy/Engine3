@@ -203,7 +203,7 @@ namespace Engine3
 	};
 }
 
-// This order and prior forward declaration handle the circular dependency.
+// The positioning of this include is important to handle circular dependencies.
 #include "Vector.h"
 
 template <std::floating_point T>

@@ -55,8 +55,8 @@ namespace Engine3
 	template <std::size_t Size, std::size_t ... ValidSizes>
 	concept IsValidDimensions = ((Size == ValidSizes) || ...);
 
-	template <std::floating_point T>
-	constexpr T DegreesToRadians(T degrees) { return degrees * (std::numbers::pi_v<T> / static_cast<T>(180)); }
+template <std::floating_point T>
+constexpr T DegreesToRadians(T degrees) { return degrees * (std::numbers::pi_v<T> / static_cast<T>(180)); }
 
 	template <typename T>
 	constexpr bool AlmostEquals(T lhs, T rhs, T epsilon = std::numeric_limits<T>::epsilon() * 100)
@@ -76,7 +76,7 @@ namespace Engine3
 		constexpr T halfTurn = std::numbers::pi_v<T>;
 
 		// If already in range, skip calculations.
-		if (angle <= halfTurn && angle > -halfTurn) { return angle; }
+		if (angle > -halfTurn && angle <= halfTurn) { return angle; }
 
 		// Add or subtract the necessary full turns to wrap around.
 		constexpr T fullTurn = halfTurn * 2;
@@ -84,7 +84,7 @@ namespace Engine3
 		angle -= revolutions * fullTurn;
 
 		// Handle inclusive case.
-		if (angle == -halfTurn) { return -angle; }
+		if (angle == -halfTurn) { angle = -angle; }
 
 		return angle;
 	}

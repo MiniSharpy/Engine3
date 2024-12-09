@@ -304,10 +304,30 @@ namespace Engine3
 
 		template <std::floating_point U = T>
 		constexpr SphericalCoordinates<U> ToSphericalCoordinates() requires (Dimensions == 3);
+
+		/*
+		 * Structured Bindings
+		 * 
+		 */
+		template <std::size_t Index>
+		constexpr auto&& get()
+		{
+			static_assert(Index < Dimensions, "Index out of bounds");
+			return (*this)[Index];
+		}
 	};
 }
 
-// This order and prior forward declarations handle the circular dependency.
+template <std::size_t Dimensions, Engine3::Number T>
+struct std::tuple_size<Engine3::Vector<Dimensions, T>> : std::integral_constant<std::size_t, Dimensions> {};
+
+template <std::size_t Index, std::size_t Dimensions, Engine3::Number T>
+struct std::tuple_element<Index, Engine3::Vector<Dimensions, T>>
+{
+	using type = T;
+};
+
+// The positioning of this include is important to handle circular dependencies.
 #include "PolarCoordinates.h"
 
 template <std::size_t Dimensions, Engine3::Number T>
