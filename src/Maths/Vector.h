@@ -309,8 +309,23 @@ namespace Engine3
 		 * Structured Bindings
 		 * 
 		 */
+		// Compiler error on MSVC, but not clang or gcc.
+		//template <std::size_t Index, class Self>
+		//constexpr auto&& get(this Self&& self)
+		//{
+		//	static_assert(Index < Dimensions, "Index out of bounds");
+		//	return std::forward<Self>(self)[Index];
+		//}
+
 		template <std::size_t Index>
 		constexpr auto&& get()
+		{
+			static_assert(Index < Dimensions, "Index out of bounds");
+			return (*this)[Index];
+		}
+
+		template <std::size_t Index>
+		constexpr auto&& get() const
 		{
 			static_assert(Index < Dimensions, "Index out of bounds");
 			return (*this)[Index];
