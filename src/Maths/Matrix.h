@@ -5,7 +5,6 @@
 #include <array>
 #include <concepts>
 #include <cstddef>
-#include <print>
 #include <utility>
 
 namespace Engine3
@@ -42,7 +41,7 @@ namespace Engine3
 			 * Static Methods
 			 */
 			/// @return A square matrix that's zeroed except for its diagonal elements, which are all one.
-			static constexpr auto IdentityMatrix() requires (IsSquare<RowSize, ColumnSize>)
+			static constexpr auto Identity() requires (IsSquare<RowSize, ColumnSize>)
 			{
 				Matrix<RowSize, ColumnSize, T> identityMatrix{};
 				for (std::size_t i = 0; i < RowSize; ++i) { identityMatrix[(RowSize + 1) * i] = 1; }
@@ -125,7 +124,7 @@ namespace Engine3
 			}
 
 			/// Flips a matrix diagonally.
-			[[nodiscard]] constexpr Matrix<ColumnSize, RowSize, T> Transposed()
+			[[nodiscard]] constexpr Matrix<ColumnSize, RowSize, T> Transposed() const
 			// [[nodiscard]] to help emphasise this is not the same as Transpose().
 			{
 				// Non-Square matrices when transposed will return a matrix that's aspect ratio is flipped.
@@ -141,7 +140,7 @@ namespace Engine3
 				return matrix;
 			}
 
-			constexpr Matrix<RowSize, ColumnSize, T> Adjoint() requires (IsSquare<RowSize, ColumnSize>)
+			constexpr Matrix<RowSize, ColumnSize, T> Adjoint() const requires (IsSquare<RowSize, ColumnSize>)
 			{
 				return CofactorMatrix().Transpose();
 			}
@@ -152,12 +151,14 @@ namespace Engine3
 				return !(Determinant() == 0);
 			}
 
-			constexpr Matrix<RowSize, ColumnSize, T> Inverted() requires (IsSquare<RowSize, ColumnSize>)
+			/// In the case of an orthogonal matrix, prefer using the transpose as it is equivalent and simpler to compute.
+			constexpr Matrix<RowSize, ColumnSize, T> Inverted() const requires (IsSquare<RowSize, ColumnSize>)
 			{
 				assert(IsInvertible());
 				return Adjoint() / Determinant();
 			}
 
+			/// In the case of an orthogonal matrix, prefer using the transpose as it is equivalent and simpler to compute.
 			constexpr Matrix<RowSize, ColumnSize, T>& Invert() requires (IsSquare<RowSize, ColumnSize>)
 			{
 				assert(IsInvertible());
@@ -414,7 +415,7 @@ namespace Engine3
 				IsSquare<RowSize, ColumnSize> &&
 				IsValidDimensions<RowSize, 3, 4>
 			{
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::IdentityMatrix()};
+				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
 				matrix(1, 1) = std::cos(radians);
 				matrix(1, 2) = std::sin(radians);
 				matrix(2, 1) = -std::sin(radians);
@@ -428,7 +429,7 @@ namespace Engine3
 				IsSquare<RowSize, ColumnSize> &&
 				IsValidDimensions<RowSize, 3, 4>
 			{
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::IdentityMatrix()};
+				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
 				matrix(0, 0) = std::cos(radians);
 				matrix(0, 2) = -std::sin(radians);
 				matrix(2, 0) = std::sin(radians);
@@ -442,7 +443,7 @@ namespace Engine3
 				IsSquare<RowSize, ColumnSize> &&
 				IsValidDimensions<RowSize, 3, 4>
 			{
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::IdentityMatrix()};
+				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
 				matrix(0, 0) = std::cos(radians);
 				matrix(0, 1) = std::sin(radians);
 				matrix(1, 0) = -std::sin(radians);
@@ -466,7 +467,7 @@ namespace Engine3
 				const T y = axis.Y();
 				const T z = axis.Z();
 
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::IdentityMatrix()};
+				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
 				matrix(0, 0) = x * x * (1 - cos(radians)) + cos(radians);
 				matrix(0, 1) = x * y * (1 - cos(radians)) + z * sin(radians);
 				matrix(0, 2) = x * z * (1 - cos(radians)) - y * sin(radians);
@@ -484,7 +485,7 @@ namespace Engine3
 				requires IsSquare<RowSize, ColumnSize> &&
 				IsValidDimensions<RowSize, 3, 4>
 			{
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::IdentityMatrix()};
+				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
 				matrix(0, 0) = x;
 				matrix(1, 1) = y;
 				matrix(2, 2) = z;
@@ -507,7 +508,7 @@ namespace Engine3
 				const T y = axis.Y();
 				const T z = axis.Z();
 
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::IdentityMatrix()};
+				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
 				matrix(0, 0) = 1 + (k - 1) * x * x;
 				matrix(0, 1) = (k - 1) * x * y;
 				matrix(0, 2) = (k - 1) * x * z;
@@ -525,7 +526,7 @@ namespace Engine3
 				requires IsSquare<RowSize, ColumnSize> &&
 				IsValidDimensions<RowSize, 3, 4>
 			{
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::IdentityMatrix()};
+				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
 				matrix(2, 2) = 0;
 
 				return matrix;
@@ -535,7 +536,7 @@ namespace Engine3
 				requires IsSquare<RowSize, ColumnSize> &&
 				IsValidDimensions<RowSize, 3, 4>
 			{
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::IdentityMatrix()};
+				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
 				matrix(1, 1) = 0;
 
 				return matrix;
@@ -545,7 +546,7 @@ namespace Engine3
 				requires IsSquare<RowSize, ColumnSize> &&
 				IsValidDimensions<RowSize, 3, 4>
 			{
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::IdentityMatrix()};
+				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
 				matrix(0, 0) = 0;
 
 				return matrix;
@@ -566,7 +567,7 @@ namespace Engine3
 				const T y = axis.Y();
 				const T z = axis.Z();
 
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::IdentityMatrix()};
+				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
 				matrix(0, 0) = 1 - x * x;
 				matrix(0, 1) = -x * y;
 				matrix(0, 2) = -x * z;
@@ -592,7 +593,7 @@ namespace Engine3
 				const T y = axis.Y();
 				const T z = axis.Z();
 
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::IdentityMatrix()};
+				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
 				matrix(0, 0) = 1 - 2 * x * x;
 				matrix(0, 1) = -2 * x * y;
 				matrix(0, 2) = -2 * x * z;
@@ -611,7 +612,7 @@ namespace Engine3
 				requires IsSquare<RowSize, ColumnSize> &&
 				IsValidDimensions<RowSize, 3, 4>
 			{
-				Matrix shear{Matrix<RowSize, ColumnSize, T>::IdentityMatrix()};
+				Matrix shear{Matrix<RowSize, ColumnSize, T>::Identity()};
 				shear(0, 1) = xy;
 				shear(0, 2) = xz;
 				shear(1, 0) = yx;
@@ -657,7 +658,7 @@ namespace Engine3
 		/// Rotation matrix around the Z-Axis.
 		static constexpr Matrix Rotation(T radians) requires std::floating_point<T>
 		{
-			Matrix matrix{Matrix::IdentityMatrix()};
+			Matrix matrix{Matrix::Identity()};
 			matrix(0, 0) = std::cos(radians);
 			matrix(0, 1) = std::sin(radians);
 			matrix(1, 0) = -std::sin(radians);

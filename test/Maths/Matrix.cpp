@@ -61,7 +61,7 @@ namespace Engine3
 			0, 0, 0, 1
 		};
 
-		ASSERT_EQ(Matrix<4>::IdentityMatrix(), expected);
+		ASSERT_EQ(Matrix<4>::Identity(), expected);
 	}
 
 	TEST(Matrix4x3Test, Transposed)

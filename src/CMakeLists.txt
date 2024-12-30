@@ -15,12 +15,13 @@ add_library(${PROJECT_NAME}_static STATIC ${ALL_FILES}
 	"Core/Events.h" "Core/Events.cpp" 
 	"Core/Renderer.h" "Core/Renderer.cpp" 
 	
-	"Maths/Maths.h" "Maths/Vector.h" "Maths/Matrix.h" "Maths/PolarCoordinates.h" 
+	"Maths/Maths.h" "Maths/Vector.h" "Maths/Matrix.h" "Maths/PolarCoordinates.h"
 
 	"Input/InputManager.h"  
 	"Input/Action.h" "Input/Action.cpp" 
 	"Input/Conditions/Condition.h" "Input/Conditions/PressedCondition.h" "Input/Conditions/ReleasedCondition.h" 
-	"Input/Modifiers/Modifier.h" "Input/Modifiers/DeadZoneModifier.h" "Input/Modifiers/SwizzleModifier.h"  )
+	"Input/Modifiers/Modifier.h" "Input/Modifiers/DeadZoneModifier.h" "Input/Modifiers/SwizzleModifier.h"   
+	"Utility/BitFlags.h")
 set_target_properties(${PROJECT_NAME}_static PROPERTIES LINKER_LANGUAGE CXX) # Not strictly speaking neccesary. CMake will infer off the types, but with just header files it can cause problems.
 
 # Linking against static library.

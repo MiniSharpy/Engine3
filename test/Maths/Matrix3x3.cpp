@@ -16,7 +16,7 @@ namespace Engine3
 			0, 1, 0,
 			0, 0, 1
 		};
-		constexpr Matrix<3> actual = Matrix<3>::IdentityMatrix();
+		constexpr Matrix<3> actual = Matrix<3>::Identity();
 		static_assert(expected == actual);
 	}
 
