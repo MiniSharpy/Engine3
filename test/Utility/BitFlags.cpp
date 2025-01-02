@@ -159,6 +159,21 @@ namespace Engine3
 		EXPECT_FALSE(flags2.IsNoneSet(flags0));
 	}
 
+	TEST(BitFlagsTestEnum, All)
+	{
+		BitFlags<RenderPass> flags0;
+		BitFlags flags1
+		{
+			RenderPass::Particles,
+			RenderPass::PostProcess
+		};
+		BitFlags flags2{static_cast<RenderPass>(0b11111111)};
+
+		EXPECT_FALSE(flags0.All());
+		EXPECT_FALSE(flags1.All());
+		EXPECT_FALSE(flags2.All());
+	}
+
 	TEST(BitFlagsTestEnum, Any)
 	{
 		BitFlags<RenderPass> flags0;

@@ -49,7 +49,6 @@ bool Engine3::Events::Process(Window& window, Renderer& renderer, InputManager& 
 		}
 		break;
 	case SDL_KEYDOWN:
-		SDL_Log("%d", event.key.keysym.scancode);
 		inputManager.Update(event.key.keysym.scancode, ProcessState::Continuous, {});
 		break;
 	case SDL_KEYUP:
