@@ -55,14 +55,26 @@ namespace Engine3
 	template <std::size_t Size, std::size_t ... ValidSizes>
 	concept IsValidDimensions = ((Size == ValidSizes) || ...);
 
-template <std::floating_point T>
-constexpr T DegreesToRadians(T degrees) { return degrees * (std::numbers::pi_v<T> / static_cast<T>(180)); }
+	template <std::floating_point T>
+	constexpr T DegreesToRadians(T degrees) { return degrees * (std::numbers::pi_v<T> / static_cast<T>(180)); }
 
 	template <typename T>
 	constexpr bool AlmostEquals(T lhs, T rhs, T epsilon = std::numeric_limits<T>::epsilon() * 100)
 	{
 		T difference = lhs - rhs;
 		return Abs(difference) < epsilon;
+	}
+
+	template <typename T>
+	constexpr bool AlmostGreaterThan(T lhs, T rhs, T epsilon = std::numeric_limits<T>::epsilon() * 100)
+	{
+		return lhs > rhs - epsilon;
+	}
+
+	template <typename T>
+	constexpr bool AlmostLessThan(T lhs, T rhs, T epsilon = std::numeric_limits<T>::epsilon() * 100)
+	{
+		return lhs < rhs - epsilon;
 	}
 
 	/// Account for the cyclic nature of angles by wrapping the passed angle around
@@ -87,5 +99,13 @@ constexpr T DegreesToRadians(T degrees) { return degrees * (std::numbers::pi_v<T
 		if (angle == -halfTurn) { angle = -angle; }
 
 		return angle;
+	}
+
+	/// Compute a value between two others by a percentage.
+	template <typename T, typename U>
+	static constexpr T LinearInterpolation(const T& start, const T& end, U fraction)
+	{
+		T difference = end - start;
+		return start + (fraction * difference);
 	}
 }

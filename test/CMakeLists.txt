@@ -7,7 +7,7 @@ add_executable(${PROJECT_NAME}Test
 "Maths/Maths.cpp"
 "Maths/Vector.cpp" 
 "Maths/Matrix.cpp" "Maths/Matrix3x3.cpp" "Maths/Matrix4x4.cpp" 
-"Maths/PolarCoordinates.cpp"
+"Maths/PolarCoordinates.cpp" "Maths/Quaternion.cpp"
 "Utility/BitFlags.cpp")
 
 set_target_properties(${PROJECT_NAME}Test PROPERTIES LINKER_LANGUAGE CXX) # CMake will try to infer off file names making this unnecesary oftentimes.

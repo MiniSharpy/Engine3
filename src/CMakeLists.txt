@@ -15,7 +15,7 @@ add_library(${PROJECT_NAME}_static STATIC ${ALL_FILES}
 	"Core/Events.h" "Core/Events.cpp" 
 	"Core/Renderer.h" "Core/Renderer.cpp" 
 	
-	"Maths/Maths.h" "Maths/Vector.h" "Maths/Matrix.h" "Maths/PolarCoordinates.h"
+	"Maths/Maths.h" "Maths/Vector.h" "Maths/Matrix.h" "Maths/PolarCoordinates.h" "Maths/Quaternion.h" 
 
 	"Input/InputManager.h"  
 	"Input/Action.h" "Input/Action.cpp" 

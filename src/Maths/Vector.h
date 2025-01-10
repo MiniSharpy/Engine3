@@ -331,8 +331,37 @@ namespace Engine3
 			return (*this)[Index];
 		}
 	};
+
+	/// A quaternion can be computed by interpolating around the arc that connects two quaternions
+	/// on the surface of a 4D hypersphere. The equation to do this is independent of quaternions
+	/// and can also be applied to vectors.
+	/// 
+	/// Unlike linear interpolation this method of interpolation maintains a uniform angular rotation.
+	template <typename T, typename U, std::size_t Dimensions>
+	constexpr Vector<Dimensions, T> SphericalLinearInterpolation(
+		const Vector<Dimensions, T>& start,
+		const Vector<Dimensions, T>& end,
+		U fraction)
+	{
+		// Prevent divide by zero.
+		// The dot product is zero when one of the vectors is a zero vector,
+		// or when they are perpendicular.
+		// Either way, linear interpolation will handle it.
+		if (start == Vector<Dimensions, T>::Zero() || end == Vector<Dimensions, T>::Zero())
+		{
+			return LinearInterpolation(start, end, fraction);
+		}
+
+		T dotProduct = Vector<Dimensions, T>::DotProduct(start, end);
+		T denominator = std::sin(dotProduct);
+
+		return
+			(std::sin((1 - fraction) * dotProduct) / denominator) * start +
+			(std::sin(fraction * dotProduct) / denominator) * end;
+	}
 }
 
+// Structured bindings.
 template <std::size_t Dimensions, Engine3::Number T>
 struct std::tuple_size<Engine3::Vector<Dimensions, T>> : std::integral_constant<std::size_t, Dimensions> {};
 
@@ -342,6 +371,7 @@ struct std::tuple_element<Index, Engine3::Vector<Dimensions, T>>
 	using type = T;
 };
 
+// ToX Conversion
 // The positioning of this include is important to handle circular dependencies.
 #include "PolarCoordinates.h"
 
@@ -350,7 +380,7 @@ template <std::floating_point U>
 constexpr Engine3::PolarCoordinates2D<U> Engine3::Vector<Dimensions, T>::ToPolarCoordinates()
 	requires (Dimensions == 2)
 {
-	Engine3::PolarCoordinates2D<U> point;
+	PolarCoordinates2D<U> point;
 	if (LengthSquared() == 0)
 	{
 		point.Radius = 0;
@@ -370,7 +400,7 @@ template <std::floating_point U>
 constexpr Engine3::CylindricalCoordinates<U> Engine3::Vector<Dimensions, T>::ToCylindricalCoordinates()
 	requires (Dimensions == 3)
 {
-	Engine3::PolarCoordinates2D<U> point = Vector<2, T>{X(), Y()}.template ToPolarCoordinates<U>();
+	PolarCoordinates2D<U> point = Vector<2, T>{X(), Y()}.template ToPolarCoordinates<U>();
 	return {point.Radius, point.Angle, Z()};
 }
 
@@ -379,7 +409,7 @@ template <std::floating_point U>
 constexpr Engine3::SphericalCoordinates<U> Engine3::Vector<Dimensions, T>::ToSphericalCoordinates()
 	requires (Dimensions == 3)
 {
-	Engine3::SphericalCoordinates<U> point;
+	SphericalCoordinates<U> point;
 	auto& [radius, heading, pitch] = point;
 
 	if (LengthSquared() == 0)
