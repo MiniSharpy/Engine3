@@ -1,8 +1,8 @@
 #include "../../src/Maths/Matrix.h"
+#include <gtest/gtest.h>
 #include "../CustomMatchers.h"
 #include "../../src/Maths/Maths.h"
 #include "gmock/gmock-matchers.h"
-#include <gtest/gtest.h>
 using testing::Pointwise;
 
 namespace Engine3
@@ -203,7 +203,18 @@ namespace Engine3
 		{
 			9, 12, 15
 		};
-		ASSERT_EQ(expected, actual);
+		EXPECT_EQ(expected, actual);
+
+
+		// Compare to matrix
+		constexpr Matrix<1, 2> rowVectorInMatrixForm =
+		{
+			1, 2
+		};
+
+		constexpr Vector<3> actualRowVectorFromMatrix = (rowVectorInMatrixForm * matrix).GetRow(0);
+
+		EXPECT_EQ(actualRowVectorFromMatrix, actual);
 	}
 
 	TEST(MatrixNonSquareTest, ColumnVectorMultiplication)
@@ -216,23 +227,33 @@ namespace Engine3
 			10, 11, 12
 		};
 
-		constexpr Vector<3> rowVector =
+		constexpr Vector<3> columnVector =
 		{
 			1, 2, 3
 		};
 
-		constexpr Vector<4> actual = matrix * rowVector;
+		constexpr Vector<4> actual = matrix * columnVector;
 
 		constexpr Vector<4> expected =
 		{
 			14, 32, 50, 68
 		};
-		ASSERT_EQ(expected, actual);
+		EXPECT_EQ(expected, actual);
+
+		// Compare to matrix
+		constexpr Matrix<3, 1> columnVectorInMatrixForm =
+		{
+			1, 2, 3
+		};
+
+		constexpr Vector<4> actualColumnVectorFromMatrix = (matrix * columnVectorInMatrixForm).GetColumn(0);
+
+		EXPECT_EQ(actualColumnVectorFromMatrix, actual);
 	}
 
 	TEST(Matrix2x2FloatTest, RotationZ)
 	{
-		Matrix actual{Matrix<2>::Rotation(DegreesToRadians(45.f))};
+		Matrix actual{Matrix<2>::RotationAboutZ(DegreesToRadians(45.f))};
 		Matrix<2> expected
 		{
 			0.707106782f, 0.7071067812f,
@@ -278,7 +299,7 @@ namespace Engine3
 
 	TEST(Matrix2x2FloatTest, OrthographicProjectAxisX)
 	{
-		Matrix<2> actual = Matrix<2>::ProjectionOntoAxisX();
+		Matrix<2> actual = Matrix<2>::ProjectionOntoPlaneXZ();
 		Matrix<2> expected{1, 0, 0, 0};
 
 		ASSERT_EQ(actual, expected);
@@ -286,7 +307,7 @@ namespace Engine3
 
 	TEST(Matrix2x2FloatTest, OrthographicProjectAxisY)
 	{
-		Matrix<2> actual = Matrix<2>::ProjectionOntoAxisY();
+		Matrix<2> actual = Matrix<2>::ProjectionOntoPlaneYZ();
 		Matrix<2> expected{0, 0, 0, 1};
 
 		ASSERT_EQ(actual, expected);
@@ -296,7 +317,7 @@ namespace Engine3
 	{
 		Vector<2> axis{0.7f, -0.7f};
 		axis.Normalise();
-		Matrix<2> actual = Matrix<2>::ProjectionOntoAxis(axis);
+		Matrix<2> actual = Matrix<2>::ProjectionOntoVector(axis);
 		Matrix<2> expected{0.5f, 0.5f, 0.5f, 0.5f};
 
 		EXPECT_THAT(actual, Pointwise(NearWithPrecision(0.01), expected));

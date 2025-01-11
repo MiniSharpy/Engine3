@@ -1,11 +1,11 @@
 #pragma once
-#include "Maths.h"
-#include "Vector.h"
 #include <algorithm>
 #include <array>
 #include <concepts>
 #include <cstddef>
 #include <utility>
+#include "Maths.h"
+#include "Vector.h"
 
 namespace Engine3
 {
@@ -36,17 +36,334 @@ namespace Engine3
 		template <std::size_t RowSize, std::size_t ColumnSize, Number T>
 		struct MatrixBase : std::array<T, RowSize * ColumnSize>
 		{
-		public:
+			static constexpr std::size_t MainDiagonalSize = std::min(RowSize, ColumnSize);
+
 			/*
 			 * Static Methods
 			 */
-			/// @return A square matrix that's zeroed except for its diagonal elements, which are all one.
-			static constexpr auto Identity() requires (IsSquare<RowSize, ColumnSize>)
+			/// @return A matrix with the basis vectors Right, Up, and Forward (In 3D).
+			static constexpr Matrix<RowSize, ColumnSize, T> World()
 			{
-				Matrix<RowSize, ColumnSize, T> identityMatrix{};
-				for (std::size_t i = 0; i < RowSize; ++i) { identityMatrix[(RowSize + 1) * i] = 1; }
+				Matrix<RowSize, ColumnSize, T> world = Unit();
 
-				return identityMatrix;
+				world(0, 0) = Vector<2>::Right().X();
+				world(0, 1) = Vector<2>::Right().Y();
+				world(1, 0) = Vector<3>::Up().X();
+				world(1, 1) = Vector<3>::Up().Y();
+
+				if constexpr (MainDiagonalSize > 3)
+				{
+					world(2, 0) = Vector<3>::Forward().X();
+					world(2, 1) = Vector<3>::Forward().Y();
+					world(2, 2) = Vector<3>::Forward().Z();
+					world(0, 2) = Vector<3>::Right().Z();
+					world(1, 2) = Vector<3>::Up().Z();
+				}
+
+				return world;
+			}
+
+			/// @return A matrix that's zeroed except for its main diagonal, which are the coordinates of a vector.
+			static constexpr Matrix<RowSize, ColumnSize, T> Diagonal(Vector<MainDiagonalSize, T> values)
+			{
+				Matrix<RowSize, ColumnSize, T> diagonalMatrix{};
+				for (int i = 0; i < values.size(); ++i) { diagonalMatrix(i, i) = values[i]; }
+
+				return diagonalMatrix;
+			}
+
+			/// @return A matrix that's zeroed except for its main diagonal, which are specified as parameters.
+			template <typename... Args>
+				requires (sizeof...(Args) == MainDiagonalSize)
+			static constexpr Matrix<RowSize, ColumnSize, T> Diagonal(Args... args)
+			{
+				Matrix<RowSize, ColumnSize, T> diagonalMatrix{};
+
+				// TODO: Pack indexing would be nice...
+				UnrollLoop<std::size_t, MainDiagonalSize>
+				(
+					[&args..., &diagonalMatrix](auto i)
+					{
+						diagonalMatrix(i, i) = std::get<i>(std::forward_as_tuple(std::forward<Args>(args)...));
+					}
+				);
+
+				return diagonalMatrix;
+			}
+
+			static constexpr Matrix<RowSize, ColumnSize, T> Scalar(T value)
+			{
+				Matrix<RowSize, ColumnSize, T> scalarMatrix{};
+				for (std::size_t i = 0; i < MainDiagonalSize; ++i) { scalarMatrix(i, i) = value; }
+
+				return scalarMatrix;
+			}
+
+			/// @return A matrix that's zeroed except for its main diagonal, which are all one.
+			static constexpr Matrix<RowSize, ColumnSize, T> Unit() { return Scalar(1); }
+
+			/// @return A square matrix that's zeroed except for its diagonal elements, which are all one.
+			static constexpr Matrix<RowSize, ColumnSize, T> Identity()
+				requires (IsSquare<RowSize, ColumnSize>) { return Scalar(1); }
+
+			/*
+			 * Linear Transformations
+			 */
+			static constexpr Matrix<RowSize, ColumnSize, T> RotationAboutX(T radians)
+				requires std::floating_point<T> && (MainDiagonalSize >= 3)
+			{
+				Matrix matrix = Unit();
+				matrix(1, 1) = std::cos(radians);
+				matrix(1, 2) = std::sin(radians);
+				matrix(2, 1) = -std::sin(radians);
+				matrix(2, 2) = std::cos(radians);
+
+				return matrix;
+			}
+
+			static constexpr Matrix<RowSize, ColumnSize, T> RotationAboutY(T radians)
+				requires std::floating_point<T> && (MainDiagonalSize >= 3)
+			{
+				Matrix matrix = Unit();
+				matrix(0, 0) = std::cos(radians);
+				matrix(0, 2) = -std::sin(radians);
+				matrix(2, 0) = std::sin(radians);
+				matrix(2, 2) = std::cos(radians);
+
+				return matrix;
+			}
+
+			static constexpr Matrix<RowSize, ColumnSize, T> RotationAboutZ(T radians)
+				requires std::floating_point<T> && (MainDiagonalSize >= 2) // Same operation in 2D and 3D.
+			{
+				Matrix matrix = Unit();
+				matrix(0, 0) = std::cos(radians);
+				matrix(0, 1) = std::sin(radians);
+				matrix(1, 0) = -std::sin(radians);
+				matrix(1, 1) = std::cos(radians);
+
+				return matrix;
+			}
+
+			/// @param axis The axis to rotate about as a unit vector.
+			/// @param radians The number of degrees in radians to rotate about \p axis.
+			static constexpr Matrix<RowSize, ColumnSize, T> RotationAboutAxis(const Vector<3, T>& axis, T radians)
+				requires std::floating_point<T> && (MainDiagonalSize >= 3)
+			{
+				assert(axis.IsUnit());
+
+				// Some convenience
+				using namespace std;
+				const auto& [x, y, z] = axis;
+
+				Matrix matrix = Unit();
+				matrix(0, 0) = x * x * (1 - cos(radians)) + cos(radians);
+				matrix(0, 1) = x * y * (1 - cos(radians)) + z * sin(radians);
+				matrix(0, 2) = x * z * (1 - cos(radians)) - y * sin(radians);
+				matrix(1, 0) = x * y * (1 - cos(radians)) - z * sin(radians);
+				matrix(1, 1) = y * y * (1 - cos(radians)) + cos(radians);
+				matrix(1, 2) = y * z * (1 - cos(radians)) + x * sin(radians);
+				matrix(2, 0) = x * z * (1 - cos(radians)) + y * sin(radians);
+				matrix(2, 1) = y * z * (1 - cos(radians)) - x * sin(radians);
+				matrix(2, 2) = z * z * (1 - cos(radians)) + cos(radians);
+
+				return matrix;
+			}
+
+			/// This method is for scaling along cardinal axes, XY (2D), and XYZ (3D).
+			/// If further scalar values on the main diagonal are desired use Matrix::Diagonal.
+			/// @return A matrix that when multiplied by results in the specified scaling along the basis axes.
+			template <typename... Args>
+				requires (sizeof...(Args) == std::min(MainDiagonalSize, static_cast<std::size_t>(3)))
+			static constexpr Matrix<RowSize, ColumnSize, T> ScalingAlongCardinalAxes(Args... args)
+			{
+				Matrix<RowSize, ColumnSize, T> diagonalMatrix = Unit();
+
+				// TODO: Pack indexing would be nice...
+				UnrollLoop<std::size_t, sizeof...(Args)>
+				(
+					[&args..., &diagonalMatrix](auto i)
+					{
+						diagonalMatrix(i, i) = std::get<i>(std::forward_as_tuple(std::forward<Args>(args)...));
+					}
+				);
+
+				return diagonalMatrix;
+			}
+
+			/// @param axis A unit vector.
+			/// @param scale A scale factor.
+			/// @return A matrix that when multiplied by resulting in a scaling of \p k along \p axis.
+			static constexpr Matrix<RowSize, ColumnSize, T> ScalingAlongAxis(
+				const Vector<std::min(MainDiagonalSize, static_cast<std::size_t>(3)), T>& axis, T scale)
+				requires (MainDiagonalSize >= 2)
+			{
+				assert(axis.IsUnit());
+
+				// Some convenience
+				T x = axis.X();
+				T y = axis.Y();
+
+				Matrix matrix = Unit();
+
+				// 2D and 3D
+				matrix(0, 0) = 1 + (scale - 1) * x * x;
+				matrix(0, 1) = (scale - 1) * x * y;
+				matrix(1, 0) = (scale - 1) * x * y;
+				matrix(1, 1) = 1 + (scale - 1) * y * y;
+
+
+				// 3D
+				if constexpr (MainDiagonalSize > 2)
+				{
+					T z = axis.Z();
+
+					matrix(2, 0) = (scale - 1) * x * z;
+					matrix(2, 1) = (scale - 1) * y * z;
+					matrix(2, 2) = 1 + (scale - 1) * z * z;
+					matrix(1, 2) = (scale - 1) * y * z;
+					matrix(0, 2) = (scale - 1) * x * z;
+				}
+
+				return matrix;
+			}
+
+			static constexpr Matrix<RowSize, ColumnSize, T> ProjectionOntoPlaneXY()
+				requires (MainDiagonalSize >= 3)
+			{
+				Matrix matrix = Unit();
+				matrix(2, 2) = 0;
+
+				return matrix;
+			}
+
+			/// In 2D, this is equivalent to projecting onto the x-axis.
+			static constexpr Matrix<RowSize, ColumnSize, T> ProjectionOntoPlaneXZ()
+				requires (MainDiagonalSize >= 2) // Same operation in 2D and 3D.
+			{
+				Matrix matrix = Unit();
+				matrix(1, 1) = 0;
+
+				return matrix;
+			}
+
+			/// In 2D, this is equivalent to projecting onto the x-axis.
+			static constexpr Matrix<RowSize, ColumnSize, T> ProjectionOntoPlaneYZ()
+				requires (MainDiagonalSize >= 2) // Same operation in 2D and 3D.
+			{
+				Matrix matrix = Unit();
+				matrix(0, 0) = 0;
+
+				return matrix;
+			}
+
+			/// Projection onto a vector, which in: \n
+			/// 2D is onto an axis. \n
+			/// 3D is onto the plane perpendicular to the vector. \n
+			/// This is equivalent to scaling along an axis by 0.
+			static constexpr Matrix<RowSize, ColumnSize, T> ProjectionOntoVector(
+				const Vector<std::min(MainDiagonalSize, static_cast<std::size_t>(3)), T>& axis
+			)
+				requires (MainDiagonalSize >= 2)
+			{
+				assert(axis.IsUnit());
+
+				// Some convenience
+				T x = axis.X();
+				T y = axis.Y();
+
+
+				Matrix matrix = Unit();
+
+				// 2D and 3D
+				matrix(0, 0) = 1 - x * x;
+				matrix(0, 1) = -x * y;
+				matrix(1, 0) = -x * y;
+				matrix(1, 1) = 1 - y * y;
+
+				// 3D
+				if constexpr (MainDiagonalSize > 2)
+				{
+					T z = axis.Z();
+
+					matrix(2, 0) = -x * z;
+					matrix(2, 1) = -y * z;
+					matrix(2, 2) = 1 - z * z;
+					matrix(1, 2) = -y * z;
+					matrix(0, 2) = -x * z;
+				}
+
+				return matrix;
+			}
+
+			/// Projection about a vector, which in: \n
+			/// 2D is about an axis. \n
+			/// 3D is about the plane perpendicular to the vector. \n
+			/// This is equivalent to scaling along an axis by -1.
+			static constexpr Matrix<RowSize, ColumnSize, T> Reflection(
+				const Vector<std::min(MainDiagonalSize, static_cast<std::size_t>(3)), T>& axis)
+				requires (MainDiagonalSize >= 2)
+			{
+				assert(axis.IsUnit());
+
+				// Some convenience
+				const T x = axis.X();
+				const T y = axis.Y();
+
+				Matrix matrix = Unit();
+				matrix(0, 0) = 1 - 2 * x * x;
+				matrix(0, 1) = -2 * x * y;
+				matrix(1, 0) = -2 * x * y;
+				matrix(1, 1) = 1 - 2 * y * y;
+
+				if constexpr (MainDiagonalSize > 2)
+				{
+					const T z = axis.Z();
+
+					matrix(2, 0) = -2 * x * z;
+					matrix(2, 1) = -2 * y * z;
+					matrix(2, 2) = 1 - 2 * z * z;
+					matrix(0, 2) = -2 * x * z;
+					matrix(1, 2) = -2 * y * z;
+				}
+
+				return matrix;
+			}
+
+			/// This matrix can be used for translating a 2D vector by dropping the homogeneous coordinate.
+			static constexpr Matrix<RowSize, ColumnSize, T> ShearingXY(T s, T t)
+				requires (RowSize >= 3)
+			{
+				Matrix shearing = Unit();
+
+				shearing(2, 0) = s;
+				shearing(2, 1) = t;
+
+				return shearing;
+			}
+
+			static constexpr Matrix<RowSize, ColumnSize, T> ShearingXZ(T s, T t)
+				requires (RowSize >= 2)
+			{
+				Matrix shearing = Unit();
+
+				shearing(1, 0) = s;
+
+				if (RowSize > 2) { shearing(1, 2) = t; }
+
+				return shearing;
+			}
+
+			static constexpr Matrix<RowSize, ColumnSize, T> ShearingYZ(T s, T t)
+				requires (RowSize >= 2)
+			{
+				Matrix shearing = Unit();
+
+				shearing(0, 1) = s;
+
+				if (RowSize > 2) { shearing(0, 2) = t; }
+
+				return shearing;
 			}
 
 			/*
@@ -73,6 +390,26 @@ namespace Engine3
 				return submatrix;
 			}
 
+			/// Flips a matrix diagonally.
+			[[nodiscard]] constexpr Matrix<ColumnSize, RowSize, T> Transposed() const
+			// [[nodiscard]] to help emphasise this is not the same as Transpose().
+			{
+				// Non-Square matrices when transposed will return a matrix that's aspect ratio is flipped.
+				Matrix<ColumnSize, RowSize, T> matrix;
+				for (std::size_t row = 0; row < RowSize; ++row)
+				{
+					for (std::size_t column = 0; column < ColumnSize; ++column)
+					{
+						matrix(column, row) = (*this)(row, column);
+					}
+				}
+
+				return matrix;
+			}
+
+			/*
+			 * Square Matrices
+			 */
 			constexpr T Minor(const std::size_t row, const std::size_t column) const
 				requires IsSquare<RowSize, ColumnSize> { return Submatrix(row, column).Determinant(); }
 
@@ -91,7 +428,7 @@ namespace Engine3
 				Matrix<RowSize, ColumnSize, T> cofactorMatrix;
 				for (std::size_t row = 0; row < RowSize; ++row)
 				{
-					for (int column = 0; column < ColumnSize; ++column)
+					for (std::size_t column = 0; column < ColumnSize; ++column)
 					{
 						cofactorMatrix(row, column) = Cofactor(row, column);
 					}
@@ -121,23 +458,6 @@ namespace Engine3
 				*this = Transposed();
 
 				return static_cast<Matrix<RowSize, ColumnSize, T>&>(*this);
-			}
-
-			/// Flips a matrix diagonally.
-			[[nodiscard]] constexpr Matrix<ColumnSize, RowSize, T> Transposed() const
-			// [[nodiscard]] to help emphasise this is not the same as Transpose().
-			{
-				// Non-Square matrices when transposed will return a matrix that's aspect ratio is flipped.
-				Matrix<ColumnSize, RowSize, T> matrix;
-				for (std::size_t row = 0; row < RowSize; ++row)
-				{
-					for (std::size_t column = 0; column < ColumnSize; ++column)
-					{
-						matrix(column, row) = (*this)(row, column);
-					}
-				}
-
-				return matrix;
 			}
 
 			constexpr Matrix<RowSize, ColumnSize, T> Adjoint() const requires (IsSquare<RowSize, ColumnSize>)
@@ -348,7 +668,7 @@ namespace Engine3
 				return result;
 			}
 
-			/// Multiplies a row vector by a matrix.
+			/// Multiplies a column vector by a matrix.
 			/// @param lhs A row vector with a number of columns equal to the number of rows in \p rhs.
 			/// @param rhs A matrix with a number of rows equal to the size of \p lhs.
 			/// @return A row vector with a size equal to the number of columns in \p rhs.
@@ -364,7 +684,7 @@ namespace Engine3
 				return rowVector;
 			}
 
-			/// Multiplies a column vector by a matrix.
+			/// Multiplies a row vector by a matrix.
 			/// @param lhs A matrix with a number of columns equal to the size of \p rhs.
 			/// @param rhs A column vector with a number of rows equal to the number of columns in \p lhs.
 			/// @return A column vector with a size equal to the number of rows in \p lhs.
@@ -406,222 +726,6 @@ namespace Engine3
 			auto operator==(const std::array<T, RowSize * ColumnSize>& rhs) = delete;
 
 			auto operator<=>(const std::array<T, RowSize * ColumnSize>& rhs) = delete;
-
-			/*
-			 * Linear Transformations (3x3 and 4x4)
-			 */
-			static constexpr Matrix<RowSize, ColumnSize, T> RotationAboutX(T radians)
-				requires std::floating_point<T> &&
-				IsSquare<RowSize, ColumnSize> &&
-				IsValidDimensions<RowSize, 3, 4>
-			{
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
-				matrix(1, 1) = std::cos(radians);
-				matrix(1, 2) = std::sin(radians);
-				matrix(2, 1) = -std::sin(radians);
-				matrix(2, 2) = std::cos(radians);
-
-				return matrix;
-			}
-
-			static constexpr Matrix<RowSize, ColumnSize, T> RotationAboutY(T radians)
-				requires std::floating_point<T> &&
-				IsSquare<RowSize, ColumnSize> &&
-				IsValidDimensions<RowSize, 3, 4>
-			{
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
-				matrix(0, 0) = std::cos(radians);
-				matrix(0, 2) = -std::sin(radians);
-				matrix(2, 0) = std::sin(radians);
-				matrix(2, 2) = std::cos(radians);
-
-				return matrix;
-			}
-
-			static constexpr Matrix<RowSize, ColumnSize, T> RotationAboutZ(T radians)
-				requires std::floating_point<T> &&
-				IsSquare<RowSize, ColumnSize> &&
-				IsValidDimensions<RowSize, 3, 4>
-			{
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
-				matrix(0, 0) = std::cos(radians);
-				matrix(0, 1) = std::sin(radians);
-				matrix(1, 0) = -std::sin(radians);
-				matrix(1, 1) = std::cos(radians);
-
-				return matrix;
-			}
-
-			/// @param axis The axis to rotate about as a unit vector.
-			/// @param radians The number of degrees in radians to rotate about \p axis.
-			static constexpr Matrix<RowSize, ColumnSize, T> RotationAboutAxis(const Vector<3, T>& axis, T radians)
-				requires std::floating_point<T> &&
-				IsSquare<RowSize, ColumnSize> &&
-				IsValidDimensions<RowSize, 3, 4>
-			{
-				assert(axis.IsUnit());
-
-				// Some convenience
-				using namespace std;
-				const T x = axis.X();
-				const T y = axis.Y();
-				const T z = axis.Z();
-
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
-				matrix(0, 0) = x * x * (1 - cos(radians)) + cos(radians);
-				matrix(0, 1) = x * y * (1 - cos(radians)) + z * sin(radians);
-				matrix(0, 2) = x * z * (1 - cos(radians)) - y * sin(radians);
-				matrix(1, 0) = x * y * (1 - cos(radians)) - z * sin(radians);
-				matrix(1, 1) = y * y * (1 - cos(radians)) + cos(radians);
-				matrix(1, 2) = y * z * (1 - cos(radians)) + x * sin(radians);
-				matrix(2, 0) = x * z * (1 - cos(radians)) + y * sin(radians);
-				matrix(2, 1) = y * z * (1 - cos(radians)) - x * sin(radians);
-				matrix(2, 2) = z * z * (1 - cos(radians)) + cos(radians);
-
-				return matrix;
-			}
-
-			static constexpr Matrix<RowSize, ColumnSize, T> ScalingAlongCardinalAxes(T x, T y, T z)
-				requires IsSquare<RowSize, ColumnSize> &&
-				IsValidDimensions<RowSize, 3, 4>
-			{
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
-				matrix(0, 0) = x;
-				matrix(1, 1) = y;
-				matrix(2, 2) = z;
-
-				return matrix;
-			}
-
-			/// @param axis A unit vector.
-			/// @param k A scale factor.
-			/// @return A matrix that when multiplied by resulting in a scaling of \p k along \p axis.
-			static constexpr Matrix<RowSize, ColumnSize, T> ScalingAlongAxis(const Vector<3, T>& axis, T k)
-				requires IsSquare<RowSize, ColumnSize> &&
-				IsValidDimensions<RowSize, 3, 4>
-			{
-				assert(axis.IsUnit());
-
-				// Some convenience
-				using namespace std;
-				const T x = axis.X();
-				const T y = axis.Y();
-				const T z = axis.Z();
-
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
-				matrix(0, 0) = 1 + (k - 1) * x * x;
-				matrix(0, 1) = (k - 1) * x * y;
-				matrix(0, 2) = (k - 1) * x * z;
-				matrix(1, 0) = (k - 1) * x * y;
-				matrix(1, 1) = 1 + (k - 1) * y * y;
-				matrix(1, 2) = (k - 1) * y * z;
-				matrix(2, 0) = (k - 1) * x * z;
-				matrix(2, 1) = (k - 1) * y * z;
-				matrix(2, 2) = 1 + (k - 1) * z * z;
-
-				return matrix;
-			}
-
-			static constexpr Matrix<RowSize, ColumnSize, T> ProjectionOntoPlaneXY()
-				requires IsSquare<RowSize, ColumnSize> &&
-				IsValidDimensions<RowSize, 3, 4>
-			{
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
-				matrix(2, 2) = 0;
-
-				return matrix;
-			}
-
-			static constexpr Matrix<RowSize, ColumnSize, T> ProjectionOntoPlaneXZ()
-				requires IsSquare<RowSize, ColumnSize> &&
-				IsValidDimensions<RowSize, 3, 4>
-			{
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
-				matrix(1, 1) = 0;
-
-				return matrix;
-			}
-
-			static constexpr Matrix<RowSize, ColumnSize, T> ProjectionOntoPlaneYZ()
-				requires IsSquare<RowSize, ColumnSize> &&
-				IsValidDimensions<RowSize, 3, 4>
-			{
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
-				matrix(0, 0) = 0;
-
-				return matrix;
-			}
-
-			/// @param axis A unit vector
-			/// @return A matrix that when multiplied by results in an orthographic projection onto \p axis.
-			static constexpr Matrix<RowSize, ColumnSize, T> ProjectionOntoPlane(const Vector<3, T>& axis)
-				requires IsSquare<RowSize, ColumnSize> &&
-				IsValidDimensions<RowSize, 3, 4>
-			{
-				// akin to ScalingAlongAxis(axis, 0)
-				assert(axis.IsUnit());
-
-				// Some convenience
-				using namespace std;
-				const T x = axis.X();
-				const T y = axis.Y();
-				const T z = axis.Z();
-
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
-				matrix(0, 0) = 1 - x * x;
-				matrix(0, 1) = -x * y;
-				matrix(0, 2) = -x * z;
-				matrix(1, 0) = -x * y;
-				matrix(1, 1) = 1 - y * y;
-				matrix(1, 2) = -y * z;
-				matrix(2, 0) = -x * z;
-				matrix(2, 1) = -y * z;
-				matrix(2, 2) = 1 - z * z;
-
-				return matrix;
-			}
-
-			static constexpr Matrix<RowSize, ColumnSize, T> Reflection(const Vector<3, T>& axis)
-				requires IsSquare<RowSize, ColumnSize> &&
-				IsValidDimensions<RowSize, 3, 4>
-			{
-				// akin to ScalingAlongAxis(axis, -1)
-				assert(axis.IsUnit());
-
-				// Some convenience
-				const T x = axis.X();
-				const T y = axis.Y();
-				const T z = axis.Z();
-
-				Matrix matrix{Matrix<RowSize, ColumnSize, T>::Identity()};
-				matrix(0, 0) = 1 - 2 * x * x;
-				matrix(0, 1) = -2 * x * y;
-				matrix(0, 2) = -2 * x * z;
-				matrix(1, 0) = -2 * x * y;
-				matrix(1, 1) = 1 - 2 * y * y;
-				matrix(1, 2) = -2 * y * z;
-				matrix(2, 0) = -2 * x * z;
-				matrix(2, 1) = -2 * y * z;
-				matrix(2, 2) = 1 - 2 * z * z;
-
-				return matrix;
-			}
-
-			constexpr static Matrix<RowSize, ColumnSize, T> Shearing(
-				float xy, float xz, float yx, float yz, float zx, float zy)
-				requires IsSquare<RowSize, ColumnSize> &&
-				IsValidDimensions<RowSize, 3, 4>
-			{
-				Matrix shear{Matrix<RowSize, ColumnSize, T>::Identity()};
-				shear(0, 1) = xy;
-				shear(0, 2) = xz;
-				shear(1, 0) = yx;
-				shear(1, 2) = yz;
-				shear(2, 0) = zx;
-				shear(2, 1) = zy;
-
-				return shear;
-			}
 		};
 	}
 
@@ -646,116 +750,6 @@ namespace Engine3
 	template <Number T>
 	struct Matrix<2, 2, T> final : Detail::MatrixBase<2, 2, T>
 	{
-		/// @return A matrix composed of the world's basis vectors.
-		static constexpr Matrix World()
-		{
-			return {
-				Vector<2>::Right().X(), Vector<2>::Right().Y(),
-				Vector<2>::Up().X(), Vector<2>::Up().Y()
-			};
-		}
-
-		/// Rotation matrix around the Z-Axis.
-		static constexpr Matrix Rotation(T radians) requires std::floating_point<T>
-		{
-			Matrix matrix{Matrix::Identity()};
-			matrix(0, 0) = std::cos(radians);
-			matrix(0, 1) = std::sin(radians);
-			matrix(1, 0) = -std::sin(radians);
-			matrix(1, 1) = std::cos(radians);
-
-			return matrix;
-		}
-
-		static constexpr Matrix ScalingAlongCardinalAxes(T x, T y)
-		{
-			return {
-				x, 0,
-				0, y
-			};
-		}
-
-		static constexpr Matrix ScalingAlongAxis(const Vector<2, T>& axis, T k)
-		{
-			assert(axis.IsUnit());
-
-			// Some convenience
-			const T x = axis.X();
-			const T y = axis.Y();
-
-			Matrix matrix;
-			matrix(0, 0) = 1 + (k - 1) * x * x;
-			matrix(0, 1) = (k - 1) * x * y;
-			matrix(1, 0) = (k - 1) * x * y;
-			matrix(1, 1) = 1 + (k - 1) * y * y;
-
-			return matrix;
-		}
-
-		static constexpr Matrix ProjectionOntoAxisX()
-		{
-			return
-			{
-				1, 0,
-				0, 0
-			};
-		}
-
-		static constexpr Matrix ProjectionOntoAxisY()
-		{
-			return
-			{
-				0, 0,
-				0, 1
-			};
-		}
-
-		/// @return A matrix that when multiplied by results in an orthographic projection onto \p axis.
-		static constexpr Matrix ProjectionOntoAxis(const Vector<2, T>& axis)
-		{
-			// akin to ScalingAlongAxis(axis, 0)
-			assert(axis.IsUnit());
-
-			// Some convenience
-			const T x = axis.X();
-			const T y = axis.Y();
-
-			Matrix matrix;
-
-			// Handle shared.
-			matrix(0, 0) = 1 - x * x;
-			matrix(0, 1) = -x * y;
-			matrix(1, 0) = -x * y;
-			matrix(1, 1) = 1 - y * y;
-
-			return matrix;
-		}
-
-		static constexpr Matrix Reflection(const Vector<2, T>& axis)
-		{
-			// akin to ScalingAlongAxis(axis, -1)
-			assert(axis.IsUnit());
-
-			// Some convenience
-			const T x = axis.X();
-			const T y = axis.Y();
-
-			return
-			{
-				1 - 2 * x * x, -2 * x * y,
-				-2 * x * y, 1 - 2 * y * y
-			};
-		}
-
-		static constexpr Matrix Shearing(T xy, T yx)
-		{
-			return
-			{
-				1, yx,
-				xy, 1
-			};
-		}
-
 		/* Methods */
 		constexpr T Determinant()
 		{
@@ -773,17 +767,6 @@ namespace Engine3
 	template <Number T>
 	struct Matrix<3, 3, T> final : Detail::MatrixBase<3, 3, T>
 	{
-		/// @return A matrix composed of the world's basis vectors.
-		static constexpr Matrix World()
-		{
-			return {
-				Vector<3>::Right().X(), Vector<3>::Right().Y(), Vector<3>::Right().Z(),
-				Vector<3>::Up().X(), Vector<3>::Up().Y(), Vector<3>::Up().Z(),
-				Vector<3>::Forward().X(), Vector<3>::Forward().Y(), Vector<3>::Forward().Z(),
-
-			};
-		}
-
 		/* Methods */
 		constexpr T Determinant()
 		{
@@ -806,18 +789,7 @@ namespace Engine3
 	template <Number T>
 	struct Matrix<4, 4, T> final : Detail::MatrixBase<4, 4, T>
 	{
-		/// @return A matrix composed of the world's basis vectors.
-		static constexpr Matrix World()
-		{
-			return {
-				Vector<3>::Right().X(), Vector<3>::Right().Y(), Vector<3>::Right().Z(), 0,
-				Vector<3>::Up().X(), Vector<3>::Up().Y(), Vector<3>::Up().Z(), 0,
-				Vector<3>::Forward().X(), Vector<3>::Forward().Y(), Vector<3>::Forward().Z(), 0,
-				0, 0, 0, 1
-
-			};
-		}
-
+		// TODO: Move onto base class.
 		static constexpr Matrix Translation(T dx, T dy, T dz)
 		{
 			return

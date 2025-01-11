@@ -25,7 +25,7 @@ template <std::size_t RowSize, std::size_t ColumnSize, std::floating_point T>
 	requires (RowSize == 3 && ColumnSize >= 3)
 constexpr Matrix<RowSize, ColumnSize, T> EulerToMatrix(Vector<RowSize, T> euler, RotationMode mode)
 {
-	// TODO: How to handle 2D case?
+	// TODO: How to handle 2D case? Overload would be best as it doesn't need RotationMode.
 
 	// For 3D case, these methods just need to exist.
 	Matrix x = Matrix<RowSize, ColumnSize, T>::RotationAboutX(euler.X());
@@ -53,18 +53,54 @@ constexpr Matrix<RowSize, ColumnSize, T> EulerToMatrix(Vector<RowSize, T> euler,
 }
 
 template <std::size_t RowSize, std::size_t ColumnSize, std::floating_point T>
-	requires (RowSize == 2 && ColumnSize >= 2)
 constexpr Matrix<RowSize, ColumnSize, T> EulerToMatrix(T euler)
 {
 	return Matrix<2, ColumnSize, T>::RotationAboutZ(euler);
 }
 
+template <std::size_t RowSize, std::size_t ColumnSize, std::floating_point T>
+void PrintByRow(Matrix<RowSize, ColumnSize, T> matrix)
+{
+	for (int row = 0; row < RowSize; ++row)
+	{
+		for (int column = 0; column < ColumnSize; ++column)
+		{
+			//std::print("M{}{}: {} ", row + 1, column + 1, matrix(row, column));
+			std::print("{} ", matrix(row, column));
+		}
+		std::print("\n");
+	}
+}
+
 int main(int argc, char* argv[])
 {
-	Vector<2> point{5, 10};
-	Matrix rotationMatrix = EulerToMatrix<2, 2, float>(DegreesToRadians(90.f));
-	Vector<2> result = point * rotationMatrix;
+	Matrix a = Matrix<4, 3>::Unit();
+	Matrix b = Matrix<3, 4>::Unit();
+	Matrix c = Matrix<4, 4>::Unit();
+	constexpr Matrix d = Matrix<4, 3>::Diagonal({1, 2, 3});
+	constexpr Matrix e = Matrix<4, 3>::Diagonal(1.f, 2.f, 3.f);
+	constexpr Matrix f = Matrix<2, 3>::ScalingAlongCardinalAxes(1, 2);
 
+
+	constexpr int va = sizeof(Vector<3, float>);
+	constexpr int vb = sizeof(Vector<3, int>);
+	constexpr int vc = sizeof(int&);
+
+
+	PrintByRow(a);
+	std::print("\n");
+	PrintByRow(b);
+	std::print("\n");
+	PrintByRow(c);
+	std::print("\n");
+	PrintByRow(d);
+	std::print("\n");
+	PrintByRow(e);
+	std::print("\n");
+	PrintByRow(f);
+
+
+	return 0;
 
 	Engine engine;
 	if (!engine) { return EXIT_FAILURE; }
