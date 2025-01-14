@@ -51,7 +51,7 @@ namespace Engine3
 				world(1, 0) = Vector<3>::Up().X();
 				world(1, 1) = Vector<3>::Up().Y();
 
-				if constexpr (MainDiagonalSize > 3)
+				if constexpr (MainDiagonalSize > 2)
 				{
 					world(2, 0) = Vector<3>::Forward().X();
 					world(2, 1) = Vector<3>::Forward().Y();
@@ -296,9 +296,9 @@ namespace Engine3
 				return matrix;
 			}
 
-			/// Projection about a vector, which in: \n
-			/// 2D is about an axis. \n
-			/// 3D is about the plane perpendicular to the vector. \n
+			/// Reflection on a vector, which in: \n
+			/// 2D is on an axis. \n
+			/// 3D is on the plane perpendicular to the vector. \n
 			/// This is equivalent to scaling along an axis by -1.
 			static constexpr Matrix<RowSize, ColumnSize, T> Reflection(
 				const Vector<std::min(MainDiagonalSize, static_cast<std::size_t>(3)), T>& axis)
@@ -332,7 +332,7 @@ namespace Engine3
 
 			/// This matrix can be used for translating a 2D vector by dropping the homogeneous coordinate.
 			static constexpr Matrix<RowSize, ColumnSize, T> ShearingXY(T s, T t)
-				requires (RowSize >= 3)
+				requires (RowSize >= 3 && ColumnSize >= 2)
 			{
 				Matrix shearing = Unit();
 
@@ -342,28 +342,72 @@ namespace Engine3
 				return shearing;
 			}
 
-			static constexpr Matrix<RowSize, ColumnSize, T> ShearingXZ(T s, T t)
-				requires (RowSize >= 2)
+			template <typename... Args>
+				requires (sizeof...(Args) == std::min(ColumnSize - 1, static_cast<std::size_t>(2)))
+			// I think I enjoy template shenanigans too much sometimes.
+			static constexpr Matrix<RowSize, ColumnSize, T> ShearingXZ(Args... args)
+				requires (MainDiagonalSize >= 2)
 			{
 				Matrix shearing = Unit();
 
-				shearing(1, 0) = s;
+				// 2D
+				shearing(1, 0) = std::get<0>(std::forward_as_tuple(std::forward<Args>(args)...));
 
-				if (RowSize > 2) { shearing(1, 2) = t; }
+				// 3D
+				if constexpr (ColumnSize > 2)
+				{
+					shearing(1, 2) = std::get<1>(std::forward_as_tuple(std::forward<Args>(args)...));
+				}
 
 				return shearing;
 			}
 
-			static constexpr Matrix<RowSize, ColumnSize, T> ShearingYZ(T s, T t)
-				requires (RowSize >= 2)
+			template <typename... Args>
+				requires (sizeof...(Args) == std::min(ColumnSize - 1, static_cast<std::size_t>(2)))
+			static constexpr Matrix<RowSize, ColumnSize, T> ShearingYZ(Args... args)
+				requires (MainDiagonalSize >= 2)
 			{
 				Matrix shearing = Unit();
 
-				shearing(0, 1) = s;
+				// 2D
+				shearing(0, 1) = std::get<0>(std::forward_as_tuple(std::forward<Args>(args)...));
 
-				if (RowSize > 2) { shearing(0, 2) = t; }
+				// 3D
+				if constexpr (ColumnSize > 2)
+				{
+					shearing(0, 2) = std::get<1>(std::forward_as_tuple(std::forward<Args>(args)...));
+				}
 
 				return shearing;
+			}
+
+			/*
+			 * Homogeneous Coordinates
+			 */
+
+			/// XY shearing in 3D to translate in 2D.
+			static constexpr Matrix<RowSize, ColumnSize, T> Translation(T dx, T dy)
+				requires (RowSize >= 3 && ColumnSize >= 2) { return ShearingXY(dx, dy); }
+
+			/// XYZ shearing in 4D to translate in 3D.
+			static constexpr Matrix<RowSize, ColumnSize, T> Translation(T dx, T dy, T dz)
+				requires (RowSize >= 4 && ColumnSize >= 3)
+			{
+				Matrix translation = Unit();
+				translation(3, 0) = dx;
+				translation(3, 1) = dy;
+				translation(3, 2) = dz;
+
+				return translation;
+			}
+
+			static constexpr Matrix<RowSize, ColumnSize, T> PerspectiveProjection(T d)
+				requires (ColumnSize >= 4) && (RowSize >= 3)
+			{
+				Matrix translation = Unit();
+				translation(2, 3) = static_cast<T>(1) / d;
+
+				return translation;
 			}
 
 			/*
@@ -450,7 +494,7 @@ namespace Engine3
 			}
 
 			/// Flips a square matrix diagonally in place.
-			constexpr Matrix<RowSize, ColumnSize, T>& Transpose() requires (RowSize == ColumnSize)
+			constexpr Matrix<RowSize, ColumnSize, T>& Transpose() requires IsSquare<RowSize, ColumnSize>
 			{
 				// Effectively swapping rows with columns.
 				// Could do in place, not sure if there would be any performance benefits besides memory usage.
@@ -460,26 +504,26 @@ namespace Engine3
 				return static_cast<Matrix<RowSize, ColumnSize, T>&>(*this);
 			}
 
-			constexpr Matrix<RowSize, ColumnSize, T> Adjoint() const requires (IsSquare<RowSize, ColumnSize>)
+			constexpr Matrix<RowSize, ColumnSize, T> Adjoint() const requires IsSquare<RowSize, ColumnSize>
 			{
 				return CofactorMatrix().Transpose();
 			}
 
-			constexpr bool IsInvertible() const requires (IsSquare<RowSize, ColumnSize>)
+			constexpr bool IsInvertible() const requires IsSquare<RowSize, ColumnSize>
 			{
 				// A matrix is inverted by dividing its adjoint by the determinant.
 				return !(Determinant() == 0);
 			}
 
 			/// In the case of an orthogonal matrix, prefer using the transpose as it is equivalent and simpler to compute.
-			constexpr Matrix<RowSize, ColumnSize, T> Inverted() const requires (IsSquare<RowSize, ColumnSize>)
+			constexpr Matrix<RowSize, ColumnSize, T> Inverted() const requires IsSquare<RowSize, ColumnSize>
 			{
 				assert(IsInvertible());
 				return Adjoint() / Determinant();
 			}
 
 			/// In the case of an orthogonal matrix, prefer using the transpose as it is equivalent and simpler to compute.
-			constexpr Matrix<RowSize, ColumnSize, T>& Invert() requires (IsSquare<RowSize, ColumnSize>)
+			constexpr Matrix<RowSize, ColumnSize, T>& Invert() requires IsSquare<RowSize, ColumnSize>
 			{
 				assert(IsInvertible());
 				*this = Inverted();
@@ -487,7 +531,7 @@ namespace Engine3
 				return static_cast<Matrix<RowSize, ColumnSize, T>&>(*this);
 			}
 
-			constexpr bool IsOrthogonal() const requires (IsSquare<RowSize, ColumnSize>)
+			constexpr bool IsOrthogonal() const requires IsSquare<RowSize, ColumnSize>
 			{
 				// If there's only one row/column we can guarantee it's not orthogonal.
 				// constexpr if should mean the machine code is simplified without needing to
@@ -545,6 +589,15 @@ namespace Engine3
 				}
 
 				return orthogonalised;
+			}
+
+			constexpr T Trace() const
+				requires (IsSquare<RowSize, ColumnSize>)
+			{
+				T sum = 0;
+				for (int i = 0; i < MainDiagonalSize; ++i) { sum += (*this)(i, i); }
+
+				return sum;
 			}
 
 			/*
@@ -668,7 +721,7 @@ namespace Engine3
 				return result;
 			}
 
-			/// Multiplies a column vector by a matrix.
+			/// Multiplies a row vector by a matrix.
 			/// @param lhs A row vector with a number of columns equal to the number of rows in \p rhs.
 			/// @param rhs A matrix with a number of rows equal to the size of \p lhs.
 			/// @return A row vector with a size equal to the number of columns in \p rhs.
@@ -684,7 +737,7 @@ namespace Engine3
 				return rowVector;
 			}
 
-			/// Multiplies a row vector by a matrix.
+			/// Multiplies a column vector by a matrix.
 			/// @param lhs A matrix with a number of columns equal to the size of \p rhs.
 			/// @param rhs A column vector with a number of rows equal to the number of columns in \p lhs.
 			/// @return A column vector with a size equal to the number of rows in \p lhs.
@@ -739,9 +792,6 @@ namespace Engine3
 	struct Matrix final : Detail::MatrixBase<RowSize, ColumnSize, T> {};
 
 	// Row first, then column to follow normal matrix conventions.
-	// Could move some duplicated code into the shared inherited object,
-	// but for interface reason such as names or parameters it's nicer to
-	// re-implement.
 	/// Matrix with its elements stored in row-major order.
 	///	Linear transformations assume row vectors.
 	/// @tparam RowSize The vertical size of the matrix.
@@ -778,29 +828,5 @@ namespace Engine3
 				m(0, 2) * (m(1, 0) * m(2, 1) - m(1, 1) * m(2, 0))
 			};
 		}
-	};
-
-	// Row first, then column to follow normal matrix conventions.
-	/// Matrix with its elements stored in row-major order.
-	///	Linear transformations assume row vectors.
-	/// @tparam RowSize The vertical size of the matrix.
-	/// @tparam ColumnSize The horizontal size of the matrix.
-	/// @tparam T The type of each element stored in the matrix.
-	template <Number T>
-	struct Matrix<4, 4, T> final : Detail::MatrixBase<4, 4, T>
-	{
-		// TODO: Move onto base class.
-		static constexpr Matrix Translation(T dx, T dy, T dz)
-		{
-			return
-			{
-				1, 0, 0, 0,
-				0, 1, 0, 0,
-				0, 0, 1, 0,
-				dx, dy, dz, 1
-			};
-		}
-
-		// TODO: Perspective projection.
 	};
 }

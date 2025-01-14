@@ -22,15 +22,15 @@ enum class RotationMode
 };
 
 template <std::size_t RowSize, std::size_t ColumnSize, std::floating_point T>
-	requires (RowSize == 3 && ColumnSize >= 3)
+	requires (Matrix<RowSize, ColumnSize, T>::MainDiagonalSize >= 3)
 constexpr Matrix<RowSize, ColumnSize, T> EulerToMatrix(Vector<RowSize, T> euler, RotationMode mode)
 {
 	// TODO: How to handle 2D case? Overload would be best as it doesn't need RotationMode.
 
 	// For 3D case, these methods just need to exist.
-	Matrix x = Matrix<RowSize, ColumnSize, T>::RotationAboutX(euler.X());
-	Matrix y = Matrix<RowSize, ColumnSize, T>::RotationAboutY(euler.Y());
-	Matrix z = Matrix<RowSize, ColumnSize, T>::RotationAboutZ(euler.Z());
+	Matrix x = Matrix<RowSize, ColumnSize, T>::RotationAboutX(DegreesToRadians(euler.X()));
+	Matrix y = Matrix<RowSize, ColumnSize, T>::RotationAboutY(DegreesToRadians(euler.Y()));
+	Matrix z = Matrix<RowSize, ColumnSize, T>::RotationAboutZ(DegreesToRadians(euler.Z()));
 
 	// Euler angles rotate around the body axes (intrinsic), but as these change during rotation this is accounted
 	// for by performing fixed-axis (extrinsic) rotation.
@@ -53,6 +53,7 @@ constexpr Matrix<RowSize, ColumnSize, T> EulerToMatrix(Vector<RowSize, T> euler,
 }
 
 template <std::size_t RowSize, std::size_t ColumnSize, std::floating_point T>
+	requires (Matrix<RowSize, ColumnSize, T>::MainDiagonalSize == 2)
 constexpr Matrix<RowSize, ColumnSize, T> EulerToMatrix(T euler)
 {
 	return Matrix<2, ColumnSize, T>::RotationAboutZ(euler);
@@ -65,8 +66,8 @@ void PrintByRow(Matrix<RowSize, ColumnSize, T> matrix)
 	{
 		for (int column = 0; column < ColumnSize; ++column)
 		{
-			//std::print("M{}{}: {} ", row + 1, column + 1, matrix(row, column));
-			std::print("{} ", matrix(row, column));
+			std::print("M{}{}: {} ", row + 1, column + 1, matrix(row, column));
+			//std::print("{} ", matrix(row, column));
 		}
 		std::print("\n");
 	}
@@ -80,25 +81,11 @@ int main(int argc, char* argv[])
 	constexpr Matrix d = Matrix<4, 3>::Diagonal({1, 2, 3});
 	constexpr Matrix e = Matrix<4, 3>::Diagonal(1.f, 2.f, 3.f);
 	constexpr Matrix f = Matrix<2, 3>::ScalingAlongCardinalAxes(1, 2);
+	Matrix g = EulerToMatrix<4, 4, float>({45, 180, 180}, RotationMode::YXZ);
+	Matrix h = Matrix<3, 3>::Unit();
 
-
-	constexpr int va = sizeof(Vector<3, float>);
-	constexpr int vb = sizeof(Vector<3, int>);
-	constexpr int vc = sizeof(int&);
-
-
-	PrintByRow(a);
+	PrintByRow(g);
 	std::print("\n");
-	PrintByRow(b);
-	std::print("\n");
-	PrintByRow(c);
-	std::print("\n");
-	PrintByRow(d);
-	std::print("\n");
-	PrintByRow(e);
-	std::print("\n");
-	PrintByRow(f);
-
 
 	return 0;
 
